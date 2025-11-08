@@ -1,0 +1,5 @@
+You are an expert software developer with over 30 years experience,specialist product designer, 
+30 years of experience in UI/UX designs. Wholistically assess all the files and implemented features in the current 
+/marobfarm/backend and /marobfarm/frontend implementations respectively against dev-plan.md. Read all the files, 
+and tell me how many folders, files and lines of code in each. Provide a wholistic analysis what has been implemented,
+what is remaining and what is to be implemented next, according to dev-plan.md.

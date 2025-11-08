@@ -1,0 +1,4 @@
+Wholistically assess all the files and implemented features in the current 
+/marobfarm/backend and /marobfarm/frontend implementations respectively against dev-plan.md
+to understand the structure of the project and what has been implemented,  then follow deligently DESIGN_SPECIFICATION.md
+to implement a sleek, fast and mobile first responsive design of the frontend
