@@ -4,6 +4,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { Upload, X, Plus } from 'lucide-react';
 import { propertyAPI } from '../api/client';
+import { useAuthStore } from '../store/authStore';
 import Button from '../components/ui/Button';
 
 interface PropertyForm {
@@ -24,13 +25,19 @@ interface PropertyForm {
 const CreateProperty: React.FC = () => {
   const { register, handleSubmit, formState: { errors } } = useForm<PropertyForm>();
   const navigate = useNavigate();
+  const { token } = useAuthStore();
   const [images, setImages] = useState<File[]>([]);
   const [imagePreviews, setImagePreviews] = useState<string[]>([]);
 
   const createMutation = useMutation({
     mutationFn: (data: any) => propertyAPI.create(data),
-    onSuccess: () => {
+    onSuccess: (response) => {
+      console.log('Property created successfully:', response.data);
       navigate('/dashboard');
+    },
+    onError: (error) => {
+      console.error('Property creation failed:', error);
+      alert('Failed to create property. Please try again.');
     },
   });
 
@@ -57,13 +64,47 @@ const CreateProperty: React.FC = () => {
     setImagePreviews(prev => prev.filter((_, i) => i !== index));
   };
 
-  const onSubmit = (data: PropertyForm) => {
-    const propertyData = {
-      ...data,
-      amenities: data.amenities ? data.amenities.split(',').map(a => a.trim()) : [],
-      images: images, // Will be handled by backend
-    };
-    createMutation.mutate(propertyData);
+  const onSubmit = async (data: PropertyForm) => {
+    try {
+      // First upload images if any
+      if (images.length > 0) {
+        const formData = new FormData();
+        images.forEach(image => {
+          formData.append('images', image);
+        });
+        
+        // Create property first
+        const tempProperty = await propertyAPI.create({
+          ...data,
+          amenities: data.amenities ? data.amenities.split(',').map(a => a.trim()) : [],
+        });
+        
+        // Upload images to the created property
+        const imageResponse = await fetch(`http://localhost:3001/api/properties/${tempProperty.data.data.id}/images`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+          body: formData,
+        });
+        
+        if (imageResponse.ok) {
+          console.log('Images uploaded successfully');
+        }
+        
+        navigate('/dashboard');
+      } else {
+        // No images, just create property
+        const propertyData = {
+          ...data,
+          amenities: data.amenities ? data.amenities.split(',').map(a => a.trim()) : [],
+        };
+        createMutation.mutate(propertyData);
+      }
+    } catch (error) {
+      console.error('Error creating property:', error);
+      alert('Failed to create property. Please try again.');
+    }
   };
 
   return (

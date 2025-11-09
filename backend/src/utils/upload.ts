@@ -19,9 +19,12 @@ export const upload = multer({
 export const uploadToSupabase = async (file: Express.Multer.File, folder: string): Promise<string> => {
   const fileName = `${Date.now()}-${file.originalname}`;
   const filePath = `${folder}/${fileName}`;
+  
+  // Use different buckets for different types
+  const bucket = folder === 'products' ? 'product-images' : 'property-images';
 
   const { data, error } = await supabase.storage
-    .from('property-images')
+    .from(bucket)
     .upload(filePath, file.buffer, {
       contentType: file.mimetype,
     });
@@ -29,7 +32,7 @@ export const uploadToSupabase = async (file: Express.Multer.File, folder: string
   if (error) throw error;
 
   const { data: { publicUrl } } = supabase.storage
-    .from('property-images')
+    .from(bucket)
     .getPublicUrl(filePath);
 
   return publicUrl;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, Home, Search, User, LogOut } from 'lucide-react';
+import { Menu, X, Home, Search, User, LogOut, BookOpen, Package } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import Button from './ui/Button';
 
@@ -18,6 +18,8 @@ const Header: React.FC = () => {
   const navItems = [
     { to: '/', label: 'Home', icon: Home },
     { to: '/properties', label: 'Properties', icon: Search },
+    { to: '/marketplace', label: 'Marketplace', icon: Package },
+    { to: '/courses', label: 'Courses', icon: BookOpen },
   ];
 
   const authItems = isAuthenticated
@@ -40,7 +42,7 @@ const Header: React.FC = () => {
               <span className="text-white font-bold text-lg">M</span>
             </div>
             <span className="font-bold text-xl text-gray-900 hidden sm:block">
-              Marob Farm
+              Agro Career
             </span>
           </Link>
 

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Search, Filter, MapPin } from 'lucide-react';
+import { Search, Filter, MapPin, Plus } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { propertyAPI } from '../api/client';
+import { useAuthStore } from '../store/authStore';
 import PropertyCard from '../components/PropertyCard';
 import Button from '../components/ui/Button';
 import Input from '../components/ui/Input';
@@ -10,6 +12,7 @@ const Properties: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('');
   const [showFilters, setShowFilters] = useState(false);
+  const { isAuthenticated } = useAuthStore();
   
   const { data, isLoading } = useQuery({
     queryKey: ['properties'],
@@ -61,13 +64,24 @@ const Properties: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="text-center md:text-left">
-        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-          Available Properties
-        </h1>
-        <p className="text-gray-600">
-          Discover the perfect livestock farming space for your needs
-        </p>
+      <div className="flex justify-between items-center">
+        <div className="text-center md:text-left">
+          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+            Available Properties
+          </h1>
+          <p className="text-gray-600">
+            Discover the perfect livestock farming space for your needs
+          </p>
+        </div>
+        {isAuthenticated && (
+          <Link 
+            to="/create-property"
+            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 flex items-center"
+          >
+            <Plus size={20} className="mr-2" />
+            Add Property
+          </Link>
+        )}
       </div>
 
       {/* Search and Filters */}

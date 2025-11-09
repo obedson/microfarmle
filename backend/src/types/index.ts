@@ -1,3 +1,5 @@
+import { Request } from 'express';
+
 export interface User {
   id: string;
   email: string;
@@ -6,6 +8,10 @@ export interface User {
   phone?: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface AuthenticatedRequest extends Request {
+  user?: User;
 }
 
 export interface Property {

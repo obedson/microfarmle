@@ -29,6 +29,21 @@ export const propertyAPI = {
     apiClient.get(`/properties/${id}`),
   create: (data: any) =>
     apiClient.post('/properties', data),
+  update: (id: string, data: any) => {
+    const headers: any = {
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    };
+    
+    // Don't set Content-Type for FormData
+    if (!(data instanceof FormData)) {
+      headers['Content-Type'] = 'application/json';
+      data = JSON.stringify(data);
+    }
+    
+    return apiClient.put(`/properties/${id}`, data, { headers });
+  },
+  delete: (id: string) =>
+    apiClient.delete(`/properties/${id}`),
 };
 
 export const bookingAPI = {

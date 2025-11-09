@@ -45,7 +45,7 @@ const Login: React.FC = () => {
               Welcome Back
             </h1>
             <p className="text-gray-600">
-              Sign in to your Marob Farm account
+              Sign in to your Agro Career account
             </p>
           </div>
 

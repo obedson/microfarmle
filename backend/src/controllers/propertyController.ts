@@ -68,12 +68,42 @@ export const getProperty = async (req: Request, res: Response) => {
 
 export const updateProperty = async (req: Request, res: Response) => {
   try {
-    const property = await PropertyModel.update(req.params.id, req.body);
-    if (!property) {
-      return res.status(404).json({ success: false, error: 'Property not found' });
+    const { id } = req.params;
+    let updates = { ...req.body };
+    
+    // Convert string values to proper types
+    if (updates.size) updates.size = parseFloat(updates.size);
+    if (updates.price_per_month) updates.price_per_month = parseFloat(updates.price_per_month);
+    if (updates.amenities && typeof updates.amenities === 'string') {
+      updates.amenities = JSON.parse(updates.amenities);
     }
+    
+    // Handle new image uploads
+    if (req.files && Array.isArray(req.files)) {
+      const newImages: string[] = [];
+      for (const file of req.files) {
+        const imageUrl = await uploadToSupabase(file, 'properties');
+        newImages.push(imageUrl);
+      }
+      
+      // Get existing images and append new ones
+      const existingProperty = await PropertyModel.findById(id);
+      if (!existingProperty) {
+        return res.status(404).json({ success: false, error: 'Property not found' });
+      }
+      
+      const existingImages = existingProperty?.images || [];
+      updates.images = [...existingImages, ...newImages];
+    }
+    
+    const property = await PropertyModel.update(id, updates);
+    if (!property) {
+      return res.status(404).json({ success: false, error: 'Property not found or update failed' });
+    }
+    
     res.json({ success: true, data: property });
   } catch (error) {
+    console.error('Update property error:', error);
     res.status(500).json({ success: false, error: 'Failed to update property' });
   }
 };

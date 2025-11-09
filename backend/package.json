@@ -1,7 +1,7 @@
 {
-  "name": "marobfarm-backend",
+  "name": "Agro-Career-backend",
   "version": "1.0.0",
-  "description": "Marob Farm Backend API",
+  "description": "Agro Career Backend API - Agro Career Investment Platform",
   "main": "dist/index.js",
   "scripts": {
     "dev": "nodemon src/index.ts",

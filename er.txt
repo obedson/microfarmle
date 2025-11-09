@@ -1,17 +1,142 @@
-[nodemon] 3.1.10
-[nodemon] to restart at any time, enter `rs`
-[nodemon] watching path(s): *.*
-[nodemon] watching extensions: ts,json
-[nodemon] starting `ts-node src/index.ts`
-Server running on port 3001
-Error 500: TypeError: fetch failed undefined
-Error 500: TypeError: fetch failed undefined
-Error 500: invalid input syntax for type uuid: "" undefined
-[nodemon] restarting due to changes...
-[nodemon] restarting due to changes...
-[nodemon] starting `ts-node src/index.ts`
-Server running on port 3001
-[nodemon] restarting due to changes...
-[nodemon] restarting due to changes...
-[nodemon] starting `ts-node src/index.ts`
-Server running on port 3001
+PS E:\Marobfarm\frontend> npm start
+
+> Agro-Career-frontend@1.0.0 start
+> react-scripts start
+
+(node:9268) [DEP0176] DeprecationWarning: fs.F_OK is deprecated, use fs.constants.F_OK instead
+(Use `node --trace-deprecation ...` to show where the warning was created)
+(node:9268) [DEP_WEBPACK_DEV_SERVER_ON_AFTER_SETUP_MIDDLEWARE] DeprecationWarning: 'onAfterSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+(node:9268) [DEP_WEBPACK_DEV_SERVER_ON_BEFORE_SETUP_MIDDLEWARE] DeprecationWarning: 'onBeforeSetupMiddleware' option is deprecated. Please use the 'setupMiddlewares' option.
+Starting the development server...
+Failed to compile.
+
+SyntaxError: E:\Marobfarm\frontend\src\pages\ProductDetail.tsx: Adjacent JSX elements must be wrapped in an enclosing tag. Did you want a JSX fragment <>...</>? (222:6)
+  220 |           )}
+  221 |         </div>
+> 222 |       </div>
+      |       ^
+  223 |     </div>
+  224 |   );
+  225 | };
+ERROR in ./src/pages/ProductDetail.tsx
+Module build failed (from ./node_modules/babel-loader/lib/index.js):
+SyntaxError: E:\Marobfarm\frontend\src\pages\ProductDetail.tsx: Adjacent JSX elements must be wrapped in an enclosing tag. Did you want a JSX fragment <>...</>? (222:6)
+
+  220 |           )}
+  221 |         </div>
+> 222 |       </div>
+      |       ^
+  223 |     </div>
+  224 |   );
+  225 | };
+    at constructor (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:367:19)
+    at TypeScriptParserMixin.raise (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:6624:19)
+    at TypeScriptParserMixin.jsxParseElementAt (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:4771:18)
+    at TypeScriptParserMixin.jsxParseElement (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:4778:17)
+    at TypeScriptParserMixin.parseExprAtom (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:4788:19)
+    at TypeScriptParserMixin.parseExprSubscripts (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:11145:23)
+    at TypeScriptParserMixin.parseUpdate (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:11130:21)
+    at TypeScriptParserMixin.parseMaybeUnary (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:11110:23)
+    at TypeScriptParserMixin.parseMaybeUnary (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:9890:18)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:10963:61)
+    at TypeScriptParserMixin.parseExprOps (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:10968:23)
+    at TypeScriptParserMixin.parseMaybeConditional (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:10945:23)
+    at TypeScriptParserMixin.parseMaybeAssign (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:10895:21)
+    at E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:9828:39
+    at TypeScriptParserMixin.tryParse (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:6932:20)
+    at TypeScriptParserMixin.parseMaybeAssign (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:9828:18)
+    at E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:10864:39
+    at TypeScriptParserMixin.allowInAnd (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:12500:12)
+    at TypeScriptParserMixin.parseMaybeAssignAllowIn (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:10864:17)
+    at TypeScriptParserMixin.parseMaybeAssignAllowInOrVoidPattern (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:12567:17)
+    at TypeScriptParserMixin.parseParenAndDistinguishExpression (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:11747:28)
+    at TypeScriptParserMixin.parseExprAtom (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:11395:23)
+    at TypeScriptParserMixin.parseExprAtom (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:4793:20)
+    at TypeScriptParserMixin.parseExprSubscripts (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:11145:23)
+    at TypeScriptParserMixin.parseUpdate (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:11130:21)
+    at TypeScriptParserMixin.parseMaybeUnary (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:11110:23)
+    at TypeScriptParserMixin.parseMaybeUnary (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:9890:18)
+    at TypeScriptParserMixin.parseMaybeUnaryOrPrivate (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:10963:61)
+    at TypeScriptParserMixin.parseExprOpBaseRightExpr (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:11050:34)
+    at TypeScriptParserMixin.parseExprOpRightExpr (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:11045:21)
+    at TypeScriptParserMixin.parseExprOp (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:11011:27)
+    at TypeScriptParserMixin.parseExprOp (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:9365:18)
+    at TypeScriptParserMixin.parseExprOps (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:10972:17)
+    at TypeScriptParserMixin.parseMaybeConditional (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:10945:23)
+    at TypeScriptParserMixin.parseMaybeAssign (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:10895:21)
+    at TypeScriptParserMixin.parseMaybeAssign (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:9839:20)
+    at TypeScriptParserMixin.parseExpressionBase (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:10848:23)
+    at E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:10844:39
+    at TypeScriptParserMixin.allowInAnd (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:12500:12)
+    at TypeScriptParserMixin.parseExpression (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:10844:17)
+    at TypeScriptParserMixin.jsxParseExpressionContainer (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:4661:31)
+    at TypeScriptParserMixin.jsxParseElementAt (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:4740:36)
+    at TypeScriptParserMixin.jsxParseElementAt (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:4727:32)
+    at TypeScriptParserMixin.jsxParseElementAt (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:4727:32)
+    at TypeScriptParserMixin.jsxParseElement (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:4778:17)
+    at TypeScriptParserMixin.parseExprAtom (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:4788:19)
+    at TypeScriptParserMixin.parseExprSubscripts (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:11145:23)
+    at TypeScriptParserMixin.parseUpdate (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:11130:21)
+    at TypeScriptParserMixin.parseMaybeUnary (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:11110:23)
+    at TypeScriptParserMixin.parseMaybeUnary (E:\Marobfarm\frontend\node_modules\@babel\parser\lib\index.js:9890:18)
+
+ERROR in [eslint]
+src\pages\ProductDetail.tsx
+  Line 222:6:  Parsing error: Adjacent JSX elements must be wrapped in an enclosing tag. Did you want a JSX fragment <>...</>? (222:6)
+
+webpack compiled with 2 errors
+Files successfully emitted, waiting for typecheck results...
+Issues checking in progress...
+ERROR in src/App.tsx:22:8
+TS1192: Module '"E:/Marobfarm/frontend/src/pages/ProductDetail"' has no default export.
+    20 | import AddProduct from './pages/AddProduct';
+    21 | import EditProduct from './pages/EditProduct';
+  > 22 | import ProductDetail from './pages/ProductDetail';
+       |        ^^^^^^^^^^^^^
+    23 | import PaymentCallback from './pages/PaymentCallback';
+    24 |
+    25 | function App() {
+
+ERROR in src/pages/ProductDetail.tsx
+TS1005: '</' expected.
+
+ERROR in src/pages/ProductDetail.tsx:62:6
+TS17008: JSX element 'div' has no corresponding closing tag.
+    60 |
+    61 |   return (
+  > 62 |     <div className="container mx-auto px-4 py-8 max-w-6xl">
+       |      ^^^
+    63 |       <button
+    64 |         onClick={() => navigate('/marketplace')}
+    65 |         className="flex items-center text-gray-600 hover:text-green-600 mb-6"
+
+ERROR in src/pages/ProductDetail.tsx:220:12
+TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+    218 |               )}
+    219 |             </div>
+  > 220 |           )}
+        |            ^
+    221 |         </div>
+    222 |       </div>
+    223 |     </div>
+
+ERROR in src/pages/ProductDetail.tsx:222:7
+TS1005: ')' expected.
+    220 |           )}
+    221 |         </div>
+  > 222 |       </div>
+        |       ^^
+    223 |     </div>
+    224 |   );
+    225 | };
+
+ERROR in src/pages/ProductDetail.tsx:225:1
+TS1381: Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+    223 |     </div>
+    224 |   );
+  > 225 | };
+        | ^
+    226 |
+    227 | export default ProductDetail;
+    228 |
+

@@ -22,26 +22,32 @@ interface PropertyCardProps {
 }
 
 const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
-  const imageUrl = property.images?.[0] || '/api/placeholder/400/300';
-
   return (
     <Card className="group">
-      <Link to={`/properties/${property.id}`} className="block">
-        {/* Image */}
-        <div className="relative h-48 overflow-hidden">
+      <div className="relative h-48 overflow-hidden rounded-t-xl bg-gray-200">
+        {property.images && property.images.length > 0 ? (
           <img
-            src={imageUrl}
+            src={property.images[0]}
             alt={property.title}
-            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            loading="lazy"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.style.display = 'none';
+            }}
           />
-          <div className="absolute top-3 left-3">
-            <span className="bg-primary-600 text-white px-2 py-1 rounded-full text-xs font-medium">
-              {property.type}
-            </span>
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <MapPin className="text-gray-400" size={48} />
           </div>
+        )}
+        <div className="absolute top-3 left-3">
+          <span className="bg-primary-600 text-white px-2 py-1 rounded-full text-xs font-medium">
+            {property.type}
+          </span>
         </div>
-
+      </div>
+      
+      <Link to={`/properties/${property.id}`} className="block">
         {/* Content */}
         <div className="p-4">
           <h3 className="font-semibold text-lg text-gray-900 mb-2 line-clamp-2">

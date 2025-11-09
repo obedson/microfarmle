@@ -9,7 +9,7 @@ router.get('/', getProperties);
 router.get('/:id', getProperty);
 router.post('/', authenticateToken, createProperty);
 router.post('/:id/images', authenticateToken, upload.array('images', 5), uploadImages);
-router.put('/:id', authenticateToken, updateProperty);
+router.put('/:id', authenticateToken, upload.array('images', 5), updateProperty);
 router.delete('/:id', authenticateToken, deleteProperty);
 
 export default router;

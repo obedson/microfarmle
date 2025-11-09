@@ -3,14 +3,14 @@ You are an expert software developer with over 30 years experience, specialist p
 
 Create a dev plan and specification requirements following modern, secure and best industry standard and practice
 
-App Name: Marob Farm
-Type: Livestock Housing & Land Rental Platform
+App Name: Agro Career (Agro Career And Investment)
+Type: Livestock Housing & Agricultural Learning Platform
 Goal: Build a modern MVP with modular code, clean architecture, and scalable state management.
 
 ---
 
 ## 🌍 Concept Overview
-Marob Farm is a digital marketplace that connects livestock farmers needing space with landowners or facility owners who have livestock housing or farmland available for rent.
+Agro Career is a comprehensive digital platform that connects livestock farmers with property owners for space rental, career development, and agricultural learning opportunities.
 It supports short-term and long-term rentals, ensuring flexible options for farmers and passive income for property owners.
 
 ---

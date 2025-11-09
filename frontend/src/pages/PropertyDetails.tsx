@@ -11,7 +11,7 @@ import BookingForm from '../components/BookingForm';
 const PropertyDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { isAuthenticated } = useAuthStore();
+  const { isAuthenticated, user } = useAuthStore();
   const { data, isLoading } = useQuery({
     queryKey: ['property', id],
     queryFn: () => propertyAPI.getById(id!)
@@ -40,6 +40,17 @@ const PropertyDetails: React.FC = () => {
     navigate('/dashboard');
   };
 
+  const handleDelete = async () => {
+    if (!confirm('Are you sure you want to delete this property?')) return;
+    
+    try {
+      await propertyAPI.delete(id!);
+      navigate('/properties');
+    } catch (error) {
+      alert('Failed to delete property');
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Back Button */}
@@ -49,25 +60,42 @@ const PropertyDetails: React.FC = () => {
       </Link>
 
       {/* Image Gallery */}
-      <div className="relative h-64 md:h-96 rounded-xl overflow-hidden">
-        <img
-          src={property.images?.[0] || '/api/placeholder/800/400'}
-          alt={property.title}
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute top-4 left-4">
-          <span className="bg-primary-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-            {property.livestock_type}
-          </span>
+      <div className="space-y-4">
+        <div className="relative h-64 md:h-96 rounded-xl overflow-hidden">
+          <img
+            src={property.images?.[0] || '/api/placeholder/800/400'}
+            alt={property.title}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute top-4 left-4">
+            <span className="bg-primary-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+              {property.livestock_type}
+            </span>
+          </div>
+          <div className="absolute top-4 right-4 flex space-x-2">
+            <button className="p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow">
+              <Heart size={20} className="text-gray-600" />
+            </button>
+            <button className="p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow">
+              <Share2 size={20} className="text-gray-600" />
+            </button>
+          </div>
         </div>
-        <div className="absolute top-4 right-4 flex space-x-2">
-          <button className="p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow">
-            <Heart size={20} className="text-gray-600" />
-          </button>
-          <button className="p-2 bg-white rounded-full shadow-md hover:shadow-lg transition-shadow">
-            <Share2 size={20} className="text-gray-600" />
-          </button>
-        </div>
+        
+        {/* Additional Images */}
+        {property.images?.length > 1 && (
+          <div className="grid grid-cols-4 gap-2">
+            {property.images.slice(1, 5).map((image: string, index: number) => (
+              <div key={index} className="relative h-20 rounded-lg overflow-hidden">
+                <img
+                  src={image}
+                  alt={`${property.title} ${index + 2}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Content Grid */}
@@ -76,9 +104,28 @@ const PropertyDetails: React.FC = () => {
         <div className="lg:col-span-2 space-y-6">
           {/* Header */}
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
-              {property.title}
-            </h1>
+            <div className="flex justify-between items-start mb-4">
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                {property.title}
+              </h1>
+              {(user?.id === property.owner_id || user?.role === 'admin') && (
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => navigate(`/properties/${id}/edit`)}
+                  >
+                    Edit
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    className="text-red-600 border-red-600 hover:bg-red-50"
+                    onClick={handleDelete}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              )}
+            </div>
             <div className="flex flex-wrap items-center gap-4 text-gray-600">
               <div className="flex items-center">
                 <MapPin size={18} className="mr-1" />

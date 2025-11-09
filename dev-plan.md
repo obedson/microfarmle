@@ -1,4 +1,4 @@
-# Marob Farm MVP Development Plan
+# Agro Career MVP Development Plan
 
 ## Phase 1: Project Setup & Core Backend (Week 1)
 1. Initialize project structure

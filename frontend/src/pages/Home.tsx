@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Search, MapPin, Shield, Users } from 'lucide-react';
+import { Search, MapPin, Shield, Users, BookOpen, TrendingUp } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 
@@ -22,6 +22,16 @@ const Home: React.FC = () => {
       description: 'Safe and secure booking process with verified property owners and transparent pricing.'
     },
     {
+      icon: BookOpen,
+      title: 'Learning Platform',
+      description: 'Access agricultural courses, best practices, and career development resources.'
+    },
+    {
+      icon: TrendingUp,
+      title: 'Career Growth',
+      description: 'Track your farming progress and build your agricultural career with expert guidance.'
+    },
+    {
       icon: Users,
       title: 'Community',
       description: 'Join a community of livestock farmers and property owners working together.'
@@ -34,12 +44,12 @@ const Home: React.FC = () => {
       <section className="text-center py-12 md:py-20">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 text-balance">
-            Find the Perfect
-            <span className="text-primary-600 block">Livestock Farming Space</span>
+            Your Agricultural
+            <span className="text-primary-600 block">Career Investment Platform</span>
           </h1>
           <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto text-balance">
-            Connect with property owners and discover ideal spaces for your livestock farming needs. 
-            Safe, secure, and community-driven.
+            Connect with property owners, discover ideal farming spaces, and advance your agricultural career 
+            through our comprehensive learning platform.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/properties">
@@ -48,9 +58,9 @@ const Home: React.FC = () => {
                 Browse Properties
               </Button>
             </Link>
-            <Link to="/register">
+            <Link to="/courses">
               <Button variant="outline" size="lg" className="w-full sm:w-auto">
-                Get Started
+                Start Learning
               </Button>
             </Link>
           </div>
@@ -61,10 +71,10 @@ const Home: React.FC = () => {
       <section>
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Why Choose Marob Farm?
+            Why Choose Agro Career?
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            We make it easy for farmers and property owners to connect and create successful partnerships.
+            We combine property rental with agricultural education to accelerate your farming career.
           </p>
         </div>
         
@@ -91,10 +101,10 @@ const Home: React.FC = () => {
       {/* CTA Section */}
       <section className="bg-primary-600 rounded-2xl p-8 md:p-12 text-center text-white">
         <h2 className="text-3xl md:text-4xl font-bold mb-4">
-          Ready to Get Started?
+          Ready to Invest in Your Agricultural Career?
         </h2>
         <p className="text-lg md:text-xl text-primary-100 mb-8 max-w-2xl mx-auto">
-          Join thousands of farmers and property owners who trust Marob Farm for their livestock space needs.
+          Join thousands of farmers and property owners who trust Agro Career for their livestock space needs and agricultural career development.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link to="/register">

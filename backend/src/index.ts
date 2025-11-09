@@ -11,6 +11,9 @@ import paymentRoutes from './routes/payments';
 import { errorHandler, notFound } from './middleware/errorHandler';
 
 import farmRecordRoutes from './routes/farmRecords';
+import courseRoutes from './routes/courses';
+import productRoutes from './routes/products';
+import orderRoutes from './routes/orders';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -32,6 +35,9 @@ app.use('/api/properties', propertyRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/farm-records', farmRecordRoutes);
+app.use('/api/courses', courseRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/orders', orderRoutes);
 
 // Health check
 app.get('/health', (req, res) => {

@@ -1,6 +1,6 @@
-# Marob Farm - Livestock Space Rental Platform
+# Agro Career - Agro Career And Investment Platform
 
-A platform connecting livestock farmers with property owners for space rental.
+A comprehensive platform connecting livestock farmers with property owners for space rental, career development, and agricultural learning opportunities.
 
 ## Features
 

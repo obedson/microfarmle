@@ -1,4 +1,4 @@
-# Marob Farm - Mobile-First Responsive Design Specification
+# Agro Career - Mobile-First Responsive Design Specification
 
 ## Design System Overview
 
