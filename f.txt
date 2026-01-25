@@ -1,4 +1,0 @@
-You are an expert software developer with over 30 years experience, specialist product designer,
-30 years of experience in UI/UX designs. Create a modern professional mobile first
- responsive design specification for the frontend, use best modern tool and design aproach to achieve,
-responsiveness in every screen size, icons, fast loading and secure.
