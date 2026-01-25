@@ -33,7 +33,7 @@ const FarmAnalytics: React.FC = () => {
             <div class="metric"><strong>Total Livestock:</strong> ${analytics.totalLivestock}</div>
             <div class="metric"><strong>Feed Consumption:</strong> ${analytics.totalFeedConsumption} kg</div>
             <div class="metric"><strong>Mortality Count:</strong> ${analytics.totalMortality}</div>
-            <div class="metric"><strong>Total Expenses:</strong> ₦${analytics.totalExpenses.toLocaleString()}</div>
+            <div class="metric"><strong>Total Expenses:</strong> ₦{analytics.totalExpenses.toLocaleString()}</div>
             <div class="metric"><strong>Mortality Rate:</strong> ${analytics.mortalityRate.toFixed(2)}%</div>
             <div class="metric"><strong>Records Count:</strong> ${analytics.recordCount}</div>
           ` : '<p>No data available for the selected date range</p>'}
