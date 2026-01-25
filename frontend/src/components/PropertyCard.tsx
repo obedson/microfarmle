@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, DollarSign, Calendar, Users } from 'lucide-react';
+import { MapPin, Calendar, Users } from 'lucide-react';
 import Card from './ui/Card';
 
 interface Property {
@@ -78,7 +78,7 @@ const PropertyCard: React.FC<PropertyCardProps> = ({ property }) => {
           {/* Price */}
           <div className="flex items-center justify-between">
             <div className="flex items-center text-primary-600 font-semibold">
-              <DollarSign size={18} className="mr-1" />
+              <span className="text-lg font-bold mr-1">₦</span>
               <span className="text-lg">{property.price.toLocaleString()}</span>
               <span className="text-sm text-gray-500 ml-1">/month</span>
             </div>
