@@ -1,0 +1,16 @@
+marketplace.ts:22   GET https://micro-farmle.onrender.com/products? 404 (Not Found)
+_m @ marketplace.ts:22
+c @ Marketplace.tsx:20
+(anonymous) @ Marketplace.tsx:15
+rl @ react-dom.production.min.js:243
+ju @ react-dom.production.min.js:285
+(anonymous) @ react-dom.production.min.js:282
+wu @ react-dom.production.min.js:280
+lu @ react-dom.production.min.js:272
+Bs @ react-dom.production.min.js:127
+(anonymous) @ react-dom.production.min.js:266
+[NEW] Explain Console errors by using Copilot in Edge: click
+         
+         to explain an error. 
+        Learn more
+        Don't show again

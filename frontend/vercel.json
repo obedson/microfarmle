@@ -24,7 +24,7 @@
     }
   ],
   "env": {
-    "REACT_APP_API_URL": "https://agro-career-backend.onrender.com",
+    "REACT_APP_API_URL": "https://micro-farmle.onrender.com/api",
     "REACT_APP_APP_NAME": "Agro Career",
     "REACT_APP_VERSION": "1.0.0"
   }

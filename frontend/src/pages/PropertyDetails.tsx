@@ -63,7 +63,7 @@ const PropertyDetails: React.FC = () => {
       <div className="space-y-4">
         <div className="relative h-64 md:h-96 rounded-xl overflow-hidden">
           <img
-            src={property.images?.[0] || '/api/placeholder/800/400'}
+            src={property.images?.[0] || 'https://via.placeholder.com/800x400?text=No+Image'}
             alt={property.title}
             className="w-full h-full object-cover"
           />

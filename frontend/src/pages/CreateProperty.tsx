@@ -89,7 +89,11 @@ const CreateProperty: React.FC = () => {
         });
         
         if (imageResponse.ok) {
-          console.log('Images uploaded successfully');
+          const imageResult = await imageResponse.json();
+          console.log('Images uploaded successfully:', imageResult);
+        } else {
+          const errorText = await imageResponse.text();
+          console.error('Image upload failed:', imageResponse.status, errorText);
         }
         
         navigate('/dashboard');
