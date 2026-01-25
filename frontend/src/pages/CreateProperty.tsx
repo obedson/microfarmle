@@ -80,7 +80,7 @@ const CreateProperty: React.FC = () => {
         });
         
         // Upload images to the created property
-        const imageResponse = await fetch(`http://localhost:3001/api/properties/${tempProperty.data.data.id}/images`, {
+        const imageResponse = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3000/api'}/properties/${tempProperty.data.data.id}/images`, {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,

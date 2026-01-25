@@ -36,7 +36,7 @@ export const initializePayment = asyncHandler(async (req: Request, res: Response
     email: (req as any).user.email,
     amount: Math.round(booking.total_amount * 100),
     reference: `booking_${actualBookingId}_${Date.now()}`,
-    callback_url: `http://localhost:3000/payment/callback`,
+    callback_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/payment/callback`,
     metadata: {
       booking_id: actualBookingId,
       farmer_id: userId,
