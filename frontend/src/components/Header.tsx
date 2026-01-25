@@ -39,10 +39,10 @@ const Header: React.FC = () => {
           {/* Logo */}
           <Link to="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-primary-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">M</span>
+              <span className="text-white font-bold text-lg">MF</span>
             </div>
             <span className="font-bold text-xl text-gray-900 hidden sm:block">
-              Agro Career
+              Micro Farmle
             </span>
           </Link>
 

@@ -11,15 +11,11 @@ export const initializePayment = asyncHandler(async (req: Request, res: Response
   const actualBookingId = bookingId || booking_id;
   const userId = (req as any).user.id;
 
-  console.log('Payment request:', { bookingId, booking_id, actualBookingId, userId });
-
   if (!PAYSTACK_SECRET_KEY) {
     throw createError('Payment service not configured', 500);
   }
 
-  const booking = await BookingModel.findById(actualBookingId);
-  console.log('Found booking:', booking);
-  
+  const booking = await BookingModel.findById(bookingId);
   if (!booking) {
     throw createError('Booking not found', 404);
   }
@@ -34,11 +30,11 @@ export const initializePayment = asyncHandler(async (req: Request, res: Response
 
   const paymentData = {
     email: (req as any).user.email,
-    amount: Math.round(booking.total_amount * 100),
-    reference: `booking_${actualBookingId}_${Date.now()}`,
-    callback_url: `http://localhost:3000/payment/callback`,
+    amount: Math.round(booking.total_amount * 100), // Convert to kobo
+    reference: `booking_${bookingId}_${Date.now()}`,
+    callback_url: `${process.env.FRONTEND_URL}/payment/callback`,
     metadata: {
-      booking_id: actualBookingId,
+      booking_id: bookingId,
       farmer_id: userId,
       property_id: booking.property_id
     }
@@ -101,7 +97,7 @@ export const verifyPayment = asyncHandler(async (req: Request, res: Response) =>
         success: true,
         data: {
           status: data.status,
-          amount: data.amount / 100,
+          amount: data.amount / 100, // Convert from kobo
           reference: data.reference,
           paid_at: data.paid_at
         }

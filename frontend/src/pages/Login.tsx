@@ -39,13 +39,13 @@ const Login: React.FC = () => {
           {/* Header */}
           <div className="text-center mb-8">
             <div className="w-16 h-16 bg-primary-600 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-white font-bold text-2xl">M</span>
+              <span className="text-white font-bold text-2xl">MF</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
               Welcome Back
             </h1>
             <p className="text-gray-600">
-              Sign in to your Agro Career account
+              Sign in to your Micro Farmle account
             </p>
           </div>
 

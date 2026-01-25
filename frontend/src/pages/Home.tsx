@@ -45,7 +45,7 @@ const Home: React.FC = () => {
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6 text-balance">
             Your Agricultural
-            <span className="text-primary-600 block">Career Investment Platform</span>
+            <span className="text-primary-600 block">Learning And Investment Platform</span>
           </h1>
           <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto text-balance">
             Connect with property owners, discover ideal farming spaces, and advance your agricultural career 
@@ -71,10 +71,10 @@ const Home: React.FC = () => {
       <section>
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Why Choose Agro Career?
+            Why Choose Micro Farmle?
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            We combine property rental with agricultural education to accelerate your farming career.
+            We combine property rental with agricultural education, and earning to accelerate your farming career.
           </p>
         </div>
         
@@ -104,7 +104,7 @@ const Home: React.FC = () => {
           Ready to Invest in Your Agricultural Career?
         </h2>
         <p className="text-lg md:text-xl text-primary-100 mb-8 max-w-2xl mx-auto">
-          Join thousands of farmers and property owners who trust Agro Career for their livestock space needs and agricultural career development.
+          Join thousands of farmers and property owners who trust Micro Farmle for their livestock space needs and agricultural career development.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link to="/register">
