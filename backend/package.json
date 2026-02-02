@@ -10,6 +10,7 @@
     "test": "jest"
   },
   "dependencies": {
+    "@getbrevo/brevo": "^3.0.1",
     "@supabase/supabase-js": "^2.38.4",
     "axios": "^1.13.2",
     "bcryptjs": "^2.4.3",

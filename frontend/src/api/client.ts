@@ -20,6 +20,10 @@ export const authAPI = {
     apiClient.post('/auth/login', { email, password }),
   register: (data: any) =>
     apiClient.post('/auth/register', data),
+  forgotPassword: (email: string) =>
+    apiClient.post('/auth/forgot-password', { email }),
+  resetPassword: (token: string, password: string) =>
+    apiClient.post('/auth/reset-password', { token, password }),
 };
 
 export const propertyAPI = {

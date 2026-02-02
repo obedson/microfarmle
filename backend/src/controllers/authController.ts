@@ -69,3 +69,56 @@ export const login = async (req: Request, res: Response) => {
     res.status(500).json({ success: false, error: 'Login failed' });
   }
 };
+export const forgotPassword = async (req: Request, res: Response) => {
+  try {
+    const { error, value } = Joi.object({
+      email: Joi.string().email().required(),
+    }).validate(req.body);
+
+    if (error) {
+      return res.status(400).json({ success: false, error: error.details[0].message });
+    }
+
+    const user = await UserModel.findByEmail(value.email);
+    if (!user) {
+      // Don't reveal if email exists
+      return res.json({ success: true, message: 'If email exists, reset link sent' });
+    }
+
+    const resetToken = require('crypto').randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 3600000); // 1 hour
+
+    await UserModel.updateResetToken(value.email, resetToken, expires);
+    
+    const { sendPasswordResetEmail } = await import('../services/emailService');
+    await sendPasswordResetEmail(value.email, resetToken);
+
+    res.json({ success: true, message: 'If email exists, reset link sent' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to process request' });
+  }
+};
+
+export const resetPassword = async (req: Request, res: Response) => {
+  try {
+    const { error, value } = Joi.object({
+      token: Joi.string().required(),
+      password: Joi.string().min(6).required(),
+    }).validate(req.body);
+
+    if (error) {
+      return res.status(400).json({ success: false, error: error.details[0].message });
+    }
+
+    const user = await UserModel.findByResetToken(value.token);
+    if (!user) {
+      return res.status(400).json({ success: false, error: 'Invalid or expired token' });
+    }
+
+    await UserModel.updatePassword(user.id, value.password);
+
+    res.json({ success: true, message: 'Password reset successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to reset password' });
+  }
+};

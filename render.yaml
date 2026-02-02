@@ -24,3 +24,7 @@ services:
         sync: false
       - key: PAYSTACK_PUBLIC_KEY
         sync: false
+      - key: BREVO_API_KEY
+        sync: false
+      - key: FROM_EMAIL
+        sync: false

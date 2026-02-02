@@ -2,11 +2,11 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate, Link } from 'react-router-dom';
-import { Mail, Lock, AlertCircle } from 'lucide-react';
+import { Mail, AlertCircle } from 'lucide-react';
 import { authAPI } from '../api/client';
 import { useAuthStore } from '../store/authStore';
 import Button from '../components/ui/Button';
-import Input from '../components/ui/Input';
+import PasswordInput from '../components/ui/PasswordInput';
 import Card from '../components/ui/Card';
 
 interface LoginForm {
@@ -91,26 +91,28 @@ const Login: React.FC = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
-                <Lock size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-                <input
-                  {...register('password', { 
-                    required: 'Password is required',
-                    minLength: {
-                      value: 6,
-                      message: 'Password must be at least 6 characters'
-                    }
-                  })}
-                  type="password"
-                  placeholder="Enter your password"
-                  className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors ${
-                    errors.password ? 'border-red-300' : 'border-gray-300'
-                  }`}
-                />
+              <div className="flex justify-between items-center mb-2">
+                <label className="block text-sm font-medium text-gray-700">
+                  Password
+                </label>
+                <Link 
+                  to="/forgot-password" 
+                  className="text-sm text-primary-600 hover:text-primary-700 font-medium"
+                >
+                  Forgot password?
+                </Link>
               </div>
+              <PasswordInput
+                {...register('password', { 
+                  required: 'Password is required',
+                  minLength: {
+                    value: 6,
+                    message: 'Password must be at least 6 characters'
+                  }
+                })}
+                placeholder="Enter your password"
+                error={!!errors.password}
+              />
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
               )}

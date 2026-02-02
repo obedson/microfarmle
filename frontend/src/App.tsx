@@ -5,6 +5,8 @@ import Layout from './components/Layout';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import Properties from './pages/Properties';
 import PropertyDetails from './pages/PropertyDetails';
 import Dashboard from './pages/Dashboard';
@@ -38,6 +40,8 @@ function App() {
         <Route path="/add-course" element={<AddCourse />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/payment/callback" element={<PaymentCallback />} />
         {isAuthenticated && (
           <>

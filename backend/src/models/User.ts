@@ -53,4 +53,43 @@ export class UserModel {
   static async verifyPassword(plainPassword: string, hashedPassword: string): Promise<boolean> {
     return bcrypt.compare(plainPassword, hashedPassword);
   }
+
+  static async updateResetToken(email: string, token: string, expires: Date): Promise<void> {
+    const { error } = await supabase
+      .from('users')
+      .update({
+        reset_token: token,
+        reset_token_expires: expires.toISOString(),
+      })
+      .eq('email', email);
+
+    if (error) throw error;
+  }
+
+  static async findByResetToken(token: string): Promise<User | null> {
+    const { data, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('reset_token', token)
+      .gt('reset_token_expires', new Date().toISOString())
+      .single();
+
+    if (error) return null;
+    return data;
+  }
+
+  static async updatePassword(id: string, newPassword: string): Promise<void> {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    
+    const { error } = await supabase
+      .from('users')
+      .update({
+        password: hashedPassword,
+        reset_token: null,
+        reset_token_expires: null,
+      })
+      .eq('id', id);
+
+    if (error) throw error;
+  }
 }
