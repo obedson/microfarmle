@@ -8,7 +8,10 @@ export const sendPasswordResetEmail = async (email: string, resetToken: string) 
   
   const sendSmtpEmail = new brevo.SendSmtpEmail();
   sendSmtpEmail.to = [{ email }];
-  // Brevo will use your account's default sender
+  sendSmtpEmail.sender = { 
+    email: process.env.FROM_EMAIL || 'obedsonfield@gmail.com',
+    name: 'Micro Farmle'
+  };
   sendSmtpEmail.subject = 'Reset Your Password';
   sendSmtpEmail.htmlContent = `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
