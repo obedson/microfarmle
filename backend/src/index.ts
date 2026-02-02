@@ -9,6 +9,7 @@ import propertyRoutes from './routes/properties';
 import bookingRoutes from './routes/bookings';
 import paymentRoutes from './routes/payments';
 import { errorHandler, notFound } from './middleware/errorHandler';
+import './services/keepAlive'; // Keep-alive service
 
 import farmRecordRoutes from './routes/farmRecords';
 import courseRoutes from './routes/courses';
