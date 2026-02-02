@@ -1,36 +1,8 @@
-client.ts:24   POST https://micro-farmle.onrender.com/api/auth/forgot-password 404 (Not Found)
-(anonymous) @ xhr.js:198
-xhr @ xhr.js:15
-cp @ dispatchRequest.js:51
-Promise.then
-_request @ Axios.js:163
-request @ Axios.js:40
-(anonymous) @ Axios.js:224
-(anonymous) @ bind.js:12
-Ep @ client.ts:24
-mutationFn @ ForgotPassword.tsx:19
-fn @ mutation.ts:179
-h @ retryer.ts:147
-bt @ retryer.ts:204
-e @ mutation.ts:174
-execute @ mutation.ts:216
-await in execute
-mutate @ mutationObserver.ts:136
-(anonymous) @ main.37ad2585.js:2
-(anonymous) @ ForgotPassword.tsx:26
-(anonymous) @ createFormControl.ts:1273
-await in (anonymous)
-_e @ react-dom.production.min.js:54
-Ie @ react-dom.production.min.js:54
-(anonymous) @ react-dom.production.min.js:55
-Lr @ react-dom.production.min.js:105
-zr @ react-dom.production.min.js:106
-(anonymous) @ react-dom.production.min.js:117
-uu @ react-dom.production.min.js:273
-Ae @ react-dom.production.min.js:52
-Wr @ react-dom.production.min.js:109
-Kt @ react-dom.production.min.js:74
-Ht @ react-dom.production.min.js:73
+Error
+
+Route /api/auth/forgot-password not found
+
+forgot-password:1   Failed to load resource: the server responded with a status of 404 ()
 [NEW] Explain Console errors by using Copilot in Edge: click
          
          to explain an error. 
