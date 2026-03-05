@@ -130,7 +130,10 @@ export const marketplaceApi = {
     const data = await response.json();
     
     if (!response.ok) {
-      console.error('Order creation failed:', data);
+      // Only log in development
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Order creation failed:', data);
+      }
       throw new Error(data.error || 'Failed to create order');
     }
     

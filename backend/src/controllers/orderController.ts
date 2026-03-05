@@ -1,12 +1,17 @@
 import { Request, Response } from 'express';
 import { supabase } from '../utils/supabase.js';
 import { AuthenticatedRequest } from '../types/index.js';
+import { logger } from '../utils/logger.js';
 
 export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { product_id, quantity, delivery_address, phone } = req.body;
     
-    console.log('Creating order:', { product_id, quantity, delivery_address, phone, buyer_id: req.user?.id });
+    logger.info('Creating order', { 
+      product_id, 
+      quantity, 
+      buyer_id: req.user?.id 
+    });
     
     // Get product details
     const { data: product, error: productError } = await supabase
@@ -16,8 +21,11 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
       .single();
 
     if (productError) {
-      console.error('Product fetch error:', productError);
-      return res.status(404).json({ error: 'Product not found', details: productError.message });
+      logger.error('Product fetch failed', { 
+        product_id, 
+        error: productError.message 
+      });
+      return res.status(404).json({ error: 'Product not found' });
     }
 
     if (!product) {
@@ -25,6 +33,11 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
     }
 
     if (quantity > product.stock_quantity) {
+      logger.warn('Insufficient stock', { 
+        product_id, 
+        requested: quantity, 
+        available: product.stock_quantity 
+      });
       return res.status(400).json({ error: 'Insufficient stock' });
     }
 
@@ -45,7 +58,11 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
       .single();
 
     if (error) {
-      console.error('Order insert error:', error);
+      logger.error('Order creation failed', { 
+        product_id, 
+        buyer_id: req.user?.id,
+        error: error.message 
+      });
       throw error;
     }
 
@@ -56,13 +73,25 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
       .eq('id', product_id);
 
     if (updateError) {
-      console.error('Stock update error:', updateError);
+      logger.error('Stock update failed', { 
+        product_id, 
+        error: updateError.message 
+      });
     }
+
+    logger.info('Order created successfully', { 
+      order_id: data.id, 
+      product_id, 
+      buyer_id: req.user?.id 
+    });
 
     res.status(201).json(data);
   } catch (error) {
-    console.error('Create order error:', error);
-    res.status(500).json({ error: 'Failed to create order', details: error instanceof Error ? error.message : 'Unknown error' });
+    logger.error('Create order error', { 
+      error: error instanceof Error ? error.message : 'Unknown error',
+      buyer_id: req.user?.id 
+    });
+    res.status(500).json({ error: 'Failed to create order' });
   }
 };
 
@@ -77,7 +106,10 @@ export const getMyOrders = async (req: AuthenticatedRequest, res: Response) => {
     if (error) throw error;
     res.json(data);
   } catch (error) {
-    console.error('Get orders error:', error);
+    logger.error('Get orders failed', { 
+      buyer_id: req.user?.id,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
     res.status(500).json({ error: 'Failed to fetch orders' });
   }
 };
@@ -91,13 +123,19 @@ export const getMySales = async (req: AuthenticatedRequest, res: Response) => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Get sales error:', error);
+      logger.error('Get sales failed', { 
+        supplier_id: req.user?.id,
+        error: error.message 
+      });
       throw error;
     }
     
     res.json(data || []);
   } catch (error) {
-    console.error('Get sales error:', error);
+    logger.error('Get sales error', { 
+      supplier_id: req.user?.id,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
     res.status(500).json({ error: 'Failed to fetch sales' });
   }
 };
@@ -118,12 +156,25 @@ export const updateOrderStatus = async (req: AuthenticatedRequest, res: Response
 
     // Check if user is the supplier
     if (data.marketplace_products.supplier_id !== req.user?.id) {
+      logger.warn('Unauthorized order status update attempt', { 
+        order_id: id,
+        user_id: req.user?.id 
+      });
       return res.status(403).json({ error: 'Not authorized' });
     }
 
+    logger.info('Order status updated', { 
+      order_id: id, 
+      status, 
+      supplier_id: req.user?.id 
+    });
+
     res.json(data);
   } catch (error) {
-    console.error('Update order status error:', error);
+    logger.error('Update order status failed', { 
+      order_id: req.params.id,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    });
     res.status(500).json({ error: 'Failed to update order status' });
   }
 };
