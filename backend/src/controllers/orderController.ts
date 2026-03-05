@@ -188,6 +188,12 @@ export const updateOrderStatus = async (req: AuthenticatedRequest, res: Response
     const { id } = req.params;
     const { status } = req.body;
     
+    logger.info('Updating order status', { 
+      order_id: id, 
+      new_status: status,
+      user_id: req.user?.id 
+    });
+    
     const { data, error } = await supabase
       .from('orders')
       .update({ status })
@@ -195,15 +201,29 @@ export const updateOrderStatus = async (req: AuthenticatedRequest, res: Response
       .select('*, marketplace_products!inner(supplier_id)')
       .single();
 
-    if (error) throw error;
+    if (error) {
+      logger.error('Supabase update error', { 
+        order_id: id,
+        error: error.message,
+        details: error 
+      });
+      throw error;
+    }
+
+    logger.info('Order fetched', { 
+      order_id: id,
+      supplier_id: data.marketplace_products.supplier_id,
+      current_user: req.user?.id 
+    });
 
     // Check if user is the supplier
     if (data.marketplace_products.supplier_id !== req.user?.id) {
       logger.warn('Unauthorized order status update attempt', { 
         order_id: id,
-        user_id: req.user?.id 
+        user_id: req.user?.id,
+        supplier_id: data.marketplace_products.supplier_id
       });
-      return res.status(403).json({ error: 'Not authorized' });
+      return res.status(403).json({ success: false, error: 'Not authorized' });
     }
 
     logger.info('Order status updated', { 
@@ -213,10 +233,11 @@ export const updateOrderStatus = async (req: AuthenticatedRequest, res: Response
     });
 
     res.json({ success: true, data });
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Update order status failed', { 
       order_id: req.params.id,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error?.message || String(error),
+      stack: error?.stack
     });
     res.status(500).json({ success: false, error: 'Failed to update order status' });
   }
