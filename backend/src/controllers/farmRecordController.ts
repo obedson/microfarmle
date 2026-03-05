@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { FarmRecordModel } from '../models/FarmRecord';
-import { asyncHandler, createError } from '../middleware/errorHandler';
+import { FarmRecordModel } from '../models/FarmRecord.js';
+import { asyncHandler, createError } from '../middleware/errorHandler.js';
 
 export const createRecord = asyncHandler(async (req: Request, res: Response) => {
   const userId = (req as any).user.id;

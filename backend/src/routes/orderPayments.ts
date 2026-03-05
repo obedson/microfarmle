@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { authenticateToken, AuthRequest } from '../middleware/auth';
-import { supabase } from '../utils/supabase';
+import { authenticateToken, AuthRequest } from '../middleware/auth.js';
+import { supabase } from '../utils/supabase.js';
 import axios from 'axios';
 
 const router = Router();

@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { UserModel } from '../models/User';
-import { generateToken } from '../utils/jwt';
+import { UserModel } from '../models/User.js';
+import { generateToken } from '../utils/jwt.js';
 import Joi from 'joi';
 
 const registerSchema = Joi.object({

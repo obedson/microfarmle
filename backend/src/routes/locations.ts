@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { LocationModel } from '../models/Location';
+import { LocationModel } from '../models/Location.js';
 
 const router = Router();
 

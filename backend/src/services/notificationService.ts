@@ -1,5 +1,5 @@
-import supabase from '../utils/supabase';
-import { sendEmail } from './emailService';
+import supabase from '../utils/supabase.js';
+import { sendEmail } from './emailService.js';
 
 export const sendPaymentReminder = async (userId: string, contributionId: string) => {
   try {

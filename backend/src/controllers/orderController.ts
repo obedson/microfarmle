@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { supabase } from '../utils/supabase';
-import { AuthenticatedRequest } from '../types';
+import { supabase } from '../utils/supabase.js';
+import { AuthenticatedRequest } from '../types/index.js';
 
 export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
   try {

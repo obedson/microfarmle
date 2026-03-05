@@ -1,8 +1,8 @@
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
-import { GroupModel } from '../models/Group';
-import { ContributionModel } from '../models/Contribution';
-import supabase from '../utils/supabase';
+import { GroupModel } from '../models/Group.js';
+import { ContributionModel } from '../models/Contribution.js';
+import supabase from '../utils/supabase.js';
 
 const router = Router();
 

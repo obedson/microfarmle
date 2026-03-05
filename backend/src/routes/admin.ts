@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { authenticateToken, requireRole, AuthRequest } from '../middleware/auth';
-import { supabase } from '../utils/supabase';
-import { logAudit } from '../utils/audit';
+import { authenticateToken, requireRole, AuthRequest } from '../middleware/auth.js';
+import { supabase } from '../utils/supabase.js';
+import { logAudit } from '../utils/audit.js';
 
 const router = Router();
 

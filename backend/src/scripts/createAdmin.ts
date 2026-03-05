@@ -1,4 +1,4 @@
-import { supabase } from '../utils/supabase';
+import { supabase } from '../utils/supabase.js';
 import bcrypt from 'bcryptjs';
 
 const createAdmin = async () => {

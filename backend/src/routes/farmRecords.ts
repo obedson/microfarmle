@@ -5,8 +5,8 @@ import {
   getAnalytics, 
   updateRecord, 
   deleteRecord 
-} from '../controllers/farmRecordController';
-import { authenticateToken } from '../middleware/auth';
+} from '../controllers/farmRecordController.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = Router();
 

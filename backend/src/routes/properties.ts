@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { createProperty, getProperties, getProperty, updateProperty, deleteProperty, uploadImages, deleteImage, updateImageOrder } from '../controllers/propertyController';
-import { authenticateToken } from '../middleware/auth';
-import { upload } from '../utils/upload';
+import { createProperty, getProperties, getProperty, updateProperty, deleteProperty, uploadImages, deleteImage, updateImageOrder } from '../controllers/propertyController.js';
+import { authenticateToken } from '../middleware/auth.js';
+import { upload } from '../utils/upload.js';
 
 const router = Router();
 

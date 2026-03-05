@@ -1,8 +1,8 @@
 import { Router, Response } from 'express';
-import { getProducts, getProduct, createProduct, updateProduct, deleteProduct } from '../controllers/productController';
-import { authenticateToken } from '../middleware/auth';
-import { upload } from '../utils/upload';
-import { supabase } from '../utils/supabase';
+import { getProducts, getProduct, createProduct, updateProduct, deleteProduct } from '../controllers/productController.js';
+import { authenticateToken } from '../middleware/auth.js';
+import { upload } from '../utils/upload.js';
+import { supabase } from '../utils/supabase.js';
 
 const router = Router();
 

@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { authenticateToken, AuthRequest } from '../middleware/auth';
-import { validate } from '../middleware/validate';
-import { createGroupSchema, joinGroupSchema } from '../utils/validation';
-import { GroupModel } from '../models/Group';
+import { authenticateToken, AuthRequest } from '../middleware/auth.js';
+import { validate } from '../middleware/validate.js';
+import { createGroupSchema, joinGroupSchema } from '../utils/validation.js';
+import { GroupModel } from '../models/Group.js';
 import { Response } from 'express';
-import supabase from '../utils/supabase';
+import supabase from '../utils/supabase.js';
 
 const router = Router();
 

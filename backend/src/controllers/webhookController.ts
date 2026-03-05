@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import crypto from 'crypto';
-import { BookingModel } from '../models/Booking';
-import { asyncHandler, createError } from '../middleware/errorHandler';
+import { BookingModel } from '../models/Booking.js';
+import { asyncHandler, createError } from '../middleware/errorHandler.js';
 
 const verifyPaystackSignature = (payload: string, signature: string): boolean => {
   const secret = process.env.PAYSTACK_SECRET_KEY;

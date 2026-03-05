@@ -1,5 +1,5 @@
-import { supabase } from '../utils/supabase';
-import { createError } from '../middleware/errorHandler';
+import { supabase } from '../utils/supabase.js';
+import { createError } from '../middleware/errorHandler.js';
 
 export class ImageService {
   private static readonly BUCKET_NAME = 'property-images';

@@ -1,6 +1,6 @@
 import multer from 'multer';
 import { Request } from 'express';
-import supabase from './supabase';
+import supabase from './supabase.js';
 
 const storage = multer.memoryStorage();
 

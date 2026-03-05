@@ -1,5 +1,5 @@
-import supabase from '../utils/supabase';
-import { verifyPaystackPayment, isDevelopmentMode } from '../utils/paystack';
+import supabase from '../utils/supabase.js';
+import { verifyPaystackPayment, isDevelopmentMode } from '../utils/paystack.js';
 
 export class GroupModel {
   static async createWithPayment(groupData: any, userId: string, paymentRef: string) {

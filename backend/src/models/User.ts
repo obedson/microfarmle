@@ -1,6 +1,6 @@
-import supabase from '../utils/supabase';
+import supabase from '../utils/supabase.js';
 import bcrypt from 'bcryptjs';
-import { User } from '../types';
+import { User } from '../types/index.js';
 
 export class UserModel {
   static async create(userData: {

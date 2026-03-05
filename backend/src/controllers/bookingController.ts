@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { BookingModel } from '../models/Booking';
-import { PropertyModel } from '../models/Property';
-import { sendEmail } from '../services/emailService';
+import { BookingModel } from '../models/Booking.js';
+import { PropertyModel } from '../models/Property.js';
+import { sendEmail } from '../services/emailService.js';
 import Joi from 'joi';
 
 const bookingSchema = Joi.object({

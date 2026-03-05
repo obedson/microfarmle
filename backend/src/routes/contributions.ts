@@ -1,9 +1,9 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { authenticateToken, AuthRequest } from '../middleware/auth';
-import { validate } from '../middleware/validate';
-import { contributionSettingsSchema, makePaymentSchema } from '../utils/validation';
-import * as contributionController from '../controllers/contributionController';
+import { authenticateToken, AuthRequest } from '../middleware/auth.js';
+import { validate } from '../middleware/validate.js';
+import { contributionSettingsSchema, makePaymentSchema } from '../utils/validation.js';
+import * as contributionController from '../controllers/contributionController.js';
 
 const router = Router();
 

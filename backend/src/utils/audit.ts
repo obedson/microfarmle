@@ -1,4 +1,4 @@
-import { supabase } from '../utils/supabase';
+import { supabase } from '../utils/supabase.js';
 
 interface AuditLog {
   user_id: string;

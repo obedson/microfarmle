@@ -1,0 +1,27 @@
+PS C:\Users\NITDA\Desktop\microfarm\backend> npm run dev
+
+> Farmle backend@1.0.0 dev
+> nodemon src/index.ts
+
+[nodemon] 3.1.10
+[nodemon] to restart at any time, enter `rs`
+[nodemon] watching path(s): *.*
+[nodemon] watching extensions: ts,json
+[nodemon] starting `ts-node src/index.ts`
+Error: Cannot find module 'C:\Users\NITDA\Desktop\microfarm\backend\src\routes\auth' imported from C:\Users\NITDA\Desktop\microfarm\backend\src\index.ts
+    at finalizeResolution (node:internal/modules/esm/resolve:275:11)
+    at moduleResolve (node:internal/modules/esm/resolve:865:10)
+    at defaultResolve (node:internal/modules/esm/resolve:991:11)
+    at ModuleLoader.#cachedDefaultResolve (node:internal/modules/esm/loader:719:20)
+    at ModuleLoader.#resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:736:38)
+    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:765:52)
+    at ModuleLoader.#resolve (node:internal/modules/esm/loader:701:17)
+    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:621:35)
+    at ModuleJob.syncLink (node:internal/modules/esm/module_job:160:33)
+    at ModuleJob.link (node:internal/modules/esm/module_job:245:17) {
+  code: 'ERR_MODULE_NOT_FOUND',
+  url: 'file:///C:/Users/NITDA/Desktop/microfarm/backend/src/routes/auth'
+}
+[nodemon] app crashed - waiting for file changes before starting...
+
+

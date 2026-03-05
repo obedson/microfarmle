@@ -1,6 +1,6 @@
 import cron from 'node-cron';
-import { supabase } from '../utils/supabase';
-import { sendEmail } from '../services/emailService';
+import { supabase } from '../utils/supabase.js';
+import { sendEmail } from '../services/emailService.js';
 
 interface ExpiredBooking {
   id: string;
@@ -10,7 +10,7 @@ interface ExpiredBooking {
   property: { title: string } | null;
 }
 
-import { logger } from '../utils/logger';
+import { logger } from '../utils/logger.js';
 
 export const startBookingJobs = () => {
   // Auto-expire pending bookings after 48 hours

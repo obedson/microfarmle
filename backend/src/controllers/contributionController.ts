@@ -1,7 +1,7 @@
 import { Response } from 'express';
-import { AuthRequest } from '../middleware/auth';
-import { ContributionModel } from '../models/Contribution';
-import supabase from '../utils/supabase';
+import { AuthRequest } from '../middleware/auth.js';
+import { ContributionModel } from '../models/Contribution.js';
+import supabase from '../utils/supabase.js';
 
 export const updateSettings = async (req: AuthRequest, res: Response) => {
   try {

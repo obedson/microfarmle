@@ -4,26 +4,26 @@ dotenv.config();
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import authRoutes from './routes/auth';
-import propertyRoutes from './routes/properties';
-import bookingRoutes from './routes/bookings';
-import paymentRoutes from './routes/payments';
-import webhookRoutes from './routes/webhooks';
-import { errorHandler, notFound } from './middleware/errorHandler';
-import { sanitizeInput } from './middleware/sanitize';
+import authRoutes from './routes/auth.js';
+import propertyRoutes from './routes/properties.js';
+import bookingRoutes from './routes/bookings.js';
+import paymentRoutes from './routes/payments.js';
+import webhookRoutes from './routes/webhooks.js';
+import { errorHandler, notFound } from './middleware/errorHandler.js';
+import { sanitizeInput } from './middleware/sanitize.js';
 
-import farmRecordRoutes from './routes/farmRecords';
-import courseRoutes from './routes/courses';
-import courseVideoRoutes from './routes/courseVideos';
-import productRoutes from './routes/products';
-import orderRoutes from './routes/orders';
-import orderPaymentRoutes from './routes/orderPayments';
-import locationRoutes from './routes/locations';
-import groupRoutes from './routes/groups';
-import contributionRoutes from './routes/contributions';
-import adminRoutes from './routes/admin';
-import { startCronJobs } from './jobs/contributionJobs';
-import { startBookingJobs } from './jobs/bookingJobs';
+import farmRecordRoutes from './routes/farmRecords.js';
+import courseRoutes from './routes/courses.js';
+import courseVideoRoutes from './routes/courseVideos.js';
+import productRoutes from './routes/products.js';
+import orderRoutes from './routes/orders.js';
+import orderPaymentRoutes from './routes/orderPayments.js';
+import locationRoutes from './routes/locations.js';
+import groupRoutes from './routes/groups.js';
+import contributionRoutes from './routes/contributions.js';
+import adminRoutes from './routes/admin.js';
+import { startCronJobs } from './jobs/contributionJobs.js';
+import { startBookingJobs } from './jobs/bookingJobs.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -70,7 +70,7 @@ app.get('/health', (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
-import { logger } from './utils/logger';
+import { logger } from './utils/logger.js';
 
 app.listen(PORT, () => {
   logger.info(`Server running on port ${PORT}`);

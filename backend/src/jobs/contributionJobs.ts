@@ -1,7 +1,7 @@
 import cron from 'node-cron';
-import { ContributionModel } from '../models/Contribution';
-import supabase from '../utils/supabase';
-import { sendPaymentReminder, sendOverdueNotice, sendSuspensionNotice, sendExpulsionNotice } from '../services/notificationService';
+import { ContributionModel } from '../models/Contribution.js';
+import supabase from '../utils/supabase.js';
+import { sendPaymentReminder, sendOverdueNotice, sendSuspensionNotice, sendExpulsionNotice } from '../services/notificationService.js';
 
 // Run on 1st of each month at 00:00
 export const createMonthlyCycles = cron.schedule('0 0 1 * *', async () => {

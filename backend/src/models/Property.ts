@@ -1,5 +1,5 @@
-import supabase from '../utils/supabase';
-import { Property } from '../types';
+import supabase from '../utils/supabase.js';
+import { Property } from '../types/index.js';
 
 export class PropertyModel {
   static async create(propertyData: Omit<Property, 'id' | 'created_at' | 'updated_at'>): Promise<Property> {

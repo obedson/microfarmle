@@ -1,5 +1,5 @@
-import { ContributionModel } from '../models/Contribution';
-import supabase from '../utils/supabase';
+import { ContributionModel } from '../models/Contribution.js';
+import supabase from '../utils/supabase.js';
 
 describe('Contribution System', () => {
   let testGroupId: string;

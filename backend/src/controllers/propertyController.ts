@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { PropertyModel } from '../models/Property';
-import { uploadToSupabase } from '../utils/upload';
-import { supabase } from '../utils/supabase';
+import { PropertyModel } from '../models/Property.js';
+import { uploadToSupabase } from '../utils/upload.js';
+import { supabase } from '../utils/supabase.js';
 import Joi from 'joi';
 
 const propertySchema = Joi.object({

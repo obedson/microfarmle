@@ -7,8 +7,8 @@ import {
   updateBookingStatus,
   getBookingStats,
   cancelBooking
-} from '../controllers/bookingController';
-import { authenticateToken } from '../middleware/auth';
+} from '../controllers/bookingController.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = Router();
 

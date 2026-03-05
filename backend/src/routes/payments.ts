@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import { initializePayment, verifyPayment } from '../controllers/paymentController';
-import { authenticateToken } from '../middleware/auth';
+import { initializePayment, verifyPayment } from '../controllers/paymentController.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -12,7 +12,7 @@ export default router;
 // Initialize payment for marketplace orders
 import axios from 'axios';
 import { Response } from 'express';
-import { AuthRequest } from '../middleware/auth';
+import { AuthRequest } from '../middleware/auth.js';
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE_URL = 'https://api.paystack.co';

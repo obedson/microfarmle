@@ -1,4 +1,4 @@
-import supabase from '../utils/supabase';
+import supabase from '../utils/supabase.js';
 
 export class LocationModel {
   static async getAllStates() {

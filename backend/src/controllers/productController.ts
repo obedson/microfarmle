@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
-import { supabase } from '../utils/supabase';
-import { uploadToSupabase } from '../utils/upload';
-import { AuthenticatedRequest } from '../types';
+import { supabase } from '../utils/supabase.js';
+import { uploadToSupabase } from '../utils/upload.js';
+import { AuthenticatedRequest } from '../types/index.js';
 
 export const getProducts = async (req: Request, res: Response) => {
   try {

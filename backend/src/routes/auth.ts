@@ -1,7 +1,7 @@
 import { Router } from 'express';
-import { register, login, forgotPassword, resetPassword } from '../controllers/authController';
-import { authenticateToken, AuthRequest } from '../middleware/auth';
-import { supabase } from '../utils/supabase';
+import { register, login, forgotPassword, resetPassword } from '../controllers/authController.js';
+import { authenticateToken, AuthRequest } from '../middleware/auth.js';
+import { supabase } from '../utils/supabase.js';
 
 const router = Router();
 

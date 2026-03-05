@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import axios from 'axios';
-import { BookingModel } from '../models/Booking';
-import { asyncHandler, createError } from '../middleware/errorHandler';
+import { BookingModel } from '../models/Booking.js';
+import { asyncHandler, createError } from '../middleware/errorHandler.js';
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE_URL = 'https://api.paystack.co';
