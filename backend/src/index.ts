@@ -10,7 +10,6 @@ import bookingRoutes from './routes/bookings.js';
 import paymentRoutes from './routes/payments.js';
 import webhookRoutes from './routes/webhooks.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
-import { sanitizeInput } from './middleware/sanitize.js';
 
 import farmRecordRoutes from './routes/farmRecords.js';
 import courseRoutes from './routes/courses.js';
@@ -29,7 +28,21 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Security middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      scriptSrc: ["'self'"],
+      imgSrc: ["'self'", "data:", "https:"],
+    },
+  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  }
+}));
 app.use(cors({
   origin: ['http://localhost:3000', 'https://microfarmle.vercel.app', 'http://localhost:3001'],
   credentials: true
@@ -41,9 +54,6 @@ app.use('/api/webhooks', express.raw({ type: 'application/json' }), webhookRoute
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// Input sanitization
-app.use(sanitizeInput);
 
 // Routes
 app.use('/api/auth', authRoutes);
