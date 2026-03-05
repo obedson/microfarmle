@@ -19,6 +19,13 @@ const ProductDetail: React.FC = () => {
     const fetchProduct = async () => {
       try {
         const data = await marketplaceApi.getProduct(id!);
+        // Ensure images is always an array
+        if (data.images && typeof data.images === 'string') {
+          data.images = JSON.parse(data.images);
+        }
+        if (!Array.isArray(data.images)) {
+          data.images = [];
+        }
         setProduct(data);
       } catch (error) {
         console.error('Failed to fetch product:', error);
@@ -57,6 +64,7 @@ const ProductDetail: React.FC = () => {
   if (!product) return <div className="p-8">Product not found</div>;
 
   const totalPrice = product.price * quantity;
+  const productImages = Array.isArray(product.images) ? product.images : [];
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -72,9 +80,9 @@ const ProductDetail: React.FC = () => {
         {/* Product Images */}
         <div>
           <div className="bg-gray-200 rounded-lg h-96 mb-4">
-            {product.images && product.images.length > 0 ? (
+            {productImages.length > 0 ? (
               <img
-                src={product.images[0]}
+                src={productImages[0]}
                 alt={product.name}
                 className="w-full h-full object-cover rounded-lg"
                 onError={(e) => {
@@ -97,9 +105,9 @@ const ProductDetail: React.FC = () => {
           </div>
 
           {/* Additional Images */}
-          {product.images && product.images.length > 1 && (
+          {productImages.length > 1 && (
             <div className="grid grid-cols-4 gap-2">
-              {product.images.slice(1, 5).map((image: string, index: number) => (
+              {productImages.slice(1, 5).map((image: string, index: number) => (
                 <div key={index} className="h-20 bg-gray-200 rounded">
                   <img
                     src={image}
