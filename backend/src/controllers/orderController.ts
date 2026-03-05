@@ -9,9 +9,17 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
     
     logger.info('Creating order', { 
       product_id, 
-      quantity, 
-      buyer_id: req.user?.id 
+      quantity,
+      delivery_address,
+      phone,
+      buyer_id: req.user?.id,
+      body: req.body
     });
+    
+    // Validate required fields
+    if (!product_id || !quantity) {
+      return res.status(400).json({ success: false, error: 'Product ID and quantity are required' });
+    }
     
     // Get product details
     const { data: product, error: productError } = await supabase
@@ -23,13 +31,14 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
     if (productError) {
       logger.error('Product fetch failed', { 
         product_id, 
-        error: productError.message 
+        error: productError.message,
+        details: productError
       });
-      return res.status(404).json({ error: 'Product not found' });
+      return res.status(404).json({ success: false, error: 'Product not found' });
     }
 
     if (!product) {
-      return res.status(404).json({ error: 'Product not found' });
+      return res.status(404).json({ success: false, error: 'Product not found' });
     }
 
     if (quantity > product.stock_quantity) {
@@ -38,22 +47,26 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
         requested: quantity, 
         available: product.stock_quantity 
       });
-      return res.status(400).json({ error: 'Insufficient stock' });
+      return res.status(400).json({ success: false, error: 'Insufficient stock' });
     }
 
     const total_amount = product.price * quantity;
+    
+    const orderData = {
+      buyer_id: req.user?.id,
+      product_id,
+      quantity,
+      unit_price: product.price,
+      total_amount,
+      delivery_address: delivery_address || 'Not provided',
+      phone: phone || 'Not provided'
+    };
+    
+    logger.info('Inserting order', { orderData });
 
     const { data, error } = await supabase
       .from('orders')
-      .insert({
-        buyer_id: req.user?.id,
-        product_id,
-        quantity,
-        unit_price: product.price,
-        total_amount,
-        delivery_address,
-        phone
-      })
+      .insert(orderData)
       .select()
       .single();
 
@@ -61,9 +74,12 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
       logger.error('Order creation failed', { 
         product_id, 
         buyer_id: req.user?.id,
-        error: error.message 
+        error: error.message,
+        details: error,
+        hint: error.hint,
+        code: error.code
       });
-      throw error;
+      return res.status(500).json({ success: false, error: error.message || 'Failed to create order' });
     }
 
     // Update stock
@@ -86,12 +102,13 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
     });
 
     res.status(201).json(data);
-  } catch (error) {
+  } catch (error: any) {
     logger.error('Create order error', { 
-      error: error instanceof Error ? error.message : String(error),
+      error: error?.message || String(error),
+      stack: error?.stack,
       buyer_id: req.user?.id 
     });
-    res.status(500).json({ success: false, error: 'Failed to create order' });
+    res.status(500).json({ success: false, error: error?.message || 'Failed to create order' });
   }
 };
 
