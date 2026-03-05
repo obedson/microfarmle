@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { MapPin, DollarSign, Users, Calendar, ArrowLeft, Heart, Share2 } from 'lucide-react';
+import { MapPin, Users, Calendar, ArrowLeft, Heart, Share2 } from 'lucide-react';
 import { propertyAPI } from '../api/client';
 import { useAuthStore } from '../store/authStore';
 import Button from '../components/ui/Button';
@@ -146,7 +146,6 @@ const PropertyDetails: React.FC = () => {
           <Card className="p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center text-primary-600">
-                <DollarSign size={24} className="mr-2" />
                 <span className="text-3xl font-bold">₦{property.price_per_month?.toLocaleString()}</span>
                 <span className="text-gray-500 ml-2">/month</span>
               </div>
@@ -167,11 +166,11 @@ const PropertyDetails: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <span className="text-gray-500">Livestock Type:</span>
-                <p className="font-medium">{property.livestock_type}</p>
+                <p className="font-medium">{property.livestock_type.split('_').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</p>
               </div>
               <div>
                 <span className="text-gray-500">Space Type:</span>
-                <p className="font-medium">{property.space_type}</p>
+                <p className="font-medium">{property.space_type.split('_').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}</p>
               </div>
               <div>
                 <span className="text-gray-500">Size:</span>

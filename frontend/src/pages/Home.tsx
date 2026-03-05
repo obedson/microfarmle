@@ -9,7 +9,7 @@ const Home: React.FC = () => {
     {
       icon: Search,
       title: 'Easy Discovery',
-      description: 'Find the perfect livestock farming space with our advanced search and filtering system.'
+      description: 'Find the perfect farm space for your livestock with our advanced search and filtering system.'
     },
     {
       icon: MapPin,
@@ -48,14 +48,14 @@ const Home: React.FC = () => {
             <span className="text-primary-600 block">Learning And Investment Platform</span>
           </h1>
           <p className="text-lg md:text-xl text-gray-600 mb-8 max-w-2xl mx-auto text-balance">
-            Connect with property owners, discover ideal farming spaces, and advance your agricultural career 
+            Rent farm spaces for your livestock, list your available farm lands or livestock houses, and advance your agricultural career 
             through our comprehensive learning platform.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/properties">
               <Button size="lg" className="w-full sm:w-auto">
                 <Search size={20} />
-                Browse Properties
+                Browse Farms
               </Button>
             </Link>
             <Link to="/courses">
@@ -114,7 +114,7 @@ const Home: React.FC = () => {
           </Link>
           <Link to="/properties">
             <Button variant="outline" size="lg" className="w-full sm:w-auto border-white text-white hover:bg-white hover:text-primary-600">
-              View Properties
+              Browse Farms
             </Button>
           </Link>
         </div>

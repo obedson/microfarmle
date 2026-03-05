@@ -56,13 +56,24 @@ export const marketplaceApi = {
 
   updateProduct: async (id: string, productData: any) => {
     const token = getToken();
+    
+    // Always send as FormData for consistency
+    let formData: FormData;
+    if (productData instanceof FormData) {
+      formData = productData;
+    } else {
+      formData = new FormData();
+      Object.entries(productData).forEach(([key, value]) => {
+        formData.append(key, value as string);
+      });
+    }
+    
     const response = await fetch(`${API_BASE}/products/${id}`, {
-      method: 'PUT',
+      method: 'PATCH',
       headers: {
-        'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify(productData)
+      body: formData
     });
     
     if (!response.ok) {
@@ -111,6 +122,16 @@ export const marketplaceApi = {
   getMyOrders: async () => {
     const token = getToken();
     const response = await fetch(`${API_BASE}/orders/my-orders`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    return response.json();
+  },
+
+  getMyProducts: async () => {
+    const token = getToken();
+    const response = await fetch(`${API_BASE}/products/my-products`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }

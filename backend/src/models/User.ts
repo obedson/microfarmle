@@ -9,8 +9,23 @@ export class UserModel {
     name: string;
     role: 'farmer' | 'owner';
     phone?: string;
+    referredBy?: string;
   }): Promise<User> {
     const hashedPassword = await bcrypt.hash(userData.password, 10);
+    
+    // Generate unique referral code
+    const referralCode = Math.random().toString(36).substring(2, 10).toUpperCase();
+    
+    // Find referrer if code provided
+    let referrerId = null;
+    if (userData.referredBy) {
+      const { data: referrer } = await supabase
+        .from('users')
+        .select('id')
+        .eq('referral_code', userData.referredBy)
+        .single();
+      referrerId = referrer?.id;
+    }
     
     const { data, error } = await supabase
       .from('users')
@@ -20,6 +35,8 @@ export class UserModel {
         name: userData.name,
         role: userData.role,
         phone: userData.phone,
+        referral_code: referralCode,
+        referred_by: referrerId,
       })
       .select()
       .single();

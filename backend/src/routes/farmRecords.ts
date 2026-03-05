@@ -10,6 +10,7 @@ import { authenticateToken } from '../middleware/auth';
 
 const router = Router();
 
+router.get('/', authenticateToken, getMyRecords);
 router.post('/', authenticateToken, createRecord);
 router.get('/my-records', authenticateToken, getMyRecords);
 router.get('/analytics', authenticateToken, getAnalytics);

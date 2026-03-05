@@ -8,9 +8,8 @@ export const getProducts = async (req: Request, res: Response) => {
     const { category, location } = req.query;
     
     let query = supabase
-      .from('products')
+      .from('marketplace_products')
       .select('*, users(name, phone)')
-      .eq('is_active', true)
       .order('created_at', { ascending: false });
 
     if (category) query = query.eq('category', category);
@@ -29,7 +28,7 @@ export const getProduct = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { data, error } = await supabase
-      .from('products')
+      .from('marketplace_products')
       .select('*, users(name, phone)')
       .eq('id', id)
       .single();
@@ -49,24 +48,29 @@ export const createProduct = async (req: AuthenticatedRequest, res: Response) =>
     const images: string[] = [];
     if (req.files && Array.isArray(req.files)) {
       for (const file of req.files) {
-        const imageUrl = await uploadToSupabase(file, 'products');
-        images.push(imageUrl);
+        try {
+          const imageUrl = await uploadToSupabase(file, 'products');
+          images.push(imageUrl);
+        } catch (uploadError) {
+          console.error('Image upload failed:', uploadError);
+        }
       }
     }
     
     const { data, error } = await supabase
-      .from('products')
+      .from('marketplace_products')
       .insert({
         supplier_id: req.user?.id,
         name,
         category,
         description,
         price: parseFloat(price),
-        unit,
         stock_quantity: parseInt(stock_quantity),
-        minimum_order: parseInt(minimum_order),
-        location,
-        images
+        unit: unit || 'kg',
+        minimum_order: parseInt(minimum_order) || 1,
+        location: location || null,
+        images: images,
+        image_url: images[0] || null
       })
       .select()
       .single();
@@ -82,19 +86,71 @@ export const createProduct = async (req: AuthenticatedRequest, res: Response) =>
 export const updateProduct = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { id } = req.params;
-    const updates = req.body;
+    const { name, category, description, price, unit, stock_quantity, minimum_order, location } = req.body;
+    
+    const parsedPrice = parseFloat(price);
+    const parsedStock = parseInt(stock_quantity);
+    const parsedMinOrder = parseInt(minimum_order);
+    
+    if (!name) {
+      return res.status(400).json({ error: 'Product name is required' });
+    }
+    
+    if (isNaN(parsedPrice) || parsedPrice <= 0) {
+      return res.status(400).json({ error: 'Valid price greater than 0 is required' });
+    }
+    
+    if (isNaN(parsedStock) || parsedStock < 0) {
+      return res.status(400).json({ error: 'Valid stock quantity (0 or more) is required' });
+    }
+    
+    const updates: any = {
+      name,
+      category: category || null,
+      description: description || null,
+      price: parsedPrice,
+      stock_quantity: parsedStock,
+      unit: unit || 'kg',
+      minimum_order: isNaN(parsedMinOrder) ? 1 : parsedMinOrder,
+      location: location || null
+    };
+    
+    // Handle image uploads if present
+    if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+      try {
+        const imageUrl = await uploadToSupabase(req.files[0], 'products');
+        
+        // Get existing images
+        const { data: existing } = await supabase
+          .from('marketplace_products')
+          .select('images')
+          .eq('id', id)
+          .single();
+        
+        const existingImages = existing?.images || [];
+        updates.images = [imageUrl, ...existingImages];
+        updates.image_url = imageUrl;
+      } catch (uploadError) {
+        console.error('Image upload failed:', uploadError);
+      }
+    }
     
     const { data, error } = await supabase
-      .from('products')
+      .from('marketplace_products')
       .update(updates)
       .eq('id', id)
       .eq('supplier_id', req.user?.id)
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase update error:', error);
+      throw error;
+    }
+    
     res.json(data);
   } catch (error) {
+    console.error('Update product error:', error);
     res.status(500).json({ error: 'Failed to update product' });
   }
 };
@@ -104,7 +160,7 @@ export const deleteProduct = async (req: AuthenticatedRequest, res: Response) =>
     const { id } = req.params;
     
     const { error } = await supabase
-      .from('products')
+      .from('marketplace_products')
       .delete()
       .eq('id', id)
       .eq('supplier_id', req.user?.id);

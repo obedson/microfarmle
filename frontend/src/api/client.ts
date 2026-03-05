@@ -48,7 +48,10 @@ export const propertyAPI = {
   },
   delete: (id: string) =>
     apiClient.delete(`/properties/${id}`),
-};
+  deleteImage: (id: string, imageUrl: string) =>
+    apiClient.delete(`/properties/${id}/images`, { data: { imageUrl } }),
+  reorderImages: (id: string, images: string[]) =>
+    apiClient.put(`/properties/${id}/images/reorder`, { images }),};
 
 export const bookingAPI = {
   create: (data: any) =>

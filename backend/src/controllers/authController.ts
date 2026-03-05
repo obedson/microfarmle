@@ -8,7 +8,8 @@ const registerSchema = Joi.object({
   password: Joi.string().min(6).required(),
   name: Joi.string().min(2).required(),
   role: Joi.string().valid('farmer', 'owner', 'admin').required(),
-  phone: Joi.string().optional(),
+  phone: Joi.string().optional().allow('').pattern(/^[0-9+\-\s()]{10,}$/),
+  referral_code: Joi.string().optional().allow('').trim(),
 });
 
 const loginSchema = Joi.object({

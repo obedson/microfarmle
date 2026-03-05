@@ -39,15 +39,26 @@ export class PropertyModel {
     return data || [];
   }
 
-  static async findById(id: string): Promise<Property | null> {
+  static async findById(id: string): Promise<any | null> {
     const { data, error } = await supabase
       .from('properties')
-      .select('*')
+      .select(`
+        *,
+        users!properties_owner_id_fkey (
+          id,
+          name,
+          email
+        )
+      `)
       .eq('id', id)
       .single();
 
     if (error) return null;
-    return data;
+    return {
+      ...data,
+      owner_name: data.users?.name,
+      owner_email: data.users?.email,
+    };
   }
 
   static async update(id: string, updates: Partial<Property>): Promise<Property | null> {

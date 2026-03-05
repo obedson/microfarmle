@@ -2,7 +2,7 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate, Link } from 'react-router-dom';
-import { User, Mail, Lock, Phone, AlertCircle, UserCheck } from 'lucide-react';
+import { User, Mail, Lock, Phone, AlertCircle, UserCheck, Users } from 'lucide-react';
 import { authAPI } from '../api/client';
 import { useAuthStore } from '../store/authStore';
 import Button from '../components/ui/Button';
@@ -14,6 +14,7 @@ interface RegisterForm {
   password: string;
   role: 'farmer' | 'owner';
   phone?: string;
+  referral_code?: string;
 }
 
 const Register: React.FC = () => {
@@ -30,6 +31,10 @@ const Register: React.FC = () => {
         login(user, token);
         navigate('/dashboard');
       },
+      onError: (error: any) => {
+        console.error('Registration error:', error);
+        console.error('Error response:', error.response?.data);
+      }
     }
   );
 
@@ -61,7 +66,7 @@ const Register: React.FC = () => {
               <div>
                 <p className="text-red-800 font-medium">Registration Failed</p>
                 <p className="text-red-600 text-sm">
-                  {(registerMutation.error as any)?.response?.data?.message || 'Please check your information and try again'}
+                  {(registerMutation.error as any)?.response?.data?.error || 'Please check your information and try again'}
                 </p>
               </div>
             </div>
@@ -161,6 +166,22 @@ const Register: React.FC = () => {
                   {...register('phone')}
                   type="tel"
                   placeholder="Enter your phone number"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
+                />
+              </div>
+            </div>
+
+            {/* Referral Code */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Referral Code <span className="text-gray-400">(Optional)</span>
+              </label>
+              <div className="relative">
+                <Users size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  {...register('referral_code')}
+                  type="text"
+                  placeholder="Enter referral code"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-colors"
                 />
               </div>

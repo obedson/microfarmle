@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { PropertyModel } from '../models/Property';
 import { uploadToSupabase } from '../utils/upload';
+import { supabase } from '../utils/supabase';
 import Joi from 'joi';
 
 const propertySchema = Joi.object({
@@ -110,6 +111,19 @@ export const updateProperty = async (req: Request, res: Response) => {
 
 export const deleteProperty = async (req: Request, res: Response) => {
   try {
+    const { data: bookings } = await supabase
+      .from('bookings')
+      .select('id')
+      .eq('property_id', req.params.id)
+      .limit(1);
+
+    if (bookings && bookings.length > 0) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Cannot delete property with existing bookings' 
+      });
+    }
+
     const success = await PropertyModel.delete(req.params.id);
     if (!success) {
       return res.status(404).json({ success: false, error: 'Property not found' });
@@ -143,5 +157,41 @@ export const uploadImages = async (req: Request, res: Response) => {
     res.json({ success: true, data: { images: imageUrls, property: updatedProperty } });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Failed to upload images' });
+  }
+};
+
+
+export const deleteImage = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { imageUrl } = req.body;
+
+    const property = await PropertyModel.findById(id);
+    if (!property) {
+      return res.status(404).json({ success: false, error: 'Property not found' });
+    }
+
+    const updatedImages = property.images.filter((img: string) => img !== imageUrl);
+    const updatedProperty = await PropertyModel.update(id, { images: updatedImages });
+
+    res.json({ success: true, data: updatedProperty });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to delete image' });
+  }
+};
+
+export const updateImageOrder = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { images } = req.body;
+
+    if (!Array.isArray(images)) {
+      return res.status(400).json({ success: false, error: 'Images must be an array' });
+    }
+
+    const updatedProperty = await PropertyModel.update(id, { images });
+    res.json({ success: true, data: updatedProperty });
+  } catch (error) {
+    res.status(500).json({ success: false, error: 'Failed to update image order' });
   }
 };

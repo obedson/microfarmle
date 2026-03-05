@@ -8,13 +8,22 @@ import authRoutes from './routes/auth';
 import propertyRoutes from './routes/properties';
 import bookingRoutes from './routes/bookings';
 import paymentRoutes from './routes/payments';
+import webhookRoutes from './routes/webhooks';
 import { errorHandler, notFound } from './middleware/errorHandler';
-import './services/keepAlive'; // Keep-alive service
+import { sanitizeInput } from './middleware/sanitize';
 
 import farmRecordRoutes from './routes/farmRecords';
 import courseRoutes from './routes/courses';
+import courseVideoRoutes from './routes/courseVideos';
 import productRoutes from './routes/products';
 import orderRoutes from './routes/orders';
+import orderPaymentRoutes from './routes/orderPayments';
+import locationRoutes from './routes/locations';
+import groupRoutes from './routes/groups';
+import contributionRoutes from './routes/contributions';
+import adminRoutes from './routes/admin';
+import { startCronJobs } from './jobs/contributionJobs';
+import { startBookingJobs } from './jobs/bookingJobs';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -22,13 +31,19 @@ const PORT = process.env.PORT || 3000;
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.FRONTEND_URL || 'http://localhost:3000',
+  origin: ['http://localhost:3000', 'https://microfarmle.vercel.app', 'http://localhost:3001'],
   credentials: true
 }));
+
+// Webhook route BEFORE body parsing (Paystack needs raw body)
+app.use('/api/webhooks', express.raw({ type: 'application/json' }), webhookRoutes);
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Input sanitization
+app.use(sanitizeInput);
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -37,8 +52,14 @@ app.use('/api/bookings', bookingRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/farm-records', farmRecordRoutes);
 app.use('/api/courses', courseRoutes);
+app.use('/api', courseVideoRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/orders', orderRoutes);
+app.use('/api/payments', orderPaymentRoutes);
+app.use('/api/locations', locationRoutes);
+app.use('/api/groups', groupRoutes);
+app.use('/api', contributionRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -49,8 +70,21 @@ app.get('/health', (req, res) => {
 app.use(notFound);
 app.use(errorHandler);
 
+import { logger } from './utils/logger';
+
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  logger.info(`Server running on port ${PORT}`);
+  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  
+  // Only run cron jobs in production
+  if (process.env.NODE_ENV === 'production') {
+    startCronJobs();
+    startBookingJobs();
+    logger.info('✅ Cron jobs enabled (production mode)');
+  } else {
+    logger.warn('⚠️  Cron jobs disabled (development mode)');
+    logger.info('   Set NODE_ENV=production to enable cron jobs');
+  }
 });
 
 export default app;

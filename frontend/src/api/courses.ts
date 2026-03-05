@@ -96,7 +96,7 @@ export const courseApi = {
     }
   },
 
-  updateProgress: async (courseId: string, progress: number, completed: boolean): Promise<void> => {
+  updateProgress: async (courseId: string, progress: number, completed: boolean, watchTime?: number): Promise<void> => {
     const token = getToken();
     await fetch(`${API_BASE}/courses/${courseId}/progress`, {
       method: 'POST',
@@ -104,7 +104,7 @@ export const courseApi = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ progress, completed })
+      body: JSON.stringify({ progress, completed, watch_time_seconds: watchTime })
     });
   },
 

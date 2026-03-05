@@ -1,186 +1,226 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Plus, Eye, Search, BarChart3, Calendar, MapPin } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+import { LoadingSpinner } from '../components/Loading';
 import { useAuthStore } from '../store/authStore';
-import Button from '../components/ui/Button';
-import Card from '../components/ui/Card';
 
-const Dashboard: React.FC = () => {
-  const { user } = useAuthStore();
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
-  const ownerActions = [
-    {
-      title: 'Add New Property',
-      description: 'List a new livestock farming space',
-      icon: Plus,
-      to: '/create-property',
-      color: 'bg-primary-600 hover:bg-primary-700'
-    },
-    {
-      title: 'View Properties',
-      description: 'Manage your listed properties',
-      icon: Eye,
-      to: '/my-properties',
-      color: 'bg-blue-600 hover:bg-blue-700'
-    },
-    {
-      title: 'Bookings',
-      description: 'View and manage bookings',
-      icon: Calendar,
-      to: '/my-bookings',
-      color: 'bg-green-600 hover:bg-green-700'
+export default function Dashboard() {
+  const [stats, setStats] = useState({ 
+    bookings: 0, 
+    properties: 0, 
+    propertyBookings: 0,
+    orders: 0,
+    products: 0,
+    sales: 0
+  });
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+  const { user, token } = useAuthStore();
+
+  useEffect(() => {
+    if (user && token) {
+      fetchStats();
     }
-  ];
+  }, [user, token]);
 
-  const farmerActions = [
-    {
-      title: 'Browse Properties',
-      description: 'Find the perfect farming space',
-      icon: Search,
-      to: '/properties',
-      color: 'bg-primary-600 hover:bg-primary-700'
-    },
-    {
-      title: 'My Bookings',
-      description: 'View your current bookings',
-      icon: Calendar,
-      to: '/my-bookings',
-      color: 'bg-blue-600 hover:bg-blue-700'
-    },
-    {
-      title: 'Nearby Properties',
-      description: 'Discover spaces near you',
-      icon: MapPin,
-      to: '/properties?nearby=true',
-      color: 'bg-green-600 hover:bg-green-700'
+  const fetchStats = async () => {
+    setLoading(true);
+    try {
+      console.log('User role:', user?.role);
+      console.log('Token exists:', !!token);
+      
+      // Fetch all stats in parallel
+      const [myBookings, allProperties, bookingsOnMyProperties, myOrders, myProducts, mySales] = await Promise.all([
+        axios.get(`${API_URL}/bookings/my-bookings`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).catch(() => ({ data: { data: [] } })),
+        axios.get(`${API_URL}/properties`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).catch(() => ({ data: { data: [] } })),
+        axios.get(`${API_URL}/bookings/owner/bookings`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).catch(() => ({ data: { data: [] } })),
+        axios.get(`${API_URL}/orders/my-orders`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).catch(() => ({ data: { data: [] } })),
+        axios.get(`${API_URL}/products/my-products`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).catch(() => ({ data: { data: [] } })),
+        axios.get(`${API_URL}/orders/my-sales`, {
+          headers: { Authorization: `Bearer ${token}` }
+        }).catch(() => ({ data: { data: [] } }))
+      ]);
+
+      // Calculate counts
+      const myBookingsCount = myBookings.data.data?.length || 0;
+      const allPropertiesData = allProperties.data.data || [];
+      const myPropertiesCount = allPropertiesData.filter((p: any) => p.owner_id === user?.id).length;
+      const bookingsOnMyPropertiesCount = bookingsOnMyProperties.data.data?.length || 0;
+      const myOrdersCount = myOrders.data.data?.length || 0;
+      const myProductsCount = myProducts.data.data?.length || 0;
+      const mySalesCount = mySales.data.data?.length || 0;
+      
+      setStats({ 
+        bookings: myBookingsCount, 
+        properties: myPropertiesCount,
+        propertyBookings: bookingsOnMyPropertiesCount,
+        orders: myOrdersCount,
+        products: myProductsCount,
+        sales: mySalesCount
+      });
+    } catch (error: any) {
+      console.error('Dashboard error:', error);
+      console.error('Error response:', error.response?.data);
+      toast.error('Failed to load dashboard');
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
 
-  const actions = user?.role === 'owner' ? ownerActions : farmerActions;
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-primary-600 to-primary-700 rounded-2xl p-6 md:p-8 text-white">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold mb-2">
-              Welcome back, {user?.name}!
-            </h1>
-            <p className="text-primary-100 text-lg">
-              {user?.role === 'owner' 
-                ? 'Manage your properties and bookings' 
-                : 'Find and book the perfect farming space'
-              }
-            </p>
-            <div className="mt-4 inline-flex items-center px-3 py-1 bg-primary-500 rounded-full text-sm font-medium">
-              <span className="w-2 h-2 bg-white rounded-full mr-2"></span>
-              {user?.role === 'owner' ? 'Property Owner' : 'Farmer'}
-            </div>
+    <div className="max-w-7xl mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
+      
+      {/* Rental Stats */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold text-gray-700 mb-4">Property Rentals</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div className="bg-white rounded-lg shadow p-6">
+            <p className="text-gray-600 mb-2">My Bookings</p>
+            <p className="text-4xl font-bold text-green-600">{stats.bookings}</p>
+            <p className="text-sm text-gray-500 mt-1">Bookings I made</p>
           </div>
-          <div className="hidden md:block">
-            <BarChart3 size={64} className="text-primary-200" />
+          <div className="bg-white rounded-lg shadow p-6">
+            <p className="text-gray-600 mb-2">My Properties</p>
+            <p className="text-4xl font-bold text-blue-600">{stats.properties}</p>
+            <p className="text-sm text-gray-500 mt-1">Properties I own</p>
           </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <p className="text-gray-600 mb-2">Property Bookings</p>
+            <p className="text-4xl font-bold text-purple-600">{stats.propertyBookings}</p>
+            <p className="text-sm text-gray-500 mt-1">Bookings on my properties</p>
+          </div>
+        </div>
+
+        {/* Property Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {stats.properties > 0 && (
+            <button
+              onClick={() => navigate('/my-properties')}
+              className="bg-white rounded-lg shadow p-6 text-left hover:shadow-lg transition"
+            >
+              <p className="text-lg font-semibold">My Properties</p>
+              <p className="text-sm text-gray-500 mt-1">View and manage my listings</p>
+            </button>
+          )}
+          {stats.properties > 0 && (
+            <button
+              onClick={() => navigate('/owner/bookings')}
+              className="bg-white rounded-lg shadow p-6 text-left hover:shadow-lg transition"
+            >
+              <p className="text-lg font-semibold">Manage Bookings</p>
+              <p className="text-sm text-gray-500 mt-1">Confirm or view property bookings</p>
+            </button>
+          )}
+          <button
+            onClick={() => navigate('/my-bookings')}
+            className="bg-white rounded-lg shadow p-6 text-left hover:shadow-lg transition"
+          >
+            <p className="text-lg font-semibold">My Bookings</p>
+            <p className="text-sm text-gray-500 mt-1">View bookings I made</p>
+          </button>
+          <button
+            onClick={() => navigate('/properties')}
+            className="bg-white rounded-lg shadow p-6 text-left hover:shadow-lg transition"
+          >
+            <p className="text-lg font-semibold">Browse Properties</p>
+            <p className="text-sm text-gray-500 mt-1">Find properties to rent</p>
+          </button>
+          <button
+            onClick={() => navigate('/create-property')}
+            className="bg-green-600 text-white rounded-lg shadow p-6 text-left hover:shadow-lg transition hover:bg-green-700"
+          >
+            <p className="text-lg font-semibold">List a Property</p>
+            <p className="text-sm text-green-100 mt-1">Add a new property</p>
+          </button>
         </div>
       </div>
 
-      {/* Quick Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm font-medium">Total Properties</p>
-              <p className="text-2xl font-bold text-gray-900">0</p>
-            </div>
-            <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
-              <MapPin size={24} className="text-primary-600" />
-            </div>
+      {/* Marketplace Stats */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold text-gray-700 mb-4">Marketplace</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+          <div className="bg-white rounded-lg shadow p-6">
+            <p className="text-gray-600 mb-2">My Orders</p>
+            <p className="text-4xl font-bold text-orange-600">{stats.orders}</p>
+            <p className="text-sm text-gray-500 mt-1">Products purchased</p>
           </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm font-medium">Active Bookings</p>
-              <p className="text-2xl font-bold text-gray-900">0</p>
-            </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-              <Calendar size={24} className="text-blue-600" />
-            </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <p className="text-gray-600 mb-2">My Products</p>
+            <p className="text-4xl font-bold text-indigo-600">{stats.products}</p>
+            <p className="text-sm text-gray-500 mt-1">Products listed</p>
           </div>
-        </Card>
-
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm font-medium">This Month</p>
-              <p className="text-2xl font-bold text-gray-900">₦0</p>
-            </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <BarChart3 size={24} className="text-green-600" />
-            </div>
+          <div className="bg-white rounded-lg shadow p-6">
+            <p className="text-gray-600 mb-2">My Sales</p>
+            <p className="text-4xl font-bold text-pink-600">{stats.sales}</p>
+            <p className="text-sm text-gray-500 mt-1">Products sold</p>
           </div>
-        </Card>
-      </div>
-
-      {/* Quick Actions */}
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">
-          Quick Actions
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {actions.map((action, index) => {
-            const Icon = action.icon;
-            return (
-              <Link key={index} to={action.to}>
-                <Card className="p-6 group cursor-pointer">
-                  <div className="flex items-start space-x-4">
-                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-white transition-colors ${action.color}`}>
-                      <Icon size={24} />
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900 group-hover:text-primary-600 transition-colors">
-                        {action.title}
-                      </h3>
-                      <p className="text-gray-600 text-sm mt-1">
-                        {action.description}
-                      </p>
-                    </div>
-                  </div>
-                </Card>
-              </Link>
-            );
-          })}
         </div>
-      </div>
 
-      {/* Recent Activity */}
-      <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">
-          Recent Activity
-        </h2>
-        <Card className="p-6">
-          <div className="text-center py-8">
-            <Calendar size={48} className="mx-auto text-gray-400 mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              No recent activity
-            </h3>
-            <p className="text-gray-600 mb-6">
-              {user?.role === 'owner' 
-                ? 'Start by adding your first property to see activity here.'
-                : 'Browse properties and make your first booking to see activity here.'
-              }
-            </p>
-            <Link to={user?.role === 'owner' ? '/create-property' : '/properties'}>
-              <Button>
-                {user?.role === 'owner' ? 'Add Property' : 'Browse Properties'}
-              </Button>
-            </Link>
-          </div>
-        </Card>
+        {/* Marketplace Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <button
+            onClick={() => navigate('/my-orders')}
+            className="bg-white rounded-lg shadow p-6 text-left hover:shadow-lg transition"
+          >
+            <p className="text-lg font-semibold">My Orders</p>
+            <p className="text-sm text-gray-500 mt-1">Track my purchases</p>
+          </button>
+          <button
+            onClick={() => navigate('/marketplace')}
+            className="bg-white rounded-lg shadow p-6 text-left hover:shadow-lg transition"
+          >
+            <p className="text-lg font-semibold">Browse Marketplace</p>
+            <p className="text-sm text-gray-500 mt-1">Shop for products</p>
+          </button>
+          {stats.products > 0 && (
+            <>
+              <button
+                onClick={() => navigate('/my-sales')}
+                className="bg-white rounded-lg shadow p-6 text-left hover:shadow-lg transition"
+              >
+                <p className="text-lg font-semibold">My Sales</p>
+                <p className="text-sm text-gray-500 mt-1">Manage incoming orders</p>
+              </button>
+              <button
+                onClick={() => navigate('/my-marketplace-products')}
+                className="bg-white rounded-lg shadow p-6 text-left hover:shadow-lg transition"
+              >
+                <p className="text-lg font-semibold">My Products</p>
+                <p className="text-sm text-gray-500 mt-1">Manage product listings</p>
+              </button>
+            </>
+          )}
+          <button
+            onClick={() => navigate('/marketplace/add-product')}
+            className="bg-indigo-600 text-white rounded-lg shadow p-6 text-left hover:shadow-lg transition hover:bg-indigo-700"
+          >
+            <p className="text-lg font-semibold">Sell a Product</p>
+            <p className="text-sm text-indigo-100 mt-1">List product for sale</p>
+          </button>
+        </div>
       </div>
     </div>
   );
-};
-
-export default Dashboard;
+}

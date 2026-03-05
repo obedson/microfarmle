@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMutation } from '@tanstack/react-query';
-import { Calendar, DollarSign, CreditCard } from 'lucide-react';
+import { Calendar, CreditCard } from 'lucide-react';
 import { bookingAPI, paymentAPI } from '../api/client';
 import { useAuthStore } from '../store/authStore';
 import Button from './ui/Button';
@@ -127,7 +127,6 @@ const BookingForm: React.FC<BookingFormProps> = ({ property, onSuccess }) => {
       <div className="mb-6">
         <h3 className="text-xl font-semibold text-gray-900 mb-2">Book This Property</h3>
         <div className="flex items-center text-primary-600">
-          <DollarSign size={20} className="mr-1" />
           <span className="text-2xl font-bold">₦{property.price_per_month?.toLocaleString()}</span>
           <span className="text-gray-500 ml-1">/month</span>
         </div>

@@ -22,6 +22,13 @@ const MyBookings: React.FC = () => {
           {bookings.map((booking: any) => (
             <div key={booking.id} style={{ border: '1px solid #ccc', padding: '1rem', margin: '1rem 0' }}>
               <h3>{booking.properties?.title || 'Property'}</h3>
+              <p><strong>Property Owner:</strong> {booking.properties?.users?.name || 'N/A'}</p>
+              {booking.status === 'confirmed' && (
+                <>
+                  <p><strong>Owner Email:</strong> {booking.properties?.users?.email || 'N/A'}</p>
+                  <p><strong>Owner Phone:</strong> {booking.properties?.users?.phone || 'N/A'}</p>
+                </>
+              )}
               <p><strong>Location:</strong> {booking.properties?.city}</p>
               <p><strong>Dates:</strong> {booking.start_date} to {booking.end_date}</p>
               <p><strong>Amount:</strong> ₦{booking.total_amount.toLocaleString()}</p>

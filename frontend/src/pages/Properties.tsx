@@ -67,10 +67,10 @@ const Properties: React.FC = () => {
       <div className="flex justify-between items-center">
         <div className="text-center md:text-left">
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-            Available Properties
+            Rent or List Your Farm Spaces
           </h1>
           <p className="text-gray-600">
-            Discover the perfect livestock farming space for your needs
+            Find the perfect space for your livestock or list your available farm property
           </p>
         </div>
         {isAuthenticated && (

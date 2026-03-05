@@ -35,7 +35,7 @@ export const getCourse = async (req: Request, res: Response) => {
 export const updateProgress = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { courseId } = req.params;
-    const { progress, completed } = req.body;
+    const { progress, completed, watch_time_seconds } = req.body;
     const userId = req.user?.id;
 
     const { data, error } = await supabase
@@ -45,7 +45,9 @@ export const updateProgress = async (req: AuthenticatedRequest, res: Response) =
         course_id: courseId,
         progress,
         completed,
-        completed_at: completed ? new Date().toISOString() : null
+        completed_at: completed ? new Date().toISOString() : null,
+        watch_time_seconds: watch_time_seconds || 0,
+        last_watched_at: new Date().toISOString()
       });
 
     if (error) throw error;
@@ -92,10 +94,14 @@ export const updateCourse = async (req: AuthenticatedRequest, res: Response) => 
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Course update error:', error);
+      throw error;
+    }
     res.json(data);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to update course' });
+  } catch (error: any) {
+    console.error('Failed to update course:', error);
+    res.status(500).json({ error: error.message || 'Failed to update course' });
   }
 };
 

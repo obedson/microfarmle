@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, Home, Search, User, LogOut, BookOpen, Package } from 'lucide-react';
+import { Menu, X, Home, Search, User, LogOut, BookOpen, Package, Users, Calendar } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import Button from './ui/Button';
 
@@ -17,20 +17,11 @@ const Header: React.FC = () => {
 
   const navItems = [
     { to: '/', label: 'Home', icon: Home },
-    { to: '/properties', label: 'Properties', icon: Search },
+    { to: '/properties', label: 'Farms', icon: Search },
     { to: '/marketplace', label: 'Marketplace', icon: Package },
     { to: '/courses', label: 'Courses', icon: BookOpen },
+    { to: '/groups', label: 'Groups', icon: Users },
   ];
-
-  const authItems = isAuthenticated
-    ? [
-        { to: '/dashboard', label: 'Dashboard', icon: User },
-        { to: '/my-bookings', label: 'My Bookings', icon: User },
-      ]
-    : [
-        { to: '/login', label: 'Login', icon: User },
-        { to: '/register', label: 'Register', icon: User },
-      ];
 
   return (
     <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
@@ -57,14 +48,6 @@ const Header: React.FC = () => {
                 {item.label}
               </Link>
             ))}
-            {isAuthenticated && (
-              <Link
-                to="/farm-records"
-                className="text-gray-600 hover:text-primary-600 font-medium transition-colors"
-              >
-                Farm Records
-              </Link>
-            )}
           </nav>
 
           {/* Desktop Auth */}
@@ -129,36 +112,12 @@ const Header: React.FC = () => {
               {isAuthenticated ? (
                 <>
                   <Link
-                    to="/farm-records"
-                    className="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <User size={20} />
-                    <span>Farm Records</span>
-                  </Link>
-                  <Link
                     to="/dashboard"
                     className="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     <User size={20} />
                     <span>Dashboard</span>
-                  </Link>
-                  <Link
-                    to="/my-bookings"
-                    className="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <User size={20} />
-                    <span>My Bookings</span>
-                  </Link>
-                  <Link
-                    to="/farm-records"
-                    className="flex items-center space-x-3 px-4 py-3 text-gray-600 hover:text-primary-600 hover:bg-gray-50 rounded-lg transition-colors"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <User size={20} />
-                    <span>Farm Records</span>
                   </Link>
                   <div className="px-4 py-2 text-sm text-gray-500">
                     Welcome, {user?.name}

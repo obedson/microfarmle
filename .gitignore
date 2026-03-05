@@ -16,6 +16,8 @@ node_modules/
 */dist/
 */build/
 
+#mscl folders
+/mscl/
 # Logs
 *.log
 npm-debug.log*

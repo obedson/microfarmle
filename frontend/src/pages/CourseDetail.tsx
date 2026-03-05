@@ -1,145 +1,80 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Clock, Award, CheckCircle } from 'lucide-react';
-import { Course } from '../types/course';
-import { courseApi } from '../api/courses';
+import axios from 'axios';
+import toast from 'react-hot-toast';
+import { VideoPlayer } from '../components/VideoPlayer';
+import { LoadingSpinner } from '../components/Loading';
 
-const CourseDetail: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
-  const [course, setCourse] = useState<Course | null>(null);
-  const [progress, setProgress] = useState(0);
-  const [completed, setCompleted] = useState(false);
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
-  const getEmbedUrl = (url: string): string => {
-    // YouTube
-    if (url.includes('youtube.com/watch?v=')) {
-      return url.replace('watch?v=', 'embed/');
-    }
-    if (url.includes('youtu.be/')) {
-      return url.replace('youtu.be/', 'youtube.com/embed/');
-    }
-    
-    // YouTube Shorts
-    if (url.includes('youtube.com/shorts/')) {
-      return url.replace('shorts/', 'embed/');
-    }
-    
-    // Vimeo
-    if (url.includes('vimeo.com/')) {
-      const videoId = url.split('/').pop();
-      return `https://player.vimeo.com/video/${videoId}`;
-    }
-    
-    // If already an embed URL or other format, return as is
-    return url;
-  };
+export default function CourseDetail() {
+  const [course, setCourse] = useState<any>(null);
+  const [videos, setVideos] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { id } = useParams();
 
   useEffect(() => {
-    const fetchCourse = async () => {
-      if (!id) return;
-      try {
-        const data = await courseApi.getCourse(id);
-        setCourse(data);
-      } catch (error) {
-        console.error('Failed to fetch course:', error);
-      }
-    };
-
     fetchCourse();
+    fetchVideos();
   }, [id]);
 
-  const handleComplete = async () => {
-    if (!id) return;
+  const fetchCourse = async () => {
     try {
-      await courseApi.updateProgress(id, 100, true);
-      setProgress(100);
-      setCompleted(true);
+      const { data } = await axios.get(`${API_URL}/courses/${id}`);
+      setCourse(data);
     } catch (error) {
-      console.error('Failed to update progress:', error);
+      toast.error('Failed to load course');
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (!course) return <div className="p-8">Loading...</div>;
+  const fetchVideos = async () => {
+    try {
+      const { data } = await axios.get(`${API_URL}/courses/${id}/videos`);
+      setVideos(data);
+    } catch (error) {
+      console.error('Failed to load videos');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  if (!course) return <div>Course not found</div>;
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <div className="bg-white rounded-lg shadow-md p-8">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-3xl font-bold">{course.title}</h1>
-          <span className={`px-3 py-1 rounded ${
-            course.level === 'beginner' ? 'bg-green-100 text-green-800' :
-            course.level === 'intermediate' ? 'bg-yellow-100 text-yellow-800' :
-            'bg-red-100 text-red-800'
-          }`}>
-            {course.level}
-          </span>
-        </div>
+    <div className="max-w-4xl mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-4">{course.title}</h1>
+      <p className="text-gray-600 mb-8">{course.description}</p>
 
-        <div className="flex items-center gap-4 mb-6 text-gray-600">
-          <div className="flex items-center">
-            <Clock size={20} className="mr-2" />
-            {course.duration} minutes
-          </div>
-          <div className="flex items-center">
-            <Award size={20} className="mr-2" />
-            {course.category}
-          </div>
+      {course.video_url && (
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-4">Course Introduction</h2>
+          <VideoPlayer url={course.video_url} platform={course.video_platform || 'youtube'} />
         </div>
+      )}
 
-        <div className="mb-6">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm font-medium">Progress</span>
-            <span className="text-sm text-gray-600">{progress}%</span>
-          </div>
-          <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-green-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            ></div>
-          </div>
-        </div>
-
-        <div className="prose max-w-none mb-8">
-          <h2>Course Description</h2>
-          <p>{course.description}</p>
-          
-          {course.video_url && (
-            <>
-              <h2>Course Video</h2>
-              <div className="aspect-video mb-6">
-                <iframe
-                  src={getEmbedUrl(course.video_url)}
-                  className="w-full h-full rounded-lg"
-                  allowFullScreen
-                  title={course.title}
-                />
+      {videos.length > 0 && (
+        <div>
+          <h2 className="text-xl font-semibold mb-4">Course Lessons</h2>
+          <div className="space-y-6">
+            {videos.map((video, index) => (
+              <div key={video.id} className="bg-white rounded-lg shadow p-4">
+                <h3 className="font-semibold mb-2">
+                  Lesson {index + 1}: {video.title}
+                </h3>
+                <VideoPlayer url={video.video_url} platform={video.video_platform} />
               </div>
-            </>
-          )}
-          
-          <h2>Course Content</h2>
-          <div className="whitespace-pre-wrap">{course.content}</div>
+            ))}
+          </div>
         </div>
-
-        <div className="flex justify-center">
-          {!completed ? (
-            <button
-              onClick={handleComplete}
-              className="bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 flex items-center"
-            >
-              <CheckCircle size={20} className="mr-2" />
-              Mark as Complete
-            </button>
-          ) : (
-            <div className="flex items-center text-green-600">
-              <CheckCircle size={20} className="mr-2" />
-              Course Completed!
-            </div>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
-};
-
-export default CourseDetail;
+}
