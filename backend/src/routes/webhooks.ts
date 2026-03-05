@@ -29,10 +29,27 @@ router.post('/paystack', async (req: Request, res: Response) => {
 
     // Handle successful charge
     if (event.event === 'charge.success') {
-      const { reference, amount, customer } = event.data;
+      const { reference, amount, customer, metadata } = event.data;
+      
+      // Handle marketplace order payment
+      if (metadata?.type === 'marketplace_order' && metadata?.order_id) {
+        const { error } = await supabase
+          .from('orders')
+          .update({ 
+            status: 'confirmed',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', metadata.order_id);
+
+        if (!error) {
+          console.log(`✅ Marketplace order payment confirmed: ${reference}`);
+        } else {
+          console.error('Failed to update order:', error);
+        }
+      }
       
       // Check if it's a group join payment
-      if (reference.startsWith('GRP-')) {
+      else if (reference.startsWith('GRP-')) {
         const { data: membership } = await supabase
           .from('group_members')
           .select('*')
