@@ -1,3 +1,9 @@
+my-sales:1  Unchecked runtime.lastError: The message port closed before a response was received.
+[NEW] Explain Console errors by using Copilot in Edge: click
+         
+         to explain an error. 
+        Learn more
+        Don't show again
 marketplace.ts:184   PUT http://localhost:3001/api/orders/413e6c50-6a3c-461c-b395-16beaa3d7b5e/status 500 (Internal Server Error)
 updateOrderStatus @ marketplace.ts:184
 mutationFn @ MySales.tsx:26
@@ -47,11 +53,6 @@ dispatchEventForPluginEventSystem @ react-dom.development.js:9287
 dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
 dispatchEvent @ react-dom.development.js:6457
 dispatchDiscreteEvent @ react-dom.development.js:6430
-[NEW] Explain Console errors by using Copilot in Edge: click
-         
-         to explain an error. 
-        Learn more
-        Don't show again
 marketplace.ts:184   PUT http://localhost:3001/api/orders/3292d4ab-f3c1-4dae-9e2a-454297c0f269/status 500 (Internal Server Error)
 updateOrderStatus @ marketplace.ts:184
 mutationFn @ MySales.tsx:26
@@ -101,3 +102,20 @@ dispatchEventForPluginEventSystem @ react-dom.development.js:9287
 dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
 dispatchEvent @ react-dom.development.js:6457
 dispatchDiscreteEvent @ react-dom.development.js:6430
+
+[nodemon] starting `node --loader ts-node/esm src/index.ts`
+(node:18676) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+2026-03-06 00:25:30 [info]: Server running on port 3001
+2026-03-06 00:25:30 [info]: Environment: development
+2026-03-06 00:25:30 [warn]: ⚠️  Cron jobs disabled (development mode)
+2026-03-06 00:25:30 [info]:    Set NODE_ENV=production to enable cron jobs
+(node:18676) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+2026-03-06 00:25:55 [info]: Updating order status
+2026-03-06 00:25:55 [error]: Supabase update error
+2026-03-06 00:25:55 [error]: Update order status failed
+2026-03-06 00:25:57 [info]: Updating order status
+2026-03-06 00:25:58 [error]: Supabase update error
+2026-03-06 00:25:58 [error]: Update order status failed
