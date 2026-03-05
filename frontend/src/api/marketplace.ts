@@ -16,13 +16,22 @@ const getToken = () => {
 
 // Normalize product data from API
 const normalizeProduct = (data: any): Product => {
+  let images: string[] = [];
+  
+  if (Array.isArray(data.images)) {
+    images = data.images;
+  } else if (typeof data.images === 'string') {
+    try {
+      images = JSON.parse(data.images);
+      if (!Array.isArray(images)) images = [];
+    } catch {
+      images = [];
+    }
+  }
+  
   return {
     ...data,
-    images: Array.isArray(data.images) 
-      ? data.images 
-      : typeof data.images === 'string' 
-        ? JSON.parse(data.images) 
-        : []
+    images
   };
 };
 

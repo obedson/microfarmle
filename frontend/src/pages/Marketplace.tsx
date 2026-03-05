@@ -68,11 +68,11 @@ const Marketplace: React.FC = () => {
       
       {/* Products Grid */}
       <div className="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {Array.isArray(products) && products.map((product: any) => (
+        {products.map((product) => (
           <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden">
             {/* Product Image */}
             <div className="h-48 bg-gray-200">
-              {product.images && product.images.length > 0 ? (
+              {product.images.length > 0 ? (
                 <img
                   src={product.images[0]}
                   alt={product.name}
