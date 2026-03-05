@@ -1,24 +1,50 @@
-PS C:\Users\NITDA\Desktop\microfarm\backend> npm run dev
-
-> Farmle backend@1.0.0 dev
-> node --loader ts-node/esm src/index.ts
-
-(node:14480) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
---import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
-(Use `node --trace-warnings ...` to show where the warning was created)
-C:\Users\NITDA\Desktop\microfarm\backend\node_modules\@supabase\supabase-js\dist\main\lib\helpers.js:50
-        throw new Error('supabaseUrl is required.');
-              ^
-
-Error: supabaseUrl is required.
-    at validateSupabaseUrl (C:\Users\NITDA\Desktop\microfarm\backend\node_modules\@supabase\supabase-js\dist\main\lib\helpers.js:50:15)
-    at new SupabaseClient (C:\Users\NITDA\Desktop\microfarm\backend\node_modules\@supabase\supabase-js\dist\main\SupabaseClient.js:34:59)
-    at createClient (C:\Users\NITDA\Desktop\microfarm\backend\node_modules\@supabase\supabase-js\dist\main\index.js:38:12)
-    at file:///C:/Users/NITDA/Desktop/microfarm/backend/src/utils/supabase.ts:4:25
-    at ModuleJob.run (node:internal/modules/esm/module_job:430:25)
-    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
-    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:661:26)
-    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
-
-Node.js v24.14.0
-PS C:\Users\NITDA\Desktop\microfarm\backend>
+2026-03-05T14:16:34.850034951Z #13 3.516 
+2026-03-05T14:16:34.850055692Z #13 3.516 54 packages are looking for funding
+2026-03-05T14:16:34.850060312Z #13 3.516   run `npm fund` for details
+2026-03-05T14:16:34.850064262Z #13 3.526 
+2026-03-05T14:16:34.850068732Z #13 3.526 5 vulnerabilities (1 low, 2 moderate, 2 high)
+2026-03-05T14:16:34.850072862Z #13 3.526 
+2026-03-05T14:16:34.850076722Z #13 3.526 To address all issues, run:
+2026-03-05T14:16:34.850080952Z #13 3.526   npm audit fix
+2026-03-05T14:16:34.850084763Z #13 3.526 
+2026-03-05T14:16:34.850088752Z #13 3.526 Run `npm audit` for details.
+2026-03-05T14:16:34.850092583Z #13 DONE 3.6s
+2026-03-05T14:16:35.002736849Z 
+2026-03-05T14:16:35.002757859Z #14 exporting to docker image format
+2026-03-05T14:16:35.002762149Z #14 exporting layers
+2026-03-05T14:16:39.836621962Z #14 exporting layers 5.0s done
+2026-03-05T14:16:40.001844498Z #14 exporting manifest sha256:c34cf9c3d17c0276edd90392b896f6f234ade21b7593936e66a78944c0f29153 done
+2026-03-05T14:16:40.001866699Z #14 exporting config sha256:e499fcdc0d797e881374f5d84a1f976dc7cdbe3a26cbd3fecfbe2abc2310a988 done
+2026-03-05T14:16:40.381954839Z #14 DONE 5.5s
+2026-03-05T14:16:40.557369831Z 
+2026-03-05T14:16:40.557401891Z #15 exporting cache to client directory
+2026-03-05T14:16:40.557407682Z #15 preparing build cache for export
+2026-03-05T14:16:40.82488875Z #15 writing cache image manifest sha256:a73d1c01497cc0f1bc10a4c1fa15bb8acd5413f9ad4af186af3c69606953c288 done
+2026-03-05T14:16:40.824907471Z #15 DONE 0.4s
+2026-03-05T14:16:41.756249015Z Pushing image to registry...
+2026-03-05T14:16:45.359486569Z Upload succeeded
+2026-03-05T14:16:55.108367845Z ==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
+2026-03-05T14:16:55.124612205Z ==> Deploying...
+2026-03-05T14:23:44.660332281Z ==> No open ports detected, continuing to scan...
+2026-03-05T14:23:44.739574589Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
+2026-03-05T14:23:45.048334524Z 
+2026-03-05T14:23:45.048362914Z > Farmle backend@1.0.0 start
+2026-03-05T14:23:45.048386905Z > node dist/index.js
+2026-03-05T14:23:45.048389865Z 
+2026-03-05T14:23:49.042362102Z ⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
+2026-03-05T14:23:51.970960627Z /app/node_modules/html-encoding-sniffer/lib/html-encoding-sniffer.js:2
+2026-03-05T14:23:51.993117688Z const { getBOMEncoding, labelToName } = require("@exodus/bytes/encoding-lite.js");
+2026-03-05T14:23:51.993133339Z                                         ^
+2026-03-05T14:23:51.993138059Z 
+2026-03-05T14:23:51.993143919Z Error [ERR_REQUIRE_ESM]: require() of ES Module /app/node_modules/@exodus/bytes/encoding-lite.js from /app/node_modules/html-encoding-sniffer/lib/html-encoding-sniffer.js not supported.
+2026-03-05T14:23:51.993148689Z Instead change the require of encoding-lite.js in /app/node_modules/html-encoding-sniffer/lib/html-encoding-sniffer.js to a dynamic import() which is available in all CommonJS modules.
+2026-03-05T14:23:51.993153869Z     at Object.<anonymous> (/app/node_modules/html-encoding-sniffer/lib/html-encoding-sniffer.js:2:41)
+2026-03-05T14:23:51.993159009Z     at Object.<anonymous> (/app/node_modules/jsdom/lib/api.js:7:27)
+2026-03-05T14:23:51.993164289Z     at /app/node_modules/isomorphic-dompurify/index.js:1:195
+2026-03-05T14:23:51.99316918Z     at Object.<anonymous> (/app/node_modules/isomorphic-dompurify/index.js:1:261) {
+2026-03-05T14:23:51.99317428Z   code: 'ERR_REQUIRE_ESM'
+2026-03-05T14:23:51.99317889Z }
+2026-03-05T14:23:51.99318309Z 
+2026-03-05T14:23:51.99318763Z Node.js v18.20.8
+2026-03-05T14:23:58.927563787Z ==> Exited with status 1
+2026-03-05T14:23:58.945851467Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys

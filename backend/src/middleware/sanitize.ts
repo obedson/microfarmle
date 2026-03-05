@@ -1,9 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
-import DOMPurify from 'isomorphic-dompurify';
 
 const sanitizeString = (value: any): any => {
   if (typeof value === 'string') {
-    return DOMPurify.sanitize(value, { ALLOWED_TAGS: [] });
+    // Remove HTML tags and dangerous characters
+    return value
+      .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+      .replace(/<[^>]+>/g, '')
+      .replace(/javascript:/gi, '')
+      .replace(/on\w+\s*=/gi, '');
   }
   if (Array.isArray(value)) {
     return value.map(sanitizeString);
