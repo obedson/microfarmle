@@ -1,13 +1,59 @@
-| column_name      | data_type                | column_default               | is_nullable |
-| ---------------- | ------------------------ | ---------------------------- | ----------- |
-| id               | uuid                     | gen_random_uuid()            | NO          |
-| buyer_id         | uuid                     | null                         | NO          |
-| product_id       | uuid                     | null                         | NO          |
-| quantity         | integer                  | null                         | NO          |
-| unit_price       | numeric                  | null                         | NO          |
-| total_amount     | numeric                  | null                         | NO          |
-| delivery_address | text                     | null                         | YES         |
-| phone            | character varying        | null                         | YES         |
-| status           | character varying        | 'pending'::character varying | YES         |
-| created_at       | timestamp with time zone | now()                        | YES         |
-| updated_at       | timestamp with time zone | now()                        | YES         |
+PS C:\Users\NITDA\Desktop\microfarm\backend> npm run dev
+
+> Farmle backend@1.0.0 dev
+> node --loader ts-node/esm src/index.ts
+
+(node:12856) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+2026-03-05 22:52:31 [info]: Server running on port 3001
+2026-03-05 22:52:31 [info]: Environment: development
+2026-03-05 22:52:31 [warn]: ⚠️  Cron jobs disabled (development mode)
+2026-03-05 22:52:31 [info]:    Set NODE_ENV=production to enable cron jobs
+(node:12856) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+
+
+
+marketplace.ts:130   POST http://localhost:3001/api/orders 500 (Internal Server Error)
+createOrder @ marketplace.ts:130
+handleOrder @ ProductDetail.tsx:42
+callCallback @ react-dom.development.js:4164
+invokeGuardedCallbackDev @ react-dom.development.js:4213
+invokeGuardedCallback @ react-dom.development.js:4277
+invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:4291
+executeDispatch @ react-dom.development.js:9041
+processDispatchQueueItemsInOrder @ react-dom.development.js:9073
+processDispatchQueue @ react-dom.development.js:9086
+dispatchEventsForPlugins @ react-dom.development.js:9097
+(anonymous) @ react-dom.development.js:9288
+batchedUpdates$1 @ react-dom.development.js:26179
+batchedUpdates @ react-dom.development.js:3991
+dispatchEventForPluginEventSystem @ react-dom.development.js:9287
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
+dispatchEvent @ react-dom.development.js:6457
+dispatchDiscreteEvent @ react-dom.development.js:6430
+[NEW] Explain Console errors by using Copilot in Edge: click
+         
+         to explain an error. 
+        Learn more
+        Don't show again
+marketplace.ts:144  Order creation failed: {success: false, error: "Cannot read properties of undefined (reading 'map')"}
+createOrder @ marketplace.ts:144
+await in createOrder
+handleOrder @ ProductDetail.tsx:42
+callCallback @ react-dom.development.js:4164
+invokeGuardedCallbackDev @ react-dom.development.js:4213
+invokeGuardedCallback @ react-dom.development.js:4277
+invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:4291
+executeDispatch @ react-dom.development.js:9041
+processDispatchQueueItemsInOrder @ react-dom.development.js:9073
+processDispatchQueue @ react-dom.development.js:9086
+dispatchEventsForPlugins @ react-dom.development.js:9097
+(anonymous) @ react-dom.development.js:9288
+batchedUpdates$1 @ react-dom.development.js:26179
+batchedUpdates @ react-dom.development.js:3991
+dispatchEventForPluginEventSystem @ react-dom.development.js:9287
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
+dispatchEvent @ react-dom.development.js:6457
+dispatchDiscreteEvent @ react-dom.development.js:6430
