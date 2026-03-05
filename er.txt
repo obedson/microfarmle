@@ -1,50 +1,23 @@
-2026-03-05T14:16:34.850034951Z #13 3.516 
-2026-03-05T14:16:34.850055692Z #13 3.516 54 packages are looking for funding
-2026-03-05T14:16:34.850060312Z #13 3.516   run `npm fund` for details
-2026-03-05T14:16:34.850064262Z #13 3.526 
-2026-03-05T14:16:34.850068732Z #13 3.526 5 vulnerabilities (1 low, 2 moderate, 2 high)
-2026-03-05T14:16:34.850072862Z #13 3.526 
-2026-03-05T14:16:34.850076722Z #13 3.526 To address all issues, run:
-2026-03-05T14:16:34.850080952Z #13 3.526   npm audit fix
-2026-03-05T14:16:34.850084763Z #13 3.526 
-2026-03-05T14:16:34.850088752Z #13 3.526 Run `npm audit` for details.
-2026-03-05T14:16:34.850092583Z #13 DONE 3.6s
-2026-03-05T14:16:35.002736849Z 
-2026-03-05T14:16:35.002757859Z #14 exporting to docker image format
-2026-03-05T14:16:35.002762149Z #14 exporting layers
-2026-03-05T14:16:39.836621962Z #14 exporting layers 5.0s done
-2026-03-05T14:16:40.001844498Z #14 exporting manifest sha256:c34cf9c3d17c0276edd90392b896f6f234ade21b7593936e66a78944c0f29153 done
-2026-03-05T14:16:40.001866699Z #14 exporting config sha256:e499fcdc0d797e881374f5d84a1f976dc7cdbe3a26cbd3fecfbe2abc2310a988 done
-2026-03-05T14:16:40.381954839Z #14 DONE 5.5s
-2026-03-05T14:16:40.557369831Z 
-2026-03-05T14:16:40.557401891Z #15 exporting cache to client directory
-2026-03-05T14:16:40.557407682Z #15 preparing build cache for export
-2026-03-05T14:16:40.82488875Z #15 writing cache image manifest sha256:a73d1c01497cc0f1bc10a4c1fa15bb8acd5413f9ad4af186af3c69606953c288 done
-2026-03-05T14:16:40.824907471Z #15 DONE 0.4s
-2026-03-05T14:16:41.756249015Z Pushing image to registry...
-2026-03-05T14:16:45.359486569Z Upload succeeded
-2026-03-05T14:16:55.108367845Z ==> Setting WEB_CONCURRENCY=1 by default, based on available CPUs in the instance
-2026-03-05T14:16:55.124612205Z ==> Deploying...
-2026-03-05T14:23:44.660332281Z ==> No open ports detected, continuing to scan...
-2026-03-05T14:23:44.739574589Z ==> Docs on specifying a port: https://render.com/docs/web-services#port-binding
-2026-03-05T14:23:45.048334524Z 
-2026-03-05T14:23:45.048362914Z > Farmle backend@1.0.0 start
-2026-03-05T14:23:45.048386905Z > node dist/index.js
-2026-03-05T14:23:45.048389865Z 
-2026-03-05T14:23:49.042362102Z ⚠️  Node.js 18 and below are deprecated and will no longer be supported in future versions of @supabase/supabase-js. Please upgrade to Node.js 20 or later. For more information, visit: https://github.com/orgs/supabase/discussions/37217
-2026-03-05T14:23:51.970960627Z /app/node_modules/html-encoding-sniffer/lib/html-encoding-sniffer.js:2
-2026-03-05T14:23:51.993117688Z const { getBOMEncoding, labelToName } = require("@exodus/bytes/encoding-lite.js");
-2026-03-05T14:23:51.993133339Z                                         ^
-2026-03-05T14:23:51.993138059Z 
-2026-03-05T14:23:51.993143919Z Error [ERR_REQUIRE_ESM]: require() of ES Module /app/node_modules/@exodus/bytes/encoding-lite.js from /app/node_modules/html-encoding-sniffer/lib/html-encoding-sniffer.js not supported.
-2026-03-05T14:23:51.993148689Z Instead change the require of encoding-lite.js in /app/node_modules/html-encoding-sniffer/lib/html-encoding-sniffer.js to a dynamic import() which is available in all CommonJS modules.
-2026-03-05T14:23:51.993153869Z     at Object.<anonymous> (/app/node_modules/html-encoding-sniffer/lib/html-encoding-sniffer.js:2:41)
-2026-03-05T14:23:51.993159009Z     at Object.<anonymous> (/app/node_modules/jsdom/lib/api.js:7:27)
-2026-03-05T14:23:51.993164289Z     at /app/node_modules/isomorphic-dompurify/index.js:1:195
-2026-03-05T14:23:51.99316918Z     at Object.<anonymous> (/app/node_modules/isomorphic-dompurify/index.js:1:261) {
-2026-03-05T14:23:51.99317428Z   code: 'ERR_REQUIRE_ESM'
-2026-03-05T14:23:51.99317889Z }
-2026-03-05T14:23:51.99318309Z 
-2026-03-05T14:23:51.99318763Z Node.js v18.20.8
-2026-03-05T14:23:58.927563787Z ==> Exited with status 1
-2026-03-05T14:23:58.945851467Z ==> Common ways to troubleshoot your deploy: https://render.com/docs/troubleshooting-deploys
+marketplace.ts:121   POST http://localhost:3001/api/orders 500 (Internal Server Error)
+createOrder @ marketplace.ts:121
+handleOrder @ ProductDetail.tsx:42
+callCallback @ react-dom.development.js:4164
+invokeGuardedCallbackDev @ react-dom.development.js:4213
+invokeGuardedCallback @ react-dom.development.js:4277
+invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:4291
+executeDispatch @ react-dom.development.js:9041
+processDispatchQueueItemsInOrder @ react-dom.development.js:9073
+processDispatchQueue @ react-dom.development.js:9086
+dispatchEventsForPlugins @ react-dom.development.js:9097
+(anonymous) @ react-dom.development.js:9288
+batchedUpdates$1 @ react-dom.development.js:26179
+batchedUpdates @ react-dom.development.js:3991
+dispatchEventForPluginEventSystem @ react-dom.development.js:9287
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
+dispatchEvent @ react-dom.development.js:6457
+dispatchDiscreteEvent @ react-dom.development.js:6430
+[NEW] Explain Console errors by using Copilot in Edge: click
+         
+         to explain an error. 
+        Learn more
+        Don't show again

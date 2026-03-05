@@ -6,18 +6,25 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { product_id, quantity, delivery_address, phone } = req.body;
     
+    console.log('Creating order:', { product_id, quantity, delivery_address, phone, buyer_id: req.user?.id });
+    
     // Get product details
     const { data: product, error: productError } = await supabase
       .from('marketplace_products')
-      .select('price, stock')
+      .select('price, stock_quantity')
       .eq('id', product_id)
       .single();
 
-    if (productError || !product) {
+    if (productError) {
+      console.error('Product fetch error:', productError);
+      return res.status(404).json({ error: 'Product not found', details: productError.message });
+    }
+
+    if (!product) {
       return res.status(404).json({ error: 'Product not found' });
     }
 
-    if (quantity > product.stock) {
+    if (quantity > product.stock_quantity) {
       return res.status(400).json({ error: 'Insufficient stock' });
     }
 
@@ -37,17 +44,25 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Order insert error:', error);
+      throw error;
+    }
 
     // Update stock
-    await supabase
+    const { error: updateError } = await supabase
       .from('marketplace_products')
-      .update({ stock: product.stock - quantity })
+      .update({ stock_quantity: product.stock_quantity - quantity })
       .eq('id', product_id);
+
+    if (updateError) {
+      console.error('Stock update error:', updateError);
+    }
 
     res.status(201).json(data);
   } catch (error) {
-    res.status(500).json({ error: 'Failed to create order' });
+    console.error('Create order error:', error);
+    res.status(500).json({ error: 'Failed to create order', details: error instanceof Error ? error.message : 'Unknown error' });
   }
 };
 

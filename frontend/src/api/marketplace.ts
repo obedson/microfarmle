@@ -127,12 +127,14 @@ export const marketplaceApi = {
       body: JSON.stringify(orderData)
     });
     
+    const data = await response.json();
+    
     if (!response.ok) {
-      const error = await response.json();
-      throw new Error(error.error || 'Failed to create order');
+      console.error('Order creation failed:', data);
+      throw new Error(data.error || 'Failed to create order');
     }
     
-    return response.json();
+    return data;
   },
 
   getMyOrders: async () => {
