@@ -212,12 +212,13 @@ export const updateOrderStatus = async (req: AuthenticatedRequest, res: Response
       supplier_id: req.user?.id 
     });
 
-    res.json(data);
+    res.json({ success: true, data });
   } catch (error) {
     logger.error('Update order status failed', { 
       order_id: req.params.id,
       error: error instanceof Error ? error.message : 'Unknown error'
     });
+    res.status(500).json({ success: false, error: 'Failed to update order status' });
     res.status(500).json({ error: 'Failed to update order status' });
   }
 };
