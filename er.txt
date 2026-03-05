@@ -1,27 +1,24 @@
 PS C:\Users\NITDA\Desktop\microfarm\backend> npm run dev
 
 > Farmle backend@1.0.0 dev
-> nodemon src/index.ts
+> node --loader ts-node/esm src/index.ts
 
-[nodemon] 3.1.10
-[nodemon] to restart at any time, enter `rs`
-[nodemon] watching path(s): *.*
-[nodemon] watching extensions: ts,json
-[nodemon] starting `ts-node src/index.ts`
-Error: Cannot find module 'C:\Users\NITDA\Desktop\microfarm\backend\src\routes\auth' imported from C:\Users\NITDA\Desktop\microfarm\backend\src\index.ts
-    at finalizeResolution (node:internal/modules/esm/resolve:275:11)
-    at moduleResolve (node:internal/modules/esm/resolve:865:10)
-    at defaultResolve (node:internal/modules/esm/resolve:991:11)
-    at ModuleLoader.#cachedDefaultResolve (node:internal/modules/esm/loader:719:20)
-    at ModuleLoader.#resolveAndMaybeBlockOnLoaderThread (node:internal/modules/esm/loader:736:38)
-    at ModuleLoader.resolveSync (node:internal/modules/esm/loader:765:52)
-    at ModuleLoader.#resolve (node:internal/modules/esm/loader:701:17)
-    at ModuleLoader.getOrCreateModuleJob (node:internal/modules/esm/loader:621:35)
-    at ModuleJob.syncLink (node:internal/modules/esm/module_job:160:33)
-    at ModuleJob.link (node:internal/modules/esm/module_job:245:17) {
-  code: 'ERR_MODULE_NOT_FOUND',
-  url: 'file:///C:/Users/NITDA/Desktop/microfarm/backend/src/routes/auth'
-}
-[nodemon] app crashed - waiting for file changes before starting...
+(node:14480) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+C:\Users\NITDA\Desktop\microfarm\backend\node_modules\@supabase\supabase-js\dist\main\lib\helpers.js:50
+        throw new Error('supabaseUrl is required.');
+              ^
 
+Error: supabaseUrl is required.
+    at validateSupabaseUrl (C:\Users\NITDA\Desktop\microfarm\backend\node_modules\@supabase\supabase-js\dist\main\lib\helpers.js:50:15)
+    at new SupabaseClient (C:\Users\NITDA\Desktop\microfarm\backend\node_modules\@supabase\supabase-js\dist\main\SupabaseClient.js:34:59)
+    at createClient (C:\Users\NITDA\Desktop\microfarm\backend\node_modules\@supabase\supabase-js\dist\main\index.js:38:12)
+    at file:///C:/Users/NITDA/Desktop/microfarm/backend/src/utils/supabase.ts:4:25
+    at ModuleJob.run (node:internal/modules/esm/module_job:430:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:661:26)
+    at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:101:5)
 
+Node.js v24.14.0
+PS C:\Users\NITDA\Desktop\microfarm\backend>
