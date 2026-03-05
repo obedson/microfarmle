@@ -219,6 +219,5 @@ export const updateOrderStatus = async (req: AuthenticatedRequest, res: Response
       error: error instanceof Error ? error.message : 'Unknown error'
     });
     res.status(500).json({ success: false, error: 'Failed to update order status' });
-    res.status(500).json({ error: 'Failed to update order status' });
   }
 };

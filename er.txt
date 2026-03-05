@@ -1,1 +1,37 @@
-Error: Failed to run sql query: ERROR: 23503: insert or update on table "orders" violates foreign key constraint "orders_product_id_fkey" DETAIL: Key (product_id)=(6bf41001-fbed-456a-8278-9a7d089d9b69) is not present in table "marketplace_products".
+PS C:\Users\NITDA\Desktop\microfarm\backend> npm run dev
+
+> Farmle backend@1.0.0 dev
+> nodemon --exec node --loader ts-node/esm src/index.ts
+
+[nodemon] 3.1.10
+[nodemon] to restart at any time, enter `rs`
+[nodemon] watching path(s): *.*
+[nodemon] watching extensions: ts,json
+[nodemon] starting `node --loader ts-node/esm src/index.ts`
+(node:17656) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+--import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+(Use `node --trace-warnings ...` to show where the warning was created)
+2026-03-05 23:53:01 [info]: Server running on port 3001
+2026-03-05 23:53:01 [info]: Environment: development
+2026-03-05 23:53:01 [warn]: ⚠️  Cron jobs disabled (development mode)
+2026-03-05 23:53:01 [info]:    Set NODE_ENV=production to enable cron jobs
+(node:17656) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+2026-03-05 23:53:08 [error]: Update order status failed
+node:_http_outgoing:642
+    throw new ERR_HTTP_HEADERS_SENT('set');
+          ^
+
+Error [ERR_HTTP_HEADERS_SENT]: Cannot set headers after they are sent to the client
+    at ServerResponse.setHeader (node:_http_outgoing:642:11)
+    at ServerResponse.header (C:\Users\NITDA\Desktop\microfarm\backend\node_modules\express\lib\response.js:794:10)
+    at ServerResponse.send (C:\Users\NITDA\Desktop\microfarm\backend\node_modules\express\lib\response.js:174:12)
+    at ServerResponse.json (C:\Users\NITDA\Desktop\microfarm\backend\node_modules\express\lib\response.js:278:15)
+    at updateOrderStatus (file:///C:/Users/NITDA/Desktop/microfarm/backend/src/controllers/orderController.ts:195:25)
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5) {
+  code: 'ERR_HTTP_HEADERS_SENT'
+}
+
+Node.js v24.14.0
+Assertion failed: !(handle->flags & UV_HANDLE_CLOSING), file src\win\async.c, line 76
+[nodemon] app crashed - waiting for file changes before starting...
