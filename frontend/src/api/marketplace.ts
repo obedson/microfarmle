@@ -1,3 +1,5 @@
+import { Product, Order } from '../types/marketplace';
+
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:3000/api';
 
 const getToken = () => {
@@ -12,20 +14,34 @@ const getToken = () => {
   return token;
 };
 
+// Normalize product data from API
+const normalizeProduct = (data: any): Product => {
+  return {
+    ...data,
+    images: Array.isArray(data.images) 
+      ? data.images 
+      : typeof data.images === 'string' 
+        ? JSON.parse(data.images) 
+        : []
+  };
+};
+
 export const marketplaceApi = {
   // Products
-  getProducts: async (filters?: { category?: string; location?: string }) => {
+  getProducts: async (filters?: { category?: string; location?: string }): Promise<Product[]> => {
     const params = new URLSearchParams();
     if (filters?.category) params.append('category', filters.category);
     if (filters?.location) params.append('location', filters.location);
     
     const response = await fetch(`${API_BASE}/products?${params}`);
-    return response.json();
+    const data = await response.json();
+    return Array.isArray(data) ? data.map(normalizeProduct) : [];
   },
 
-  getProduct: async (id: string) => {
+  getProduct: async (id: string): Promise<Product> => {
     const response = await fetch(`${API_BASE}/products/${id}`);
-    return response.json();
+    const data = await response.json();
+    return normalizeProduct(data);
   },
 
   createProduct: async (productData: any) => {

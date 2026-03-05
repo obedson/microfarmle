@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { Package, MapPin, User, ShoppingCart, ArrowLeft, Edit, Trash2 } from 'lucide-react';
+import { Package, MapPin, User, ShoppingCart, ArrowLeft, Edit } from 'lucide-react';
 import { marketplaceApi } from '../api/marketplace';
 import { useAuthStore } from '../store/authStore';
+import { Product } from '../types/marketplace';
 
 const ProductDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [orderLoading, setOrderLoading] = useState(false);
@@ -19,13 +20,6 @@ const ProductDetail: React.FC = () => {
     const fetchProduct = async () => {
       try {
         const data = await marketplaceApi.getProduct(id!);
-        // Ensure images is always an array
-        if (data.images && typeof data.images === 'string') {
-          data.images = JSON.parse(data.images);
-        }
-        if (!Array.isArray(data.images)) {
-          data.images = [];
-        }
         setProduct(data);
       } catch (error) {
         console.error('Failed to fetch product:', error);
@@ -64,7 +58,6 @@ const ProductDetail: React.FC = () => {
   if (!product) return <div className="p-8">Product not found</div>;
 
   const totalPrice = product.price * quantity;
-  const productImages = Array.isArray(product.images) ? product.images : [];
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-6xl">
@@ -80,9 +73,9 @@ const ProductDetail: React.FC = () => {
         {/* Product Images */}
         <div>
           <div className="bg-gray-200 rounded-lg h-96 mb-4">
-            {productImages.length > 0 ? (
+            {product.images.length > 0 ? (
               <img
-                src={productImages[0]}
+                src={product.images[0]}
                 alt={product.name}
                 className="w-full h-full object-cover rounded-lg"
                 onError={(e) => {
@@ -105,9 +98,9 @@ const ProductDetail: React.FC = () => {
           </div>
 
           {/* Additional Images */}
-          {productImages.length > 1 && (
+          {product.images.length > 1 && (
             <div className="grid grid-cols-4 gap-2">
-              {productImages.slice(1, 5).map((image: string, index: number) => (
+              {product.images.slice(1, 5).map((image: string, index: number) => (
                 <div key={index} className="h-20 bg-gray-200 rounded">
                   <img
                     src={image}

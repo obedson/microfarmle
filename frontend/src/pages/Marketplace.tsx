@@ -3,9 +3,10 @@ import { Link } from 'react-router-dom';
 import { Package, Plus, Filter } from 'lucide-react';
 import { marketplaceApi } from '../api/marketplace';
 import { useAuthStore } from '../store/authStore';
+import { Product } from '../types/marketplace';
 
 const Marketplace: React.FC = () => {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<string[]>(['']);
   const [loading, setLoading] = useState(true);
   const [category, setCategory] = useState('');
@@ -18,11 +19,11 @@ const Marketplace: React.FC = () => {
   const fetchProducts = async () => {
     try {
       const data = await marketplaceApi.getProducts({ category });
-      const productsArray = Array.isArray(data) ? data : [];
-      setProducts(productsArray);
+      
+      setProducts(data);
       
       // Extract unique categories from products
-      const uniqueCategories = ['', ...new Set(productsArray.map((p: any) => p.category).filter(Boolean))] as string[];
+      const uniqueCategories = ['', ...new Set(data.map(p => p.category).filter(Boolean))] as string[];
       setCategories(uniqueCategories);
     } catch (error) {
       console.error('Failed to fetch products:', error);
