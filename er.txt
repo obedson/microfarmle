@@ -1,121 +1,25 @@
-my-sales:1  Unchecked runtime.lastError: The message port closed before a response was received.
-[NEW] Explain Console errors by using Copilot in Edge: click
-         
-         to explain an error. 
-        Learn more
-        Don't show again
-marketplace.ts:184   PUT http://localhost:3001/api/orders/413e6c50-6a3c-461c-b395-16beaa3d7b5e/status 500 (Internal Server Error)
-updateOrderStatus @ marketplace.ts:184
-mutationFn @ MySales.tsx:26
-fn @ mutation.ts:179
-run @ retryer.ts:147
-createRetryer @ retryer.ts:204
-executeMutation @ mutation.ts:174
-execute @ mutation.ts:216
-await in execute
-mutate @ mutationObserver.ts:136
-(anonymous) @ useMutation.ts:96
-onClick @ MySales.tsx:108
-callCallback @ react-dom.development.js:4164
-invokeGuardedCallbackDev @ react-dom.development.js:4213
-invokeGuardedCallback @ react-dom.development.js:4277
-invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:4291
-executeDispatch @ react-dom.development.js:9041
-processDispatchQueueItemsInOrder @ react-dom.development.js:9073
-processDispatchQueue @ react-dom.development.js:9086
-dispatchEventsForPlugins @ react-dom.development.js:9097
-(anonymous) @ react-dom.development.js:9288
-batchedUpdates$1 @ react-dom.development.js:26179
-batchedUpdates @ react-dom.development.js:3991
-dispatchEventForPluginEventSystem @ react-dom.development.js:9287
-dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
-dispatchEvent @ react-dom.development.js:6457
-dispatchDiscreteEvent @ react-dom.development.js:6430
-MySales.tsx:108  Error: Failed to update order status
-    at Object.updateOrderStatus (marketplace.ts:195:1)
-execute @ mutation.ts:261
-await in execute
-mutate @ mutationObserver.ts:136
-(anonymous) @ useMutation.ts:96
-onClick @ MySales.tsx:108
-callCallback @ react-dom.development.js:4164
-invokeGuardedCallbackDev @ react-dom.development.js:4213
-invokeGuardedCallback @ react-dom.development.js:4277
-invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:4291
-executeDispatch @ react-dom.development.js:9041
-processDispatchQueueItemsInOrder @ react-dom.development.js:9073
-processDispatchQueue @ react-dom.development.js:9086
-dispatchEventsForPlugins @ react-dom.development.js:9097
-(anonymous) @ react-dom.development.js:9288
-batchedUpdates$1 @ react-dom.development.js:26179
-batchedUpdates @ react-dom.development.js:3991
-dispatchEventForPluginEventSystem @ react-dom.development.js:9287
-dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
-dispatchEvent @ react-dom.development.js:6457
-dispatchDiscreteEvent @ react-dom.development.js:6430
-marketplace.ts:184   PUT http://localhost:3001/api/orders/3292d4ab-f3c1-4dae-9e2a-454297c0f269/status 500 (Internal Server Error)
-updateOrderStatus @ marketplace.ts:184
-mutationFn @ MySales.tsx:26
-fn @ mutation.ts:179
-run @ retryer.ts:147
-createRetryer @ retryer.ts:204
-executeMutation @ mutation.ts:174
-execute @ mutation.ts:216
-await in execute
-mutate @ mutationObserver.ts:136
-(anonymous) @ useMutation.ts:96
-onClick @ MySales.tsx:108
-callCallback @ react-dom.development.js:4164
-invokeGuardedCallbackDev @ react-dom.development.js:4213
-invokeGuardedCallback @ react-dom.development.js:4277
-invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:4291
-executeDispatch @ react-dom.development.js:9041
-processDispatchQueueItemsInOrder @ react-dom.development.js:9073
-processDispatchQueue @ react-dom.development.js:9086
-dispatchEventsForPlugins @ react-dom.development.js:9097
-(anonymous) @ react-dom.development.js:9288
-batchedUpdates$1 @ react-dom.development.js:26179
-batchedUpdates @ react-dom.development.js:3991
-dispatchEventForPluginEventSystem @ react-dom.development.js:9287
-dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
-dispatchEvent @ react-dom.development.js:6457
-dispatchDiscreteEvent @ react-dom.development.js:6430
-MySales.tsx:108  Error: Failed to update order status
-    at Object.updateOrderStatus (marketplace.ts:195:1)
-execute @ mutation.ts:261
-await in execute
-mutate @ mutationObserver.ts:136
-(anonymous) @ useMutation.ts:96
-onClick @ MySales.tsx:108
-callCallback @ react-dom.development.js:4164
-invokeGuardedCallbackDev @ react-dom.development.js:4213
-invokeGuardedCallback @ react-dom.development.js:4277
-invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:4291
-executeDispatch @ react-dom.development.js:9041
-processDispatchQueueItemsInOrder @ react-dom.development.js:9073
-processDispatchQueue @ react-dom.development.js:9086
-dispatchEventsForPlugins @ react-dom.development.js:9097
-(anonymous) @ react-dom.development.js:9288
-batchedUpdates$1 @ react-dom.development.js:26179
-batchedUpdates @ react-dom.development.js:3991
-dispatchEventForPluginEventSystem @ react-dom.development.js:9287
-dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
-dispatchEvent @ react-dom.development.js:6457
-dispatchDiscreteEvent @ react-dom.development.js:6430
+PS C:\Users\NITDA\Desktop\microfarm\backend> npm run dev
 
+> Farmle backend@1.0.0 dev
+> nodemon --exec node --loader ts-node/esm src/index.ts
+
+[nodemon] 3.1.10
+[nodemon] to restart at any time, enter `rs`
+[nodemon] watching path(s): *.*
+[nodemon] watching extensions: ts,json
 [nodemon] starting `node --loader ts-node/esm src/index.ts`
-(node:18676) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+(node:4860) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
 --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
 (Use `node --trace-warnings ...` to show where the warning was created)
-2026-03-06 00:25:30 [info]: Server running on port 3001
-2026-03-06 00:25:30 [info]: Environment: development
-2026-03-06 00:25:30 [warn]: ⚠️  Cron jobs disabled (development mode)
-2026-03-06 00:25:30 [info]:    Set NODE_ENV=production to enable cron jobs
-(node:18676) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+2026-03-06 00:29:15 [info]: Server running on port 3001
+2026-03-06 00:29:15 [info]: Environment: development
+2026-03-06 00:29:15 [warn]: ⚠️  Cron jobs disabled (development mode)
+2026-03-06 00:29:15 [info]:    Set NODE_ENV=production to enable cron jobs
+(node:4860) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
 (Use `node --trace-deprecation ...` to show where the warning was created)
-2026-03-06 00:25:55 [info]: Updating order status
-2026-03-06 00:25:55 [error]: Supabase update error
-2026-03-06 00:25:55 [error]: Update order status failed
-2026-03-06 00:25:57 [info]: Updating order status
-2026-03-06 00:25:58 [error]: Supabase update error
-2026-03-06 00:25:58 [error]: Update order status failed
+2026-03-06 00:29:43 [info]: Updating order status {"order_id":"413e6c50-6a3c-461c-b395-16beaa3d7b5e","new_status":"processing","user_id":"f1c168d3-a861-4afd-ac65-e4b946d5dad6"}
+2026-03-06 00:29:43 [error]: Supabase update error {"order_id":"413e6c50-6a3c-461c-b395-16beaa3d7b5e","error":"new row for relation \"orders\" violates check constraint \"orders_status_check\"","details":{"code":"23514","details":"Failing row contains (413e6c50-6a3c-461c-b395-16beaa3d7b5e, dcabedcc-bfd8-4f97-8dce-e093603e72d7, 39bf9c0d-a6dc-46a5-b769-bb3135609343, 50, 12000.00, 600000.00, Default address, 1234567890, processing, 2026-03-05 22:35:09.210653+00, 2026-03-05 23:29:43.617395+00).","hint":null,"message":"new row for relation \"orders\" violates check constraint \"orders_status_check\""}}
+2026-03-06 00:29:43 [error]: Update order status failed {"order_id":"413e6c50-6a3c-461c-b395-16beaa3d7b5e","error":"new row for relation \"orders\" violates check constraint \"orders_status_check\""}
+2026-03-06 00:29:47 [info]: Updating order status {"order_id":"3292d4ab-f3c1-4dae-9e2a-454297c0f269","new_status":"processing","user_id":"f1c168d3-a861-4afd-ac65-e4b946d5dad6"}
+2026-03-06 00:29:47 [error]: Supabase update error {"order_id":"3292d4ab-f3c1-4dae-9e2a-454297c0f269","error":"new row for relation \"orders\" violates check constraint \"orders_status_check\"","details":{"code":"23514","details":"Failing row contains (3292d4ab-f3c1-4dae-9e2a-454297c0f269, dcabedcc-bfd8-4f97-8dce-e093603e72d7, 4a8043f6-5b52-4ebb-80e0-c96a1ba3f323, 100, 5500.00, 550000.00, Default address, 1234567890, processing, 2026-03-05 22:28:26.150955+00, 2026-03-05 23:29:47.430412+00).","hint":null,"message":"new row for relation \"orders\" violates check constraint \"orders_status_check\""}}
+2026-03-06 00:29:47 [error]: Update order status failed {"order_id":"3292d4ab-f3c1-4dae-9e2a-454297c0f269","error":"new row for relation \"orders\" violates check constraint \"orders_status_check\""}

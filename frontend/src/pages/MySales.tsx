@@ -7,7 +7,7 @@ import toast from 'react-hot-toast';
 
 const statusConfig = {
   pending: { icon: Clock, color: 'text-yellow-600', bg: 'bg-yellow-50' },
-  processing: { icon: ShoppingBag, color: 'text-blue-600', bg: 'bg-blue-50' },
+  confirmed: { icon: ShoppingBag, color: 'text-blue-600', bg: 'bg-blue-50' },
   shipped: { icon: Truck, color: 'text-purple-600', bg: 'bg-purple-50' },
   delivered: { icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50' },
   cancelled: { icon: XCircle, color: 'text-red-600', bg: 'bg-red-50' },
@@ -56,7 +56,7 @@ export default function MySales() {
         >
           <option value="all">All Orders</option>
           <option value="pending">Pending</option>
-          <option value="processing">Processing</option>
+          <option value="confirmed">Confirmed</option>
           <option value="shipped">Shipped</option>
           <option value="delivered">Delivered</option>
         </select>
@@ -105,7 +105,7 @@ export default function MySales() {
                 {order.status === 'pending' && (
                   <div className="border-t pt-4 mt-4 flex gap-3">
                     <button
-                      onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'processing' })}
+                      onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'confirmed' })}
                       className="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
                       disabled={updateStatusMutation.isPending}
                     >
@@ -121,7 +121,7 @@ export default function MySales() {
                   </div>
                 )}
 
-                {order.status === 'processing' && (
+                {order.status === 'confirmed' && (
                   <div className="border-t pt-4 mt-4">
                     <button
                       onClick={() => updateStatusMutation.mutate({ orderId: order.id, status: 'shipped' })}
