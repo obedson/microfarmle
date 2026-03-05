@@ -101,7 +101,12 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
       buyer_id: req.user?.id 
     });
 
-    res.status(201).json(data);
+    // Return order with payment info
+    res.status(201).json({ 
+      success: true,
+      order: data,
+      message: 'Order created. Please proceed to payment.'
+    });
   } catch (error: any) {
     logger.error('Create order error', { 
       error: error?.message || String(error),

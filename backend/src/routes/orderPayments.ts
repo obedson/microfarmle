@@ -2,10 +2,11 @@ import { Router } from 'express';
 import { authenticateToken, AuthRequest } from '../middleware/auth.js';
 import { supabase } from '../utils/supabase.js';
 import axios from 'axios';
+import { logger } from '../utils/logger.js';
 
 const router = Router();
 
-// Initialize payment for order
+// Initialize payment for marketplace order
 router.post('/orders/:orderId/pay', authenticateToken, async (req: AuthRequest, res) => {
   try {
     const { orderId } = req.params;
@@ -13,30 +14,32 @@ router.post('/orders/:orderId/pay', authenticateToken, async (req: AuthRequest, 
     // Get order details
     const { data: order, error } = await supabase
       .from('orders')
-      .select('*, order_items(*)')
+      .select('*, marketplace_products(name)')
       .eq('id', orderId)
-      .eq('user_id', req.user.id)
+      .eq('buyer_id', req.user?.id)
       .single();
 
     if (error || !order) {
-      return res.status(404).json({ error: 'Order not found' });
+      logger.error('Order not found', { orderId, buyer_id: req.user?.id });
+      return res.status(404).json({ success: false, error: 'Order not found' });
     }
 
-    if (order.payment_status === 'paid') {
-      return res.status(400).json({ error: 'Order already paid' });
+    if (order.status === 'paid') {
+      return res.status(400).json({ success: false, error: 'Order already paid' });
     }
 
     // Initialize Paystack payment
     const paystackResponse = await axios.post(
       'https://api.paystack.co/transaction/initialize',
       {
-        email: req.user.email,
+        email: req.user?.email,
         amount: Math.round(order.total_amount * 100), // Convert to kobo
         reference: `order_${orderId}_${Date.now()}`,
         metadata: {
           order_id: orderId,
-          user_id: req.user.id,
-          type: 'order'
+          buyer_id: req.user?.id,
+          product_id: order.product_id,
+          type: 'marketplace_order'
         },
         callback_url: `${process.env.FRONTEND_URL}/payment/callback`
       },
@@ -48,23 +51,22 @@ router.post('/orders/:orderId/pay', authenticateToken, async (req: AuthRequest, 
       }
     );
 
-    // Update order with payment reference
-    await supabase
-      .from('orders')
-      .update({ 
-        payment_reference: paystackResponse.data.data.reference,
-        payment_status: 'pending'
-      })
-      .eq('id', orderId);
+    logger.info('Payment initialized', { 
+      orderId, 
+      reference: paystackResponse.data.data.reference 
+    });
 
     res.json({
       success: true,
       authorization_url: paystackResponse.data.data.authorization_url,
       reference: paystackResponse.data.data.reference
     });
-  } catch (error) {
-    console.error('Payment initialization error:', error);
-    res.status(500).json({ error: 'Failed to initialize payment' });
+  } catch (error: any) {
+    logger.error('Payment initialization error', { 
+      orderId: req.params.orderId,
+      error: error.message 
+    });
+    res.status(500).json({ success: false, error: 'Failed to initialize payment' });
   }
 });
 
@@ -75,18 +77,22 @@ router.get('/orders/:orderId/status', authenticateToken, async (req: AuthRequest
 
     const { data: order, error } = await supabase
       .from('orders')
-      .select('id, status, payment_status, total_amount')
+      .select('id, status, total_amount, created_at')
       .eq('id', orderId)
-      .eq('user_id', req.user.id)
+      .eq('buyer_id', req.user?.id)
       .single();
 
     if (error || !order) {
-      return res.status(404).json({ error: 'Order not found' });
+      return res.status(404).json({ success: false, error: 'Order not found' });
     }
 
-    res.json(order);
-  } catch (error) {
-    res.status(500).json({ error: 'Failed to fetch order status' });
+    res.json({ success: true, data: order });
+  } catch (error: any) {
+    logger.error('Failed to fetch order status', { 
+      orderId: req.params.orderId,
+      error: error.message 
+    });
+    res.status(500).json({ success: false, error: 'Failed to fetch order status' });
   }
 });
 

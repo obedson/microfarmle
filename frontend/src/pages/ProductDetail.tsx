@@ -39,14 +39,33 @@ const ProductDetail: React.FC = () => {
 
     setOrderLoading(true);
     try {
-      await marketplaceApi.createOrder({
+      const response = await marketplaceApi.createOrder({
         product_id: id,
         quantity,
-        delivery_address: 'Default address', // You can add a form for this
-        phone: '1234567890' // You can add a form for this
+        delivery_address: 'Default address',
+        phone: '1234567890'
       });
-      alert('Order placed successfully!');
-      navigate('/marketplace');
+      
+      // Redirect to payment
+      if (response.success && response.order) {
+        const paymentResponse = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:3000/api'}/payments/orders/${response.order.id}/pay`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const paymentData = await paymentResponse.json();
+        
+        if (paymentData.success && paymentData.authorization_url) {
+          // Redirect to Paystack
+          window.location.href = paymentData.authorization_url;
+        } else {
+          alert('Order created but payment initialization failed');
+          navigate('/marketplace/my-orders');
+        }
+      }
     } catch (error: any) {
       alert(error.message || 'Failed to place order');
     } finally {
