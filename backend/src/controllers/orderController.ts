@@ -88,10 +88,10 @@ export const createOrder = async (req: AuthenticatedRequest, res: Response) => {
     res.status(201).json(data);
   } catch (error) {
     logger.error('Create order error', { 
-      error: error instanceof Error ? error.message : 'Unknown error',
+      error: error instanceof Error ? error.message : String(error),
       buyer_id: req.user?.id 
     });
-    res.status(500).json({ error: 'Failed to create order' });
+    res.status(500).json({ success: false, error: 'Failed to create order' });
   }
 };
 
@@ -116,10 +116,31 @@ export const getMyOrders = async (req: AuthenticatedRequest, res: Response) => {
 
 export const getMySales = async (req: AuthenticatedRequest, res: Response) => {
   try {
+    // First get user's products
+    const { data: userProducts, error: productsError } = await supabase
+      .from('marketplace_products')
+      .select('id')
+      .eq('supplier_id', req.user?.id);
+
+    if (productsError) {
+      logger.error('Failed to fetch user products', { 
+        supplier_id: req.user?.id,
+        error: productsError.message 
+      });
+      return res.status(500).json({ success: false, error: 'Failed to fetch sales' });
+    }
+
+    if (!userProducts || userProducts.length === 0) {
+      return res.json([]);
+    }
+
+    const productIds = userProducts.map(p => p.id);
+
+    // Then get orders for those products
     const { data, error } = await supabase
       .from('orders')
-      .select('*, marketplace_products(name, category, supplier_id), users(name)')
-      .eq('marketplace_products.supplier_id', req.user?.id)
+      .select('*, marketplace_products(name, category), users(name)')
+      .in('product_id', productIds)
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -127,16 +148,16 @@ export const getMySales = async (req: AuthenticatedRequest, res: Response) => {
         supplier_id: req.user?.id,
         error: error.message 
       });
-      throw error;
+      return res.status(500).json({ success: false, error: 'Failed to fetch sales' });
     }
     
     res.json(data || []);
   } catch (error) {
     logger.error('Get sales error', { 
       supplier_id: req.user?.id,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : String(error)
     });
-    res.status(500).json({ error: 'Failed to fetch sales' });
+    res.status(500).json({ success: false, error: 'Failed to fetch sales' });
   }
 };
 
