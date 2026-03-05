@@ -121,18 +121,18 @@ export const getMyOrders = async (req: AuthenticatedRequest, res: Response) => {
   try {
     const { data, error } = await supabase
       .from('orders')
-      .select('*, marketplace_products(name, category), users(name)')
+      .select('*, marketplace_products(name, category, supplier_id, users(name, phone, email))')
       .eq('buyer_id', req.user?.id)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    res.json(data);
+    res.json({ success: true, data });
   } catch (error) {
     logger.error('Get orders failed', { 
       buyer_id: req.user?.id,
       error: error instanceof Error ? error.message : 'Unknown error'
     });
-    res.status(500).json({ error: 'Failed to fetch orders' });
+    res.status(500).json({ success: false, error: 'Failed to fetch orders' });
   }
 };
 

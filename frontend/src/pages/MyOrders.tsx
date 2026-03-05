@@ -57,7 +57,7 @@ export default function MyOrders() {
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-semibold">{order.products?.name || 'Product'}</h3>
+                      <h3 className="text-xl font-semibold">{order.marketplace_products?.name || 'Product'}</h3>
                       <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm ${status.bg} ${status.color}`}>
                         <StatusIcon size={16} />
                         {status.label}
@@ -82,20 +82,20 @@ export default function MyOrders() {
                   <p className="text-gray-600">Phone: {order.phone}</p>
                 </div>
 
-                {order.products && (
+                {order.marketplace_products && (
                   <div className="border-t pt-4 mt-4">
                     <h4 className="font-semibold mb-2">Seller Information</h4>
                     <p className="text-gray-600">
-                      Seller: {order.products.users?.name || 'N/A'}
+                      Seller: {order.marketplace_products.users?.name || 'N/A'}
                     </p>
-                    {order.products.users?.phone && (
+                    {order.marketplace_products.users?.phone && (
                       <p className="text-gray-600">
-                        Phone: {order.products.users.phone}
+                        Phone: {order.marketplace_products.users.phone}
                       </p>
                     )}
-                    {order.products.users?.email && (
+                    {order.marketplace_products.users?.email && (
                       <p className="text-gray-600">
-                        Email: {order.products.users.email}
+                        Email: {order.marketplace_products.users.email}
                       </p>
                     )}
                   </div>
