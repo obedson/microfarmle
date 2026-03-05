@@ -153,7 +153,7 @@ export const getMySales = async (req: AuthenticatedRequest, res: Response) => {
     }
 
     if (!userProducts || userProducts.length === 0) {
-      return res.json([]);
+      return res.json({ success: true, data: [] });
     }
 
     const productIds = userProducts.map(p => p.id);
@@ -161,7 +161,7 @@ export const getMySales = async (req: AuthenticatedRequest, res: Response) => {
     // Then get orders for those products
     const { data, error } = await supabase
       .from('orders')
-      .select('*, marketplace_products(name, category), users(name)')
+      .select('*, marketplace_products(name, category)')
       .in('product_id', productIds)
       .order('created_at', { ascending: false });
 
@@ -173,7 +173,7 @@ export const getMySales = async (req: AuthenticatedRequest, res: Response) => {
       return res.status(500).json({ success: false, error: 'Failed to fetch sales' });
     }
     
-    res.json(data || []);
+    res.json({ success: true, data: data || [] });
   } catch (error) {
     logger.error('Get sales error', { 
       supplier_id: req.user?.id,

@@ -78,7 +78,7 @@ export default function MySales() {
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
-                      <h3 className="text-xl font-semibold">{order.products?.name}</h3>
+                      <h3 className="text-xl font-semibold">{order.marketplace_products?.name}</h3>
                       <span className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm ${status.bg} ${status.color}`}>
                         <StatusIcon size={16} />
                         {order.status}
