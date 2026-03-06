@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { Calendar, CreditCard } from 'lucide-react';
 import { bookingAPI, paymentAPI } from '../api/client';
 import { useAuthStore } from '../store/authStore';
@@ -21,6 +21,27 @@ const BookingForm: React.FC<BookingFormProps> = ({ property, onSuccess }) => {
   const { register, handleSubmit, watch, formState: { errors } } = useForm<BookingForm>();
   const { isAuthenticated } = useAuthStore();
   const [bookingId, setBookingId] = useState<string | null>(null);
+  const [disabledDates, setDisabledDates] = useState<string[]>([]);
+
+  const { data: bookedDatesData } = useQuery(
+    ['bookedDates', property.id],
+    () => bookingAPI.getBookedDates(property.id),
+    { enabled: !!property.id }
+  );
+
+  useEffect(() => {
+    if (bookedDatesData?.data?.data) {
+      const dates: string[] = [];
+      bookedDatesData.data.data.forEach((booking: any) => {
+        const start = new Date(booking.start_date);
+        const end = new Date(booking.end_date);
+        for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+          dates.push(d.toISOString().split('T')[0]);
+        }
+      });
+      setDisabledDates(dates);
+    }
+  }, [bookedDatesData]);
 
   const startDate = watch('start_date');
   const endDate = watch('end_date');
@@ -133,6 +154,11 @@ const BookingForm: React.FC<BookingFormProps> = ({ property, onSuccess }) => {
       </div>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {disabledDates.length > 0 && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-800">
+            ⚠️ Some dates are already booked. Please avoid selecting booked dates.
+          </div>
+        )}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Start Date

@@ -21,6 +21,24 @@ const statusUpdateSchema = Joi.object({
   })
 });
 
+export const getBookedDates = async (req: Request, res: Response) => {
+  try {
+    const { property_id } = req.params;
+    
+    const bookedDates = await BookingModel.getBookedDates(property_id);
+    
+    res.json({ 
+      success: true, 
+      data: bookedDates 
+    });
+  } catch (error: any) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+};
+
 export const createBooking = async (req: Request, res: Response) => {
   try {
     const { error, value } = bookingSchema.validate(req.body);

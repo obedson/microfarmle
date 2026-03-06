@@ -6,11 +6,15 @@ import {
   getBookingById,
   updateBookingStatus,
   getBookingStats,
-  cancelBooking
+  cancelBooking,
+  getBookedDates
 } from '../controllers/bookingController.js';
 import { authenticateToken } from '../middleware/auth.js';
 
 const router = Router();
+
+// Public routes
+router.get('/property/:property_id/booked-dates', getBookedDates);
 
 // Farmer routes
 router.post('/', authenticateToken, createBooking);

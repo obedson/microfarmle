@@ -313,4 +313,15 @@ export class BookingModel {
     if (error) throw error;
     return data || [];
   }
+
+  static async getBookedDates(propertyId: string): Promise<Array<{start_date: string, end_date: string}>> {
+    const { data, error } = await supabase
+      .from('bookings')
+      .select('start_date, end_date')
+      .eq('property_id', propertyId)
+      .in('status', ['pending', 'confirmed']);
+
+    if (error) throw error;
+    return data || [];
+  }
 }
