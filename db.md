@@ -1,3 +1,5 @@
-| booking1_id                          | booking2_id                          | start_date | end_date   |
-| ------------------------------------ | ------------------------------------ | ---------- | ---------- |
-| 83517c07-8cfe-464d-b84f-797c5386d8b6 | ea6e620b-b2d7-49dc-9e2d-cfd23e2d9f81 | 2026-01-24 | 2029-12-24 |
+| status    | payment_status | count |
+| --------- | -------------- | ----- |
+| cancelled | paid           | 4     |
+| cancelled | pending        | 4     |
+| confirmed | paid           | 3     |
