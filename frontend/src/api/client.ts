@@ -57,9 +57,9 @@ export const bookingAPI = {
   create: (data: any) =>
     apiClient.post('/bookings', data),
   getMyBookings: () =>
+    apiClient.get('/bookings/my-bookings'),
   getBookedDates: (propertyId: string) =>
     apiClient.get(`/bookings/property/${propertyId}/booked-dates`),
-    apiClient.get('/bookings/my-bookings'),
 };
 
 export const paymentAPI = {
