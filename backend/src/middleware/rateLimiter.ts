@@ -1,56 +1,28 @@
-import { Request, Response, NextFunction } from 'express';
+import rateLimit from 'express-rate-limit';
 
-interface RateLimitStore {
-  [key: string]: {
-    count: number;
-    resetTime: number;
-  };
-}
+// General API rate limiter
+export const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // 100 requests per window
+  message: 'Too many requests, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
-const store: RateLimitStore = {};
+// Strict limiter for booking creation
+export const bookingLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000, // 1 hour
+  max: 10, // 10 bookings per hour
+  message: 'Too many booking attempts. Please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
-export const createRateLimit = (windowMs: number, maxRequests: number) => {
-  return (req: Request, res: Response, next: NextFunction) => {
-    const key = req.ip || 'unknown';
-    const now = Date.now();
-    
-    // Clean up expired entries
-    Object.keys(store).forEach(k => {
-      if (store[k].resetTime < now) {
-        delete store[k];
-      }
-    });
-
-    if (!store[key]) {
-      store[key] = {
-        count: 1,
-        resetTime: now + windowMs
-      };
-      return next();
-    }
-
-    if (store[key].resetTime < now) {
-      store[key] = {
-        count: 1,
-        resetTime: now + windowMs
-      };
-      return next();
-    }
-
-    if (store[key].count >= maxRequests) {
-      return res.status(429).json({
-        success: false,
-        error: 'Too many requests, please try again later.',
-        retryAfter: Math.ceil((store[key].resetTime - now) / 1000)
-      });
-    }
-
-    store[key].count++;
-    next();
-  };
-};
-
-// Common rate limiters
-export const authLimiter = createRateLimit(15 * 60 * 1000, 5); // 5 requests per 15 minutes
-export const apiLimiter = createRateLimit(15 * 60 * 1000, 100); // 100 requests per 15 minutes
-export const uploadLimiter = createRateLimit(60 * 60 * 1000, 10); // 10 uploads per hour
+// Payment initialization limiter
+export const paymentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 20, // 20 payment attempts per window
+  message: 'Too many payment attempts. Please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});

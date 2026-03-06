@@ -10,6 +10,7 @@ import {
   getBookedDates
 } from '../controllers/bookingController.js';
 import { authenticateToken } from '../middleware/auth.js';
+import { bookingLimiter } from '../middleware/rateLimiter.js';
 
 const router = Router();
 
@@ -17,7 +18,7 @@ const router = Router();
 router.get('/property/:property_id/booked-dates', getBookedDates);
 
 // Farmer routes
-router.post('/', authenticateToken, createBooking);
+router.post('/', authenticateToken, bookingLimiter, createBooking);
 router.get('/my-bookings', authenticateToken, getMyBookings);
 
 // Owner routes

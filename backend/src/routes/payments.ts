@@ -1,10 +1,11 @@
 import { Router } from 'express';
 import { initializePayment, verifyPayment } from '../controllers/paymentController.js';
 import { authenticateToken } from '../middleware/auth.js';
+import { paymentLimiter } from '../middleware/rateLimiter.js';
 
 const router = Router();
 
-router.post('/initialize', authenticateToken, initializePayment);
+router.post('/initialize', authenticateToken, paymentLimiter, initializePayment);
 router.get('/verify/:reference', verifyPayment);
 
 export default router;

@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { BookingModel } from '../models/Booking.js';
 import { PropertyModel } from '../models/Property.js';
 import { sendEmail } from '../services/emailService.js';
+import { initiateRefund } from '../services/refundService.js';
 import Joi from 'joi';
 
 const bookingSchema = Joi.object({
@@ -276,10 +277,19 @@ export const cancelBooking = async (req: Request, res: Response) => {
     }
 
     // Handle refunds for paid bookings
-    if (booking.payment_status === 'paid') {
-      // TODO: Implement refund logic with Paystack
-      // For now, just log it for manual processing
-      console.log(`⚠️ REFUND NEEDED: Booking ${id}, Amount: ${booking.total_amount}, Reference: ${booking.payment_reference}`);
+    if (booking.payment_status === 'paid' && booking.payment_reference) {
+      const refundResult = await initiateRefund(
+        booking.payment_reference,
+        booking.total_amount,
+        reason || 'Booking cancelled'
+      );
+
+      if (refundResult.success) {
+        console.log(`✅ Refund initiated for booking ${id}: ${booking.payment_reference}`);
+      } else {
+        console.error(`❌ Refund failed for booking ${id}:`, refundResult.error);
+        // Continue with cancellation even if refund fails - log for manual processing
+      }
     }
 
     await BookingModel.updateStatus(id, 'cancelled', reason);

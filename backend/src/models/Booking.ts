@@ -183,6 +183,10 @@ export class BookingModel {
       updateData.rejection_reason = rejectionReason;
     }
 
+    if (status === 'cancelled') {
+      updateData.cancelled_at = new Date().toISOString();
+    }
+
     const { error } = await supabase
       .from('bookings')
       .update(updateData)
