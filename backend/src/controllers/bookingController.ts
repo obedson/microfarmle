@@ -54,6 +54,36 @@ export const createBooking = async (req: Request, res: Response) => {
       });
     }
 
+    // Verify property exists and calculate correct price
+    const property = await PropertyModel.findById(value.property_id);
+    if (!property) {
+      return res.status(404).json({ 
+        success: false, 
+        error: 'Property not found' 
+      });
+    }
+
+    if (!property.is_active) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Property is not available for booking' 
+      });
+    }
+
+    // Calculate and validate total amount
+    const start = new Date(value.start_date);
+    const end = new Date(value.end_date);
+    const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
+    const months = Math.ceil(days / 30);
+    const calculatedAmount = months * property.price_per_month;
+
+    if (Math.abs(value.total_amount - calculatedAmount) > 0.01) {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Invalid total amount. Please refresh and try again.' 
+      });
+    }
+
     // Check for booking conflicts
     const hasConflict = await BookingModel.checkConflict(
       value.property_id,
@@ -69,30 +99,28 @@ export const createBooking = async (req: Request, res: Response) => {
     }
 
     const booking = await BookingModel.create({
-      ...value,
+      property_id: value.property_id,
       start_date: value.start_date,
       end_date: value.end_date,
+      total_amount: calculatedAmount,
       farmer_id: (req as any).user.id,
       status: 'pending_payment',
       payment_status: 'pending',
     });
 
-    // Get property and owner details for notification
-    const property = await PropertyModel.findById(value.property_id);
-    if (property) {
-      await sendEmail({
-        to: property.owner_email,
-        subject: 'New Booking Request',
-        template: 'new-booking',
-        data: {
-          propertyTitle: property.title,
-          farmerName: (req as any).user.name,
-          startDate: value.start_date,
-          endDate: value.end_date,
-          amount: value.total_amount
-        }
-      });
-    }
+    // Send notification to owner
+    await sendEmail({
+      to: property.owner_email,
+      subject: 'New Booking Request',
+      template: 'new-booking',
+      data: {
+        propertyTitle: property.title,
+        farmerName: (req as any).user.name,
+        startDate: value.start_date,
+        endDate: value.end_date,
+        amount: calculatedAmount
+      }
+    });
 
     res.status(201).json({ success: true, data: booking });
   } catch (error) {
@@ -238,6 +266,20 @@ export const cancelBooking = async (req: Request, res: Response) => {
         success: false, 
         error: 'Cannot cancel completed bookings' 
       });
+    }
+
+    if (booking.status === 'cancelled') {
+      return res.status(400).json({ 
+        success: false, 
+        error: 'Booking is already cancelled' 
+      });
+    }
+
+    // Handle refunds for paid bookings
+    if (booking.payment_status === 'paid') {
+      // TODO: Implement refund logic with Paystack
+      // For now, just log it for manual processing
+      console.log(`⚠️ REFUND NEEDED: Booking ${id}, Amount: ${booking.total_amount}, Reference: ${booking.payment_reference}`);
     }
 
     await BookingModel.updateStatus(id, 'cancelled', reason);

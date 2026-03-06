@@ -40,16 +40,21 @@ router.post('/paystack', async (req: Request, res: Response) => {
           .single();
 
         if (booking) {
-          await supabase
-            .from('bookings')
-            .update({ 
-              payment_status: 'paid',
-              status: 'pending',
-              updated_at: new Date().toISOString()
-            })
-            .eq('id', booking.id);
-          
-          console.log(`✅ Booking payment confirmed: ${reference}`);
+          // Only update if booking is still in pending_payment status
+          if (booking.status === 'pending_payment') {
+            await supabase
+              .from('bookings')
+              .update({ 
+                payment_status: 'paid',
+                status: 'pending',
+                updated_at: new Date().toISOString()
+              })
+              .eq('id', booking.id);
+            
+            console.log(`✅ Booking payment confirmed: ${reference}`);
+          } else {
+            console.log(`⚠️ Booking ${booking.id} already processed or cancelled`);
+          }
         }
       }
       
