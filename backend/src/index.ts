@@ -23,6 +23,7 @@ import contributionRoutes from './routes/contributions.js';
 import adminRoutes from './routes/admin.js';
 import { startCronJobs } from './jobs/contributionJobs.js';
 import { startBookingJobs } from './jobs/bookingJobs.js';
+import './cleanupBookings.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;

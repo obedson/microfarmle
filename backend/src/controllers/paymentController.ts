@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import axios from 'axios';
 import { BookingModel } from '../models/Booking.js';
 import { asyncHandler, createError } from '../middleware/errorHandler.js';
+import supabase from '../utils/supabase.js';
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE_URL = 'https://api.paystack.co';
@@ -35,7 +36,7 @@ export const initializePayment = asyncHandler(async (req: Request, res: Response
   const paymentData = {
     email: (req as any).user.email,
     amount: Math.round(booking.total_amount * 100),
-    reference: `booking_${actualBookingId}_${Date.now()}`,
+    reference: `BOOK-${actualBookingId.substring(0, 8)}-${Date.now()}`,
     callback_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/payment/callback`,
     metadata: {
       booking_id: actualBookingId,
@@ -55,6 +56,12 @@ export const initializePayment = asyncHandler(async (req: Request, res: Response
         }
       }
     );
+
+    // Store payment reference in booking
+    await supabase
+      .from('bookings')
+      .update({ payment_reference: response.data.data.reference })
+      .eq('id', actualBookingId);
 
     res.json({
       success: true,

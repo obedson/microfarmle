@@ -73,7 +73,7 @@ export const createBooking = async (req: Request, res: Response) => {
       start_date: value.start_date,
       end_date: value.end_date,
       farmer_id: (req as any).user.id,
-      status: 'pending',
+      status: 'pending_payment',
       payment_status: 'pending',
     });
 

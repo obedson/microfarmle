@@ -7,7 +7,7 @@ export interface Booking {
   start_date: string;
   end_date: string;
   total_amount: number;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
+  status: 'pending_payment' | 'pending' | 'confirmed' | 'cancelled' | 'completed';
   payment_status: 'pending' | 'paid' | 'failed';
   payment_reference?: string;
   notes?: string;
@@ -223,7 +223,7 @@ export class BookingModel {
       .from('bookings')
       .select('id')
       .eq('property_id', propertyId)
-      .in('status', ['pending', 'confirmed'])
+      .in('status', ['pending_payment', 'pending', 'confirmed'])
       .or(`and(start_date.lte.${endDate},end_date.gte.${startDate})`);
 
     if (excludeBookingId) {
@@ -319,7 +319,7 @@ export class BookingModel {
       .from('bookings')
       .select('start_date, end_date')
       .eq('property_id', propertyId)
-      .in('status', ['pending', 'confirmed']);
+      .in('status', ['pending', 'confirmed', 'pending_payment']);
 
     if (error) throw error;
     return data || [];

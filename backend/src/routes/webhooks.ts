@@ -31,8 +31,30 @@ router.post('/paystack', async (req: Request, res: Response) => {
     if (event.event === 'charge.success') {
       const { reference, amount, customer, metadata } = event.data;
       
+      // Handle property booking payment
+      if (reference.startsWith('BOOK-')) {
+        const { data: booking } = await supabase
+          .from('bookings')
+          .select('*')
+          .eq('payment_reference', reference)
+          .single();
+
+        if (booking) {
+          await supabase
+            .from('bookings')
+            .update({ 
+              payment_status: 'paid',
+              status: 'pending',
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', booking.id);
+          
+          console.log(`✅ Booking payment confirmed: ${reference}`);
+        }
+      }
+      
       // Handle marketplace order payment
-      if (metadata?.type === 'marketplace_order' && metadata?.order_id) {
+      else if (metadata?.type === 'marketplace_order' && metadata?.order_id) {
         const { error } = await supabase
           .from('orders')
           .update({ 
