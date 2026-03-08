@@ -278,10 +278,10 @@ export class BookingModel {
       completed: bookings?.filter(b => b.status === 'completed').length || 0,
       cancelled: bookings?.filter(b => b.status === 'cancelled').length || 0,
       totalRevenue: bookings
-        ?.filter(b => b.payment_status === 'paid')
+        ?.filter(b => b.payment_status === 'paid' && b.status !== 'cancelled')
         .reduce((sum, b) => sum + parseFloat(b.total_amount), 0) || 0,
       pendingRevenue: bookings
-        ?.filter(b => b.status === 'pending' || b.status === 'confirmed')
+        ?.filter(b => (b.status === 'pending' || b.status === 'confirmed') && b.payment_status === 'paid')
         .reduce((sum, b) => sum + parseFloat(b.total_amount), 0) || 0,
       totalProperties: properties?.length || 0,
       activeProperties: properties?.filter(p => p.is_active).length || 0,
