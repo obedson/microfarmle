@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X, Home, Search, User, LogOut, BookOpen, Package, Users, Calendar } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { MessageNotificationIcon } from './communication';
 import Button from './ui/Button';
 
 const Header: React.FC = () => {
@@ -60,6 +61,7 @@ const Header: React.FC = () => {
                 >
                   Dashboard
                 </Link>
+                {user && <MessageNotificationIcon currentUserId={user.id} />}
                 <span className="text-sm text-gray-500">
                   Welcome, {user?.name}
                 </span>
@@ -79,6 +81,13 @@ const Header: React.FC = () => {
               </>
             )}
           </div>
+
+          {/* Mobile Message Icon */}
+          {isAuthenticated && user && (
+            <div className="md:hidden">
+              <MessageNotificationIcon currentUserId={user.id} />
+            </div>
+          )}
 
           {/* Mobile Menu Button */}
           <button

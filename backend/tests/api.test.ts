@@ -15,9 +15,9 @@ describe('API Endpoints', () => {
 
   describe('Auth Endpoints', () => {
     const testUser = {
-      email: 'test@example.com',
+      email: `test-api-${Date.now()}@example.com`,
       password: 'password123',
-      name: 'Test User',
+      name: 'Test API User',
       role: 'farmer'
     };
 

@@ -4,6 +4,11 @@ import axios from 'axios';
 import toast from 'react-hot-toast';
 import { LoadingSpinner } from '../components/Loading';
 import { useAuthStore } from '../store/authStore';
+import CourseRecommendations from '../components/courses/CourseRecommendations';
+import UserCourseProgress from '../components/courses/UserCourseProgress';
+import ProductRecommendations from '../components/marketplace/ProductRecommendations';
+import FarmRecommendations from '../components/farm-records/FarmRecommendations';
+import MFASetup from '../components/ui/MFASetup';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
@@ -141,6 +146,13 @@ export default function Dashboard() {
             <p className="text-sm text-gray-500 mt-1">View bookings I made</p>
           </button>
           <button
+            onClick={() => navigate('/messages')}
+            className="bg-white rounded-lg shadow p-6 text-left hover:shadow-lg transition"
+          >
+            <p className="text-lg font-semibold">Messages</p>
+            <p className="text-sm text-gray-500 mt-1">View and manage conversations</p>
+          </button>
+          <button
             onClick={() => navigate('/properties')}
             className="bg-white rounded-lg shadow p-6 text-left hover:shadow-lg transition"
           >
@@ -160,6 +172,11 @@ export default function Dashboard() {
       {/* Marketplace Stats */}
       <div className="mb-8">
         <h2 className="text-xl font-semibold text-gray-700 mb-4">Marketplace</h2>
+        
+        <div className="mb-6">
+          <ProductRecommendations />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
           <div className="bg-white rounded-lg shadow p-6">
             <p className="text-gray-600 mb-2">My Orders</p>
@@ -220,6 +237,19 @@ export default function Dashboard() {
             <p className="text-sm text-indigo-100 mt-1">List product for sale</p>
           </button>
         </div>
+      </div>
+
+      {/* Learning & Development */}
+      <div className="mb-8">
+        <h2 className="text-xl font-semibold text-gray-700 mb-4">Learning & Development</h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div className="space-y-6">
+            <CourseRecommendations />
+            <UserCourseProgress />
+          </div>
+          <MFASetup />
+        </div>
+        <FarmRecommendations />
       </div>
     </div>
   );

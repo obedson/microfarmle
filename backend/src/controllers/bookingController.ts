@@ -3,6 +3,9 @@ import { BookingModel } from '../models/Booking.js';
 import { PropertyModel } from '../models/Property.js';
 import { sendEmail } from '../services/emailService.js';
 import { initiateRefund } from '../services/refundService.js';
+import { BookingCancellationService } from '../services/bookingCancellationService.js';
+import { PaymentRecoveryService } from '../services/paymentRecoveryService.js';
+import { AvailabilityService } from '../services/availabilityService.js';
 import Joi from 'joi';
 
 const bookingSchema = Joi.object({
@@ -27,10 +30,15 @@ export const getBookedDates = async (req: Request, res: Response) => {
     const { property_id } = req.params;
     
     const bookedDates = await BookingModel.getBookedDates(property_id);
+    const nextSlot = await AvailabilityService.findNextAvailableSlot(
+      property_id, 
+      new Date().toISOString().split('T')[0]
+    );
     
     res.json({ 
       success: true, 
-      data: bookedDates 
+      data: bookedDates,
+      suggestion: nextSlot
     });
   } catch (error: any) {
     res.status(500).json({ 
@@ -86,16 +94,23 @@ export const createBooking = async (req: Request, res: Response) => {
     }
 
     // Check for booking conflicts
-    const hasConflict = await BookingModel.checkConflict(
+    const conflictingBookings = await AvailabilityService.getConflictingBookings(
       value.property_id,
       value.start_date,
       value.end_date
     );
 
-    if (hasConflict) {
+    if (conflictingBookings.length > 0) {
+      const nextSlot = await AvailabilityService.findNextAvailableSlot(
+        value.property_id, 
+        value.end_date
+      );
+
       return res.status(409).json({ 
         success: false, 
-        error: 'Property is already booked for the selected dates' 
+        error: 'Property is already booked for some of the selected dates',
+        conflicts: conflictingBookings,
+        suggestion: nextSlot
       });
     }
 
@@ -107,6 +122,7 @@ export const createBooking = async (req: Request, res: Response) => {
       farmer_id: (req as any).user.id,
       status: 'pending_payment',
       payment_status: 'pending',
+      payment_retry_count: 0,
     });
 
     // Send notification to owner
@@ -132,22 +148,74 @@ export const createBooking = async (req: Request, res: Response) => {
 
 export const getMyBookings = async (req: Request, res: Response) => {
   try {
-    const bookings = await BookingModel.findByFarmer((req as any).user.id);
-    res.json({ success: true, data: bookings });
+    const {
+      status,
+      payment_status,
+      property_id,
+      date_from,
+      date_to,
+      search,
+      page = '1',
+      limit = '10'
+    } = req.query;
+
+    const filters = {
+      status: status ? (status as string).split(',') : undefined,
+      payment_status: payment_status ? (payment_status as string).split(',') : undefined,
+      property_id: property_id as string,
+      date_from: date_from as string,
+      date_to: date_to as string,
+      search: search as string,
+      page: parseInt(page as string),
+      limit: parseInt(limit as string)
+    };
+
+    const result = await BookingModel.findByFarmerWithFilters((req as any).user.id, filters);
+    
+    res.json({ 
+      success: true, 
+      data: result.bookings,
+      pagination: result.pagination,
+      filters_applied: filters
+    });
   } catch (error) {
+    console.error('Get my bookings error:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch bookings' });
   }
 };
 
 export const getOwnerBookings = async (req: Request, res: Response) => {
   try {
-    const { status, property_id } = req.query;
-    const bookings = await BookingModel.findByOwner(
-      (req as any).user.id,
-      status as string,
-      property_id as string
-    );
-    res.json({ success: true, data: bookings });
+    const {
+      status,
+      payment_status,
+      property_id,
+      date_from,
+      date_to,
+      search,
+      page = '1',
+      limit = '10'
+    } = req.query;
+
+    const filters = {
+      status: status ? (status as string).split(',') : undefined,
+      payment_status: payment_status ? (payment_status as string).split(',') : undefined,
+      property_id: property_id as string,
+      date_from: date_from as string,
+      date_to: date_to as string,
+      search: search as string,
+      page: parseInt(page as string),
+      limit: parseInt(limit as string)
+    };
+
+    const result = await BookingModel.findByOwnerWithFilters((req as any).user.id, filters);
+    
+    res.json({ 
+      success: true, 
+      data: result.bookings,
+      pagination: result.pagination,
+      filters_applied: filters
+    });
   } catch (error) {
     console.error('Get owner bookings error:', error);
     res.status(500).json({ success: false, error: 'Failed to fetch bookings' });
@@ -249,71 +317,125 @@ export const cancelBooking = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const { reason } = req.body;
+    const userId = (req as any).user.id;
 
+    // Use the cancellation service for complete workflow
+    const result = await BookingCancellationService.processCancellation({
+      bookingId: id,
+      reason: reason,
+      cancelledBy: userId
+    });
+
+    if (result.success) {
+      res.json(result);
+    } else {
+      const statusCode = result.error === 'BOOKING_NOT_FOUND' ? 404 :
+                        result.error === 'MISSING_REASON' ? 400 :
+                        result.error === 'CANCELLATION_NOT_ALLOWED' ? 400 : 500;
+      
+      res.status(statusCode).json({
+        success: false,
+        error: result.message
+      });
+    }
+  } catch (error) {
+    console.error('Cancel booking error:', error);
+    res.status(500).json({ success: false, error: 'Failed to cancel booking' });
+  }
+};
+
+export const retryPayment = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = (req as any).user.id;
+    
+    // Use the payment recovery service
+    const result = await PaymentRecoveryService.processPaymentRetry({
+      bookingId: id,
+      userId: userId
+    });
+
+    if (result.success) {
+      res.json(result);
+    } else {
+      const statusCode = result.error === 'Booking not found' ? 404 :
+                        result.error?.includes('Only the farmer') ? 403 :
+                        result.error?.includes('Maximum retry') ? 429 : 400;
+      
+      res.status(statusCode).json({
+        success: false,
+        error: result.error
+      });
+    }
+  } catch (error) {
+    console.error('Retry payment error:', error);
+    res.status(500).json({ success: false, error: 'Failed to retry payment' });
+  }
+};
+
+export const getBookingHistory = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    
     const booking = await BookingModel.findByIdWithDetails(id);
     if (!booking) {
       return res.status(404).json({ success: false, error: 'Booking not found' });
     }
 
+    // Check authorization
     const userId = (req as any).user.id;
+    const userRole = (req as any).user.role;
     
-    // Only farmer or owner can cancel
-    if (booking.farmer_id !== userId && booking.owner_id !== userId) {
+    if (booking.farmer_id !== userId && booking.owner_id !== userId && userRole !== 'admin') {
       return res.status(403).json({ success: false, error: 'Unauthorized' });
     }
 
-    if (booking.status === 'completed') {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Cannot cancel completed bookings' 
-      });
-    }
+    const history = await BookingModel.getBookingHistory(id);
 
-    if (booking.status === 'cancelled') {
-      return res.status(400).json({ 
-        success: false, 
-        error: 'Booking is already cancelled' 
-      });
-    }
-
-    // Handle refunds for paid bookings
-    if (booking.payment_status === 'paid' && booking.payment_reference) {
-      const refundResult = await initiateRefund(
-        booking.payment_reference,
-        booking.total_amount,
-        reason || 'Booking cancelled'
-      );
-
-      if (refundResult.success) {
-        console.log(`✅ Refund initiated for booking ${id}: ${booking.payment_reference}`);
-      } else {
-        console.error(`❌ Refund failed for booking ${id}:`, refundResult.error);
-        // Continue with cancellation even if refund fails - log for manual processing
-      }
-    }
-
-    await BookingModel.updateStatus(id, 'cancelled', reason);
-
-    // Notify the other party
-    const notifyEmail = booking.farmer_id === userId ? booking.owner_email : booking.farmer_email;
-    const cancelledBy = booking.farmer_id === userId ? 'farmer' : 'owner';
-
-    await sendEmail({
-      to: notifyEmail,
-      subject: 'Booking Cancelled',
-      template: 'booking-cancelled',
-      data: {
-        propertyTitle: booking.property_title,
-        cancelledBy,
-        reason,
-        startDate: booking.start_date,
-        endDate: booking.end_date
-      }
+    res.json({
+      success: true,
+      booking_id: id,
+      history: history.status_history,
+      audit_logs: history.audit_logs
     });
-
-    res.json({ success: true, message: 'Booking cancelled successfully' });
   } catch (error) {
-    console.error('Cancel booking error:', error);
-    res.status(500).json({ success: false, error: 'Failed to cancel booking' });
+    console.error('Get booking history error:', error);
+    res.status(500).json({ success: false, error: 'Failed to fetch booking history' });
+  }
+};
+
+export const getCancellationEligibility = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = (req as any).user.id;
+
+    const eligibility = await BookingCancellationService.getCancellationEligibility(id, userId);
+
+    res.json({
+      success: true,
+      booking_id: id,
+      ...eligibility
+    });
+  } catch (error) {
+    console.error('Get cancellation eligibility error:', error);
+    res.status(500).json({ success: false, error: 'Failed to check cancellation eligibility' });
+  }
+};
+
+export const getPaymentRetryStatus = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const userId = (req as any).user.id;
+
+    const status = await PaymentRecoveryService.getRetryStatus(id, userId);
+
+    res.json({
+      success: true,
+      booking_id: id,
+      ...status
+    });
+  } catch (error) {
+    console.error('Get payment retry status error:', error);
+    res.status(500).json({ success: false, error: 'Failed to check payment retry status' });
   }
 };

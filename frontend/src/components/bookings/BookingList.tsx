@@ -9,6 +9,7 @@ interface BookingListProps {
   onApprove?: (booking: any) => void;
   onReject?: (booking: any) => void;
   onContact?: (booking: any) => void;
+  onRetryPayment?: (booking: any) => void;
 }
 
 const BookingList: React.FC<BookingListProps> = ({
@@ -18,7 +19,8 @@ const BookingList: React.FC<BookingListProps> = ({
   onCancel,
   onApprove,
   onReject,
-  onContact
+  onContact,
+  onRetryPayment
 }) => {
   if (isLoading) {
     return (
@@ -67,6 +69,7 @@ const BookingList: React.FC<BookingListProps> = ({
           onApprove={onApprove}
           onReject={onReject}
           onContact={onContact}
+          onRetryPayment={onRetryPayment}
         />
       ))}
     </div>

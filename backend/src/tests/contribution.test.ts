@@ -4,15 +4,30 @@ import supabase from '../utils/supabase.js';
 describe('Contribution System', () => {
   let testGroupId: string;
   let testCycleId: string;
+  let testUserId: string;
 
   beforeAll(async () => {
-    // Create test group
+    // Create a test user first
+    const { data: user } = await supabase
+      .from('users')
+      .insert({
+        email: 'test-contribution@example.com',
+        password: 'hashedpassword',
+        name: 'Test User',
+        role: 'farmer'
+      })
+      .select()
+      .single();
+
+    testUserId = user!.id;
+
+    // Create test group with valid creator_id
     const { data: group } = await supabase
       .from('groups')
       .insert({
         name: 'Test Group',
         description: 'Test',
-        creator_id: 'test-user-id',
+        creator_id: testUserId,
         contribution_enabled: true,
         contribution_amount: 5000,
         payment_day: 15,
@@ -28,7 +43,12 @@ describe('Contribution System', () => {
 
   afterAll(async () => {
     // Cleanup
-    await supabase.from('groups').delete().eq('id', testGroupId);
+    if (testGroupId) {
+      await supabase.from('groups').delete().eq('id', testGroupId);
+    }
+    if (testUserId) {
+      await supabase.from('users').delete().eq('id', testUserId);
+    }
   });
 
   test('should create contribution cycle', async () => {

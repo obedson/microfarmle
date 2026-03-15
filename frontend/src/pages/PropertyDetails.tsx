@@ -7,15 +7,40 @@ import { useAuthStore } from '../store/authStore';
 import Button from '../components/ui/Button';
 import Card from '../components/ui/Card';
 import BookingForm from '../components/BookingForm';
+import BookingCalendar from '../components/bookings/BookingCalendar';
+import { bookingAPI } from '../api/client';
 
 const PropertyDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
+  
   const { data, isLoading } = useQuery({
     queryKey: ['property', id],
     queryFn: () => propertyAPI.getById(id!)
   });
+
+  const { data: availabilityData } = useQuery({
+    queryKey: ['bookedDates', id],
+    queryFn: () => bookingAPI.getBookedDates(id!),
+    enabled: !!id
+  });
+
+  const nextSlot = availabilityData?.data?.suggestion;
+  const bookedDatesRaw = availabilityData?.data?.data || [];
+  
+  // Transform booked ranges into individual date strings for the calendar
+  const bookedDates = React.useMemo(() => {
+    const dates: string[] = [];
+    bookedDatesRaw.forEach((booking: any) => {
+      const start = new Date(booking.start_date);
+      const end = new Date(booking.end_date);
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        dates.push(d.toISOString().split('T')[0]);
+      }
+    });
+    return dates;
+  }, [bookedDatesRaw]);
 
   if (isLoading) {
     return (
@@ -137,7 +162,13 @@ const PropertyDetails: React.FC = () => {
               </div>
               <div className="flex items-center">
                 <Calendar size={18} className="mr-1" />
-                <span>Available {property.available_from} - {property.available_to}</span>
+                {nextSlot ? (
+                  <span className="text-primary-700 font-bold">
+                    Next Available: {new Date(nextSlot.start_date).toLocaleDateString()} - {new Date(nextSlot.end_date).toLocaleDateString()}
+                  </span>
+                ) : (
+                  <span>Available {property.available_from} - {property.available_to}</span>
+                )}
               </div>
             </div>
           </div>
@@ -200,10 +231,16 @@ const PropertyDetails: React.FC = () => {
         </div>
 
         {/* Sidebar - Booking Form */}
-        <div className="lg:col-span-1">
-          <div className="sticky top-24">
+        <div className="lg:col-span-1 space-y-6">
+          <div className="sticky top-24 space-y-6">
             {isAuthenticated ? (
-              <BookingForm property={property} onSuccess={handleBookingSuccess} />
+              <>
+                <BookingForm property={property} onSuccess={handleBookingSuccess} />
+                <BookingCalendar 
+                  bookings={[]} // The individual booked date highlighting is handled by bookedDates prop
+                  bookedDates={bookedDates}
+                />
+              </>
             ) : (
               <Card className="p-6 text-center">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">

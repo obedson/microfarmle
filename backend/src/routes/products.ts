@@ -1,5 +1,5 @@
 import { Router, Response } from 'express';
-import { getProducts, getProduct, createProduct, updateProduct, deleteProduct } from '../controllers/productController.js';
+import { getProducts, getProduct, createProduct, updateProduct, deleteProduct, getRecommendations, calculateBulkDiscount } from '../controllers/productController.js';
 import { authenticateToken } from '../middleware/auth.js';
 import { upload } from '../utils/upload.js';
 import { supabase } from '../utils/supabase.js';
@@ -7,6 +7,7 @@ import { supabase } from '../utils/supabase.js';
 const router = Router();
 
 router.get('/', getProducts);
+router.get('/recommendations', authenticateToken, getRecommendations);
 router.get('/my-products', authenticateToken, async (req: any, res: Response) => {
   try {
     const { data, error } = await supabase
@@ -22,6 +23,7 @@ router.get('/my-products', authenticateToken, async (req: any, res: Response) =>
   }
 });
 router.get('/:id', getProduct);
+router.get('/:id/bulk-discount', calculateBulkDiscount);
 router.post('/', authenticateToken, upload.array('images', 5), createProduct);
 router.patch('/:id', authenticateToken, upload.array('images', 5), updateProduct);
 router.delete('/:id', authenticateToken, deleteProduct);

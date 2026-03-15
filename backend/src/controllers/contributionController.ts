@@ -1,7 +1,57 @@
 import { Response } from 'express';
 import { AuthRequest } from '../middleware/auth.js';
 import { ContributionModel } from '../models/Contribution.js';
+import { ContributionService } from '../services/contributionService.js';
 import supabase from '../utils/supabase.js';
+
+export const getUserGroupFunds = async (req: AuthRequest, res: Response) => {
+  try {
+    const userId = req.user.id;
+    const funds = await ContributionService.getUserGroupFunds(userId);
+    res.json(funds);
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const calculateGroupDiscount = async (req: AuthRequest, res: Response) => {
+  try {
+    const { groupId } = req.params;
+    const { amount } = req.query;
+    
+    const result = await ContributionService.calculateGroupDiscount(
+      groupId, 
+      parseFloat(amount as string)
+    );
+    res.json(result);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+export const processGroupFundPayment = async (req: AuthRequest, res: Response) => {
+  try {
+    const { bookingId, groupId, amount } = req.body;
+    
+    // Verify user is in group
+    const { data: member } = await supabase
+      .from('group_members')
+      .select('id')
+      .eq('group_id', groupId)
+      .eq('user_id', req.user.id)
+      .eq('member_status', 'active')
+      .single();
+
+    if (!member) {
+      return res.status(403).json({ error: 'You are not an active member of this group' });
+    }
+
+    const result = await ContributionService.processGroupFundPayment(bookingId, groupId, amount);
+    res.json(result);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+};
 
 export const updateSettings = async (req: AuthRequest, res: Response) => {
   try {

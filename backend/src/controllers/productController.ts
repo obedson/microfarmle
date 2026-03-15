@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { supabase } from '../utils/supabase.js';
 import { uploadToSupabase } from '../utils/upload.js';
 import { AuthenticatedRequest } from '../types/index.js';
+import { MarketplaceService } from '../services/marketplaceService.js';
 
 export const getProducts = async (req: Request, res: Response) => {
   try {
@@ -21,6 +22,33 @@ export const getProducts = async (req: Request, res: Response) => {
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch products' });
+  }
+};
+
+export const getRecommendations = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const recommendations = await MarketplaceService.getRecommendedProducts(userId);
+    res.json(recommendations);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch recommendations' });
+  }
+};
+
+export const calculateBulkDiscount = async (req: Request, res: Response) => {
+  try {
+    const { id: productId } = req.params;
+    const { quantity } = req.query;
+    
+    const result = await MarketplaceService.calculateBulkDiscount(
+      productId, 
+      parseInt(quantity as string) || 1
+    );
+    res.json(result);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
   }
 };
 

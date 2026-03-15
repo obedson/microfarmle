@@ -94,6 +94,48 @@ const emailTemplates = {
         Go to Dashboard
       </a>
     </div>
+  `,
+  'payment-receipt': (data: any) => `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+      <div style="background-color: #22c55e; color: white; padding: 30px; text-align: center;">
+        <h1 style="margin: 0; font-size: 28px;">Payment Successful!</h1>
+        <p style="margin: 10px 0 0 0; opacity: 0.9;">Thank you for your booking on Farmle</p>
+      </div>
+      <div style="padding: 30px;">
+        <h2 style="color: #374151; margin-top: 0;">Receipt #${data.receiptNumber}</h2>
+        <p>Hello ${data.farmerName},</p>
+        <p>Your payment for <strong>${data.propertyTitle}</strong> has been successfully processed. Attached to this email is your official digital receipt.</p>
+        
+        <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin: 25px 0; border: 1px solid #f3f4f6;">
+          <div style="margin-bottom: 10px; display: flex; justify-content: space-between;">
+            <span style="color: #6b7280;">Amount Paid:</span>
+            <span style="font-weight: bold; color: #111827;">₦${data.amount.toLocaleString()}</span>
+          </div>
+          <div style="margin-bottom: 10px; display: flex; justify-content: space-between;">
+            <span style="color: #6b7280;">Payment Ref:</span>
+            <span style="font-family: monospace; color: #111827;">${data.paymentReference}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between;">
+            <span style="color: #6b7280;">Date:</span>
+            <span style="color: #111827;">${new Date().toLocaleDateString()}</span>
+          </div>
+        </div>
+
+        <div style="text-align: center; margin: 30px 0;">
+          <a href="${data.pdfUrl}" style="background-color: #22c55e; color: white; padding: 14px 28px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+            Download PDF Receipt
+          </a>
+        </div>
+
+        <p style="color: #6b7280; font-size: 14px; line-height: 1.5;">
+          You can also access this receipt anytime by logging into your <a href="${process.env.FRONTEND_URL}/my-bookings" style="color: #22c55e; text-decoration: none;">Farmle Dashboard</a>.
+        </p>
+      </div>
+      <div style="background-color: #f3f4f6; padding: 20px; text-align: center; color: #9ca3af; font-size: 12px;">
+        <p style="margin: 0;">&copy; ${new Date().getFullYear()} Farmle Platform. All rights reserved.</p>
+        <p style="margin: 5px 0 0 0;">Ensuring food security through technology.</p>
+      </div>
+    </div>
   `
 };
 

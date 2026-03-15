@@ -1,7 +1,7 @@
 import { supabase } from '../utils/supabase.js';
 
 interface AuditLog {
-  user_id: string;
+  user_id: string | null;
   action: string;
   resource_type: string;
   resource_id?: string;

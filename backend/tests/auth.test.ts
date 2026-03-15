@@ -5,7 +5,7 @@ describe('Authentication Endpoints', () => {
   describe('POST /api/auth/register', () => {
     it('should register a new user successfully', async () => {
       const userData = {
-        email: 'test@example.com',
+        email: `test-${Date.now()}@example.com`,
         password: 'password123',
         name: 'Test User',
         role: 'farmer',

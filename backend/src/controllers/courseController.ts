@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { supabase } from '../utils/supabase.js';
 import { AuthenticatedRequest } from '../types/index.js';
+import { CourseService } from '../services/courseService.js';
 
 export const getCourses = async (req: Request, res: Response) => {
   try {
@@ -48,12 +49,39 @@ export const updateProgress = async (req: AuthenticatedRequest, res: Response) =
         completed_at: completed ? new Date().toISOString() : null,
         watch_time_seconds: watch_time_seconds || 0,
         last_watched_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id,course_id'
       });
 
     if (error) throw error;
     res.json(data);
   } catch (error) {
     res.status(500).json({ error: 'Failed to update progress' });
+  }
+};
+
+export const getRecommendations = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const recommendations = await CourseService.getRecommendedCourses(userId);
+    res.json(recommendations);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch recommendations' });
+  }
+};
+
+export const generateCertificate = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const userId = req.user?.id;
+    const { courseId } = req.params;
+    if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const certificate = await CourseService.generateCertificate(userId, courseId);
+    res.json(certificate);
+  } catch (error: any) {
+    res.status(400).json({ error: error.message || 'Failed to generate certificate' });
   }
 };
 

@@ -37,6 +37,7 @@ import ContributionDashboard from './pages/ContributionDashboard';
 import MakeContribution from './pages/MakeContribution';
 import ContributionHistory from './pages/ContributionHistory';
 import Payment from './pages/Payment';
+import MessagesPage from './pages/MessagesPage';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import AuditLogs from './pages/AuditLogs';
@@ -65,6 +66,7 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/payment/callback" element={<PaymentCallback />} />
+        <Route path="/payment/:bookingId" element={<ProtectedRoute><Payment /></ProtectedRoute>} />
         <Route path="/payment" element={<Payment />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
         <Route path="/create-property" element={<ProtectedRoute><CreateProperty /></ProtectedRoute>} />
@@ -73,6 +75,7 @@ function App() {
         <Route path="/marketplace/add-product" element={<ProtectedRoute><AddProduct /></ProtectedRoute>} />
         <Route path="/marketplace/products/:id/edit" element={<ProtectedRoute><EditProduct /></ProtectedRoute>} />
         <Route path="/my-bookings" element={<ProtectedRoute><MyBookings /></ProtectedRoute>} />
+        <Route path="/messages" element={<ProtectedRoute><MessagesPage /></ProtectedRoute>} />
         <Route path="/my-properties" element={<ProtectedRoute><MyProperties /></ProtectedRoute>} />
         <Route path="/my-orders" element={<ProtectedRoute><MyOrders /></ProtectedRoute>} />
         <Route path="/my-sales" element={<ProtectedRoute><MySales /></ProtectedRoute>} />

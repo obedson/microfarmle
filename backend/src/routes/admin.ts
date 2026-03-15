@@ -2,10 +2,14 @@ import { Router } from 'express';
 import { authenticateToken, requireRole, AuthRequest } from '../middleware/auth.js';
 import { supabase } from '../utils/supabase.js';
 import { logAudit } from '../utils/audit.js';
+import { getSecurityAlerts, setupMFA, verifyMFA } from '../controllers/adminController.js';
 
 const router = Router();
 
-// Admin only routes
+// Admin only routes (MFA setup is available to all authenticated users)
+router.post('/mfa/setup', authenticateToken, setupMFA);
+router.post('/mfa/verify', authenticateToken, verifyMFA);
+
 router.use(authenticateToken);
 router.use(requireRole(['admin']));
 
@@ -72,6 +76,9 @@ router.post('/users/:id/suspend', async (req: AuthRequest, res) => {
     res.status(500).json({ error: 'Failed to suspend user' });
   }
 });
+
+// Get security alerts
+router.get('/security-alerts', getSecurityAlerts);
 
 // Get audit logs
 router.get('/audit-logs', async (req: AuthRequest, res) => {

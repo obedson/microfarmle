@@ -1,10 +1,11 @@
 import { Request, Response } from 'express';
 import { FarmRecordModel } from '../models/FarmRecord.js';
+import { FarmRecordService } from '../services/farmRecordService.js';
 import { asyncHandler, createError } from '../middleware/errorHandler.js';
 
 export const createRecord = asyncHandler(async (req: Request, res: Response) => {
   const userId = (req as any).user.id;
-  const { property_id, ...recordData } = req.body;
+  const { property_id, booking_id, ...recordData } = req.body;
   
   // Validate required fields
   if (!recordData.livestock_type || !recordData.record_date) {
@@ -14,11 +15,32 @@ export const createRecord = asyncHandler(async (req: Request, res: Response) => 
   const finalData = { 
     ...recordData, 
     farmer_id: userId,
-    property_id: property_id || null // Convert empty string to null
+    property_id: property_id || null,
+    booking_id: booking_id || null
   };
 
   const record = await FarmRecordModel.create(finalData);
   res.status(201).json({ success: true, data: record });
+});
+
+export const linkToBooking = asyncHandler(async (req: Request, res: Response) => {
+  const { id: recordId } = req.params;
+  const { booking_id } = req.body;
+  
+  const record = await FarmRecordService.linkToBooking(recordId, booking_id);
+  res.json({ success: true, data: record });
+});
+
+export const getPropertyProductivity = asyncHandler(async (req: Request, res: Response) => {
+  const { propertyId } = req.params;
+  const report = await FarmRecordService.getPropertyProductivityReport(propertyId);
+  res.json({ success: true, data: report });
+});
+
+export const getFarmerRecommendations = asyncHandler(async (req: Request, res: Response) => {
+  const userId = (req as any).user.id;
+  const recommendations = await FarmRecordService.getRecommendations(userId);
+  res.json({ success: true, data: recommendations });
 });
 
 export const getMyRecords = asyncHandler(async (req: Request, res: Response) => {

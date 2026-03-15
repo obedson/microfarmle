@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
+import { BookingModel } from '../models/Booking.js';
 import { GroupModel } from '../models/Group.js';
 import { ContributionModel } from '../models/Contribution.js';
 import supabase from '../utils/supabase.js';
@@ -29,32 +30,54 @@ router.post('/paystack', async (req: Request, res: Response) => {
 
     // Handle successful charge
     if (event.event === 'charge.success') {
-      const { reference, amount, customer, metadata } = event.data;
+      const { reference, amount, metadata } = event.data;
+      console.log(`💳 Processing successful charge: ${reference}`, { metadata });
       
       // Handle property booking payment
-      if (reference.startsWith('BOOK-')) {
-        const { data: booking } = await supabase
-          .from('bookings')
-          .select('*')
-          .eq('payment_reference', reference)
-          .single();
+      if (reference.startsWith('BOOK-') || metadata?.booking_id) {
+        const bookingId = metadata?.booking_id;
+        
+        // Find booking by ID (preferred) or reference
+        let query = supabase.from('bookings').select('*');
+        if (bookingId) {
+          query = query.eq('id', bookingId);
+        } else {
+          query = query.eq('payment_reference', reference);
+        }
+        
+        const { data: booking, error: fetchError } = await query.maybeSingle();
+
+        if (fetchError) {
+          console.error(`❌ Error fetching booking:`, fetchError);
+          return res.status(500).json({ error: 'Database fetch error' });
+        }
 
         if (booking) {
           // Only update if booking is still in pending_payment status
-          if (booking.status === 'pending_payment') {
-            await supabase
-              .from('bookings')
-              .update({ 
-                payment_status: 'paid',
-                status: 'pending',
-                updated_at: new Date().toISOString()
-              })
-              .eq('id', booking.id);
-            
-            console.log(`✅ Booking payment confirmed: ${reference}`);
+          if (booking.status === 'pending_payment' || booking.payment_status !== 'paid') {
+            try {
+              // Use atomic update
+              await BookingModel.completePayment(booking.id, reference);
+              console.log(`✅ Booking ${booking.id} confirmed via webhook`);
+              
+              // Generate receipt automatically
+              try {
+                const { ReceiptService } = await import('../services/receiptService.js');
+                const receiptService = new ReceiptService();
+                await receiptService.generateReceipt(booking.id, reference);
+                console.log(`✅ Receipt generated for booking ${booking.id}`);
+              } catch (receiptError) {
+                console.error(`❌ Receipt generation failed for ${booking.id}:`, receiptError);
+              }
+            } catch (updateError) {
+              console.error(`❌ Failed to update booking ${booking.id}:`, updateError);
+              return res.status(500).json({ error: 'Database update error' });
+            }
           } else {
-            console.log(`⚠️ Booking ${booking.id} already processed or cancelled`);
+            console.log(`⚠️ Booking ${booking.id} already processed (Status: ${booking.status})`);
           }
+        } else {
+          console.error(`❌ Booking not found for reference ${reference} or ID ${bookingId}`);
         }
       }
       
@@ -113,6 +136,13 @@ router.post('/paystack', async (req: Request, res: Response) => {
     console.error('Webhook error:', error);
     res.sendStatus(500);
   }
+});
+
+// Callback redirect endpoint
+router.get('/payment/callback', (req: Request, res: Response) => {
+  const { reference, trxref } = req.query;
+  // Redirect to frontend with payment reference
+  res.redirect(`http://localhost:3000/payment/callback?reference=${reference || trxref}`);
 });
 
 export default router;

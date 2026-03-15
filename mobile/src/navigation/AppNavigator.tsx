@@ -15,6 +15,7 @@ import PropertiesScreen from '../screens/PropertiesScreen';
 import PropertyDetailScreen from '../screens/PropertyDetailScreen';
 import CreateBookingScreen from '../screens/CreateBookingScreen';
 import MyBookingsScreen from '../screens/MyBookingsScreen';
+import BookingDetailScreen from '../screens/BookingDetailScreen';
 import DashboardScreen from '../screens/DashboardScreen';
 import CoursesScreen from '../screens/CoursesScreen';
 import CourseDetailScreen from '../screens/CourseDetailScreen';
@@ -83,6 +84,7 @@ export default function AppNavigator() {
         <Stack.Screen name="PropertyDetail" component={PropertyDetailScreen} />
         <Stack.Screen name="CreateBooking" component={CreateBookingScreen} />
         <Stack.Screen name="MyBookings" component={MyBookingsScreen} />
+        <Stack.Screen name="BookingDetail" component={BookingDetailScreen} options={{ title: 'Booking Detail' }} />
         <Stack.Screen name="Courses" component={CoursesScreen} />
         <Stack.Screen name="CourseDetail" component={CourseDetailScreen} />
         <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />

@@ -1,6 +1,17 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+// Add global error handlers to catch uncaught exceptions
+process.on('uncaughtException', (error) => {
+  console.error('Uncaught Exception:', error);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('Unhandled Rejection at:', promise, 'reason:', reason);
+  process.exit(1);
+});
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -9,6 +20,9 @@ import propertyRoutes from './routes/properties.js';
 import bookingRoutes from './routes/bookings.js';
 import paymentRoutes from './routes/payments.js';
 import webhookRoutes from './routes/webhooks.js';
+import analyticsRoutes from './routes/analytics.js';
+import communicationRoutes from './routes/communications.js';
+import receiptRoutes from './routes/receipts.js';
 import { errorHandler, notFound } from './middleware/errorHandler.js';
 
 import farmRecordRoutes from './routes/farmRecords.js';
@@ -21,6 +35,7 @@ import locationRoutes from './routes/locations.js';
 import groupRoutes from './routes/groups.js';
 import contributionRoutes from './routes/contributions.js';
 import adminRoutes from './routes/admin.js';
+import reportRoutes from './routes/reports.js';
 import { startCronJobs } from './jobs/contributionJobs.js';
 import { startBookingJobs } from './jobs/bookingJobs.js';
 import './cleanupBookings.js';
@@ -61,6 +76,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/properties', propertyRoutes);
 app.use('/api/bookings', bookingRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/analytics', analyticsRoutes);
+app.use('/api/communications', communicationRoutes);
+app.use('/api/receipts', receiptRoutes);
 app.use('/api/farm-records', farmRecordRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api', courseVideoRoutes);
@@ -71,6 +89,7 @@ app.use('/api/locations', locationRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api', contributionRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/reports', reportRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -83,11 +102,13 @@ app.use(errorHandler);
 
 import { logger } from './utils/logger.js';
 
-app.listen(PORT, () => {
-  logger.info(`Server running on port ${PORT}`);
-  logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  
-  // Only run cron jobs in production
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    logger.info(`Server running on port ${PORT}`);
+    logger.info(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  });
+
+  // Only run cron jobs if not in test environment
   if (process.env.NODE_ENV === 'production') {
     startCronJobs();
     startBookingJobs();
@@ -96,6 +117,6 @@ app.listen(PORT, () => {
     logger.warn('⚠️  Cron jobs disabled (development mode)');
     logger.info('   Set NODE_ENV=production to enable cron jobs');
   }
-});
+}
 
 export default app;

@@ -1,5 +1,8 @@
 import React from 'react';
-import { Calendar, MapPin, User, DollarSign, Clock } from 'lucide-react';
+import { Calendar, MapPin, User, DollarSign, Clock, CheckCircle, AlertCircle, XCircle } from 'lucide-react';
+import { MessageButton } from '../communication';
+import { useAuthStore } from '../../store/authStore';
+import '../communication/Communication.css';
 
 interface BookingCardProps {
   booking: any;
@@ -8,6 +11,7 @@ interface BookingCardProps {
   onApprove?: (booking: any) => void;
   onReject?: (booking: any) => void;
   onContact?: (booking: any) => void;
+  onRetryPayment?: (booking: any) => void;
 }
 
 const BookingCard: React.FC<BookingCardProps> = ({
@@ -16,8 +20,10 @@ const BookingCard: React.FC<BookingCardProps> = ({
   onCancel,
   onApprove,
   onReject,
-  onContact
+  onContact,
+  onRetryPayment
 }) => {
+  const { user: currentUser } = useAuthStore();
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'confirmed': return 'bg-green-100 text-green-800';
@@ -46,6 +52,48 @@ const BookingCard: React.FC<BookingCardProps> = ({
     });
   };
 
+  // Property 4: Timeline Status Progression
+  const getTimelineSteps = () => {
+    const steps = [
+      { key: 'created', label: 'Created', icon: Clock },
+      { key: 'payment', label: 'Payment', icon: DollarSign },
+      { key: 'pending', label: 'Pending Approval', icon: AlertCircle },
+      { key: 'confirmed', label: 'Confirmed', icon: CheckCircle },
+      { key: 'completed', label: 'Completed', icon: CheckCircle }
+    ];
+
+    const currentStep = booking.status === 'pending_payment' ? 'payment' :
+                       booking.status === 'pending' ? 'pending' :
+                       booking.status === 'confirmed' ? 'confirmed' :
+                       booking.status === 'completed' ? 'completed' :
+                       booking.status === 'cancelled' ? 'cancelled' : 'created';
+
+    return steps.map((step, index) => {
+      let status = 'upcoming';
+      if (booking.status === 'cancelled') {
+        status = index === 0 ? 'completed' : 'cancelled';
+      } else if (step.key === 'created') {
+        status = 'completed';
+      } else if (step.key === 'payment') {
+        status = booking.payment_status === 'paid' ? 'completed' : 
+                booking.payment_status === 'failed' ? 'failed' :
+                booking.status === 'pending_payment' ? 'current' : 'upcoming';
+      } else if (step.key === 'pending') {
+        status = booking.status === 'pending' ? 'current' :
+                ['confirmed', 'completed'].includes(booking.status) ? 'completed' : 'upcoming';
+      } else if (step.key === 'confirmed') {
+        status = booking.status === 'confirmed' ? 'current' :
+                booking.status === 'completed' ? 'completed' : 'upcoming';
+      } else if (step.key === 'completed') {
+        status = booking.status === 'completed' ? 'completed' : 'upcoming';
+      }
+
+      return { ...step, status };
+    });
+  };
+
+  const timelineSteps = getTimelineSteps();
+
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6">
       {/* Header */}
@@ -54,6 +102,10 @@ const BookingCard: React.FC<BookingCardProps> = ({
           <h3 className="text-xl font-semibold text-gray-900 mb-2">
             {booking.properties?.title || 'Property'}
           </h3>
+          {/* Property 2: Reference Number Display */}
+          <div className="text-sm text-gray-500 mb-2">
+            Booking Reference: <span className="font-mono font-medium text-gray-700">#{booking.id?.slice(-8)?.toUpperCase()}</span>
+          </div>
           <div className="flex gap-2 flex-wrap">
             <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(booking.status)}`}>
               {booking.status?.replace('_', ' ')}
@@ -67,6 +119,47 @@ const BookingCard: React.FC<BookingCardProps> = ({
           <p className="text-2xl font-bold text-green-600">
             ₦{booking.total_amount?.toLocaleString()}
           </p>
+        </div>
+      </div>
+
+      {/* Property 4: Timeline Status Progression */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between">
+          {timelineSteps.map((step, index) => {
+            const Icon = step.icon;
+            const isLast = index === timelineSteps.length - 1;
+            
+            return (
+              <div key={step.key} className="flex items-center flex-1">
+                <div className="flex flex-col items-center">
+                  <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                    step.status === 'completed' ? 'bg-green-500 text-white' :
+                    step.status === 'current' ? 'bg-blue-500 text-white' :
+                    step.status === 'failed' ? 'bg-red-500 text-white' :
+                    step.status === 'cancelled' ? 'bg-gray-400 text-white' :
+                    'bg-gray-200 text-gray-400'
+                  }`}>
+                    {step.status === 'cancelled' ? <XCircle size={16} /> : <Icon size={16} />}
+                  </div>
+                  <span className={`text-xs mt-1 text-center ${
+                    step.status === 'completed' ? 'text-green-600 font-medium' :
+                    step.status === 'current' ? 'text-blue-600 font-medium' :
+                    step.status === 'failed' ? 'text-red-600 font-medium' :
+                    'text-gray-400'
+                  }`}>
+                    {step.label}
+                  </span>
+                </div>
+                {!isLast && (
+                  <div className={`flex-1 h-0.5 mx-2 ${
+                    step.status === 'completed' ? 'bg-green-500' :
+                    step.status === 'failed' ? 'bg-red-500' :
+                    'bg-gray-200'
+                  }`} />
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -149,12 +242,23 @@ const BookingCard: React.FC<BookingCardProps> = ({
         {/* Farmer Actions */}
         {type === 'farmer' && (
           <>
-            {booking.status === 'pending_payment' && (
+            {/* Property 3: Payment Button Visibility */}
+            {booking.status === 'pending_payment' && booking.payment_status !== 'paid' && (
               <button
                 onClick={() => window.location.href = `/payment/${booking.id}`}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium"
+                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm font-medium flex items-center gap-2"
               >
+                <DollarSign size={16} />
                 Complete Payment
+              </button>
+            )}
+            {booking.payment_status === 'failed' && onRetryPayment && (
+              <button
+                onClick={() => onRetryPayment(booking)}
+                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 text-sm font-medium flex items-center gap-2"
+              >
+                <AlertCircle size={16} />
+                Retry Payment
               </button>
             )}
             {(booking.status === 'pending' || booking.status === 'confirmed') && onCancel && (
@@ -165,12 +269,82 @@ const BookingCard: React.FC<BookingCardProps> = ({
                 Cancel Booking
               </button>
             )}
-            {booking.status === 'confirmed' && onContact && (
+            {(booking.status === 'confirmed' || booking.status === 'pending') && currentUser && (
+              <MessageButton
+                userType="farmer"
+                bookingStatus={booking.status}
+                bookingId={booking.id}
+                currentUserId={currentUser.id}
+                currentUserName={currentUser.name}
+                recipientId={booking.properties?.owner_id}
+                recipientName={booking.properties?.users?.name || 'Property Owner'}
+                recipientEmail={booking.properties?.users?.email}
+                recipientPhone={booking.properties?.users?.phone}
+                bookingReference={`#${booking.id?.slice(-8)?.toUpperCase()}`}
+                propertyName={booking.properties?.title || 'Property'}
+                onMessageClick={() => onContact?.(booking)}
+              />
+            )}
+            {booking.payment_status === 'paid' && (
               <button
-                onClick={() => onContact(booking)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+                onClick={async () => {
+                  try {
+                    const token = localStorage.getItem('token');
+                    if (!token) {
+                      alert('Please log in to download receipt');
+                      return;
+                    }
+
+                    const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
+                    
+                    // Standard approach for authenticated file downloads:
+                    // 1. Fetch the data
+                    // 2. Handle potential redirect or blob
+                    const response = await fetch(`${apiUrl}/receipts/${booking.id}/download`, {
+                      headers: {
+                        'Authorization': `Bearer ${token}`
+                      },
+                      redirect: 'follow' // Explicitly follow redirects
+                    });
+
+                    if (response.ok) {
+                      const contentType = response.headers.get('content-type');
+                      
+                      // If the response is a PDF or other file, download it as a blob
+                      const blob = await response.blob();
+                      const url = window.URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      
+                      // Extract filename from header if possible, else use default
+                      const disposition = response.headers.get('content-disposition');
+                      let filename = `receipt-${booking.id.slice(-8)}.pdf`;
+                      if (disposition && disposition.indexOf('attachment') !== -1) {
+                        const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                        const matches = filenameRegex.exec(disposition);
+                        if (matches != null && matches[1]) { 
+                          filename = matches[1].replace(/['"]/g, '');
+                        }
+                      }
+                      
+                      a.download = filename;
+                      document.body.appendChild(a);
+                      a.click();
+                      window.URL.revokeObjectURL(url);
+                      document.body.removeChild(a);
+                    } else {
+                      const error = await response.json();
+                      alert(`Error: ${error.error || 'Failed to download receipt'}`);
+                    }
+                  } catch (error) {
+                    console.error('Receipt download error:', error);
+                    alert('Failed to download receipt. Please try again.');
+                  }
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium flex items-center gap-2 transition-colors"
               >
-                Contact Owner
+                <DollarSign size={16} />
+                Download Receipt
               </button>
             )}
           </>
@@ -199,13 +373,21 @@ const BookingCard: React.FC<BookingCardProps> = ({
                 )}
               </>
             )}
-            {onContact && (
-              <button
-                onClick={() => onContact(booking)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
-              >
-                Contact Farmer
-              </button>
+            {onContact && currentUser && (
+              <MessageButton
+                userType="owner"
+                bookingStatus={booking.status}
+                bookingId={booking.id}
+                currentUserId={currentUser.id}
+                currentUserName={currentUser.name}
+                recipientId={booking.farmer_id}
+                recipientName={booking.users?.name || 'Farmer'}
+                recipientEmail={booking.users?.email}
+                recipientPhone={booking.users?.phone}
+                bookingReference={`#${booking.id?.slice(-8)?.toUpperCase()}`}
+                propertyName={booking.properties?.title || 'Property'}
+                onMessageClick={() => onContact?.(booking)}
+              />
             )}
           </>
         )}

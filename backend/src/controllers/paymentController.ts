@@ -3,9 +3,11 @@ import axios from 'axios';
 import { BookingModel } from '../models/Booking.js';
 import { asyncHandler, createError } from '../middleware/errorHandler.js';
 import supabase from '../utils/supabase.js';
+import { ReceiptService } from '../services/receiptService.js';
 
 const PAYSTACK_SECRET_KEY = process.env.PAYSTACK_SECRET_KEY;
 const PAYSTACK_BASE_URL = 'https://api.paystack.co';
+const receiptService = new ReceiptService();
 
 export const initializePayment = asyncHandler(async (req: Request, res: Response) => {
   const { bookingId, booking_id } = req.body;
@@ -33,10 +35,23 @@ export const initializePayment = asyncHandler(async (req: Request, res: Response
     throw createError('Booking already paid', 400);
   }
 
+  // Pre-generate reference and save to DB before Paystack call
+  const reference = `BOOK-${actualBookingId.substring(0, 8)}-${Date.now()}`;
+  
+  const { error: preUpdateError } = await supabase
+    .from('bookings')
+    .update({ payment_reference: reference })
+    .eq('id', actualBookingId);
+
+  if (preUpdateError) {
+    console.error('Failed to save payment intent:', preUpdateError);
+    throw createError('Could not initialize payment intent', 500);
+  }
+
   const paymentData = {
     email: (req as any).user.email,
     amount: Math.round(booking.total_amount * 100),
-    reference: `BOOK-${actualBookingId.substring(0, 8)}-${Date.now()}`,
+    reference: reference,
     callback_url: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/payment/callback`,
     metadata: {
       booking_id: actualBookingId,
@@ -57,18 +72,12 @@ export const initializePayment = asyncHandler(async (req: Request, res: Response
       }
     );
 
-    // Store payment reference in booking
-    await supabase
-      .from('bookings')
-      .update({ payment_reference: response.data.data.reference })
-      .eq('id', actualBookingId);
-
     res.json({
       success: true,
       data: {
         authorization_url: response.data.data.authorization_url,
         access_code: response.data.data.access_code,
-        reference: response.data.data.reference
+        reference: reference
       }
     });
   } catch (error: any) {
@@ -99,9 +108,29 @@ export const verifyPayment = asyncHandler(async (req: Request, res: Response) =>
     if (data.status === 'success') {
       const bookingId = data.metadata?.booking_id;
       
+      // Look up booking by ID or Reference
+      let booking;
       if (bookingId) {
-        await BookingModel.updatePaymentStatus(bookingId, 'paid', reference);
-        await BookingModel.updateStatus(bookingId, 'confirmed');
+        booking = await BookingModel.findById(bookingId);
+      } else {
+        const { data: bData } = await supabase.from('bookings').select('*').eq('payment_reference', reference).maybeSingle();
+        booking = bData;
+      }
+      
+      if (booking) {
+        if (booking.payment_status !== 'paid') {
+          // Use atomic update
+          await BookingModel.completePayment(booking.id, reference);
+
+          // Automatically generate receipt (Requirement 9.1)
+          try {
+            await receiptService.generateReceipt(booking.id, reference);
+          } catch (receiptError) {
+            console.error(`Failed to generate receipt during verification for ${booking.id}:`, receiptError);
+          }
+        }
+      } else {
+        console.warn(`⚠️ verifyPayment: No booking found for reference ${reference} or ID ${bookingId}`);
       }
 
       res.json({

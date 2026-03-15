@@ -33,4 +33,9 @@ router.get('/contributions/my-history', authenticateToken, contributionControlle
 router.post('/contributions/members/:memberId/suspend', authenticateToken, contributionController.suspendMember);
 router.post('/contributions/members/:memberId/expel', authenticateToken, contributionController.expelMember);
 
+// Group Booking Integration
+router.get('/user/group-funds', authenticateToken, contributionController.getUserGroupFunds);
+router.get('/groups/:groupId/booking-discount', authenticateToken, contributionController.calculateGroupDiscount);
+router.post('/bookings/pay-with-group-funds', authenticateToken, contributionController.processGroupFundPayment);
+
 export default router;

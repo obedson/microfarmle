@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   View,
   Text,
@@ -7,14 +7,19 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import apiClient from '../api/client';
+import BookingCard from '../components/BookingCard';
+
+type TabType = 'upcoming' | 'past' | 'cancelled';
 
 export default function MyBookingsScreen({ navigation }: any) {
-  const [bookings, setBookings] = useState([]);
+  const [bookings, setBookings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>('upcoming');
 
   const fetchBookings = async () => {
     try {
@@ -22,6 +27,7 @@ export default function MyBookingsScreen({ navigation }: any) {
       setBookings(response.data.data || response.data);
     } catch (error) {
       console.error('Error fetching bookings:', error);
+      Alert.alert('Error', 'Failed to fetch bookings');
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -37,51 +43,55 @@ export default function MyBookingsScreen({ navigation }: any) {
     fetchBookings();
   };
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'confirmed': return '#10b981';
-      case 'pending': return '#f59e0b';
-      case 'cancelled': return '#ef4444';
-      default: return '#6b7280';
-    }
+  const handleCancel = (booking: any) => {
+    Alert.alert(
+      'Cancel Booking',
+      'Are you sure you want to cancel this booking?',
+      [
+        { text: 'No', style: 'cancel' },
+        { 
+          text: 'Yes, Cancel', 
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              setLoading(true);
+              await apiClient.post(`/bookings/${booking.id}/cancel`);
+              Alert.alert('Success', 'Booking cancelled successfully');
+              fetchBookings();
+            } catch (error: any) {
+              const message = error.response?.data?.error || 'Failed to cancel booking';
+              Alert.alert('Error', message);
+            } finally {
+              setLoading(false);
+            }
+          }
+        }
+      ]
+    );
   };
 
-  const renderBooking = ({ item }: any) => (
-    <TouchableOpacity
-      style={styles.card}
-      onPress={() => navigation.navigate('BookingDetail', { id: item.id })}
-    >
-      <View style={styles.cardHeader}>
-        <Text style={styles.propertyTitle} numberOfLines={1}>
-          {item.property?.title || 'Property'}
-        </Text>
-        <View style={[styles.statusBadge, { backgroundColor: getStatusColor(item.status) }]}>
-          <Text style={styles.statusText}>{item.status}</Text>
-        </View>
-      </View>
+  const handleRetryPayment = (booking: any) => {
+    navigation.navigate('Payment', { bookingId: booking.id });
+  };
 
-      <View style={styles.row}>
-        <Ionicons name="calendar-outline" size={16} color="#666" />
-        <Text style={styles.date}>
-          {new Date(item.start_date).toLocaleDateString()} - {new Date(item.end_date).toLocaleDateString()}
-        </Text>
-      </View>
+  const filteredBookings = useMemo(() => {
+    const now = new Date();
+    return bookings.filter((booking: any) => {
+      const endDate = new Date(booking.end_date);
+      if (activeTab === 'cancelled') {
+        return booking.status === 'cancelled';
+      }
+      if (activeTab === 'past') {
+        return booking.status === 'completed' || (booking.status !== 'cancelled' && endDate < now);
+      }
+      if (activeTab === 'upcoming') {
+        return booking.status !== 'cancelled' && booking.status !== 'completed' && endDate >= now;
+      }
+      return true;
+    });
+  }, [bookings, activeTab]);
 
-      <View style={styles.row}>
-        <Ionicons name="cash-outline" size={16} color="#666" />
-        <Text style={styles.amount}>₦{item.total_amount}</Text>
-      </View>
-
-      {item.payment_status && (
-        <View style={styles.row}>
-          <Ionicons name="card-outline" size={16} color="#666" />
-          <Text style={styles.payment}>Payment: {item.payment_status}</Text>
-        </View>
-      )}
-    </TouchableOpacity>
-  );
-
-  if (loading) {
+  if (loading && !refreshing) {
     return (
       <View style={styles.center}>
         <ActivityIndicator size="large" color="#10b981" />
@@ -94,24 +104,56 @@ export default function MyBookingsScreen({ navigation }: any) {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>My Bookings</Text>
       </View>
+
+      <View style={styles.tabContainer}>
+        {(['upcoming', 'past', 'cancelled'] as TabType[]).map((tab) => (
+          <TouchableOpacity
+            key={tab}
+            style={[styles.tab, activeTab === tab && styles.activeTab]}
+            onPress={() => setActiveTab(tab)}
+          >
+            <Text style={[styles.tabText, activeTab === tab && styles.activeTabText]}>
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+
       <FlatList
-        data={bookings}
-        renderItem={renderBooking}
+        data={filteredBookings}
+        renderItem={({ item }) => (
+          <BookingCard
+            booking={item}
+            onPress={() => navigation.navigate('BookingDetail', { id: item.id })}
+            onCancel={
+              (item.status === 'pending' || item.status === 'confirmed') 
+                ? () => handleCancel(item) 
+                : undefined
+            }
+            onRetryPayment={
+              (item.status === 'pending_payment' && item.payment_status !== 'paid')
+                ? () => handleRetryPayment(item)
+                : undefined
+            }
+          />
+        )}
         keyExtractor={(item: any) => item.id}
         contentContainerStyle={styles.list}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#10b981" />
         }
         ListEmptyComponent={
           <View style={styles.empty}>
             <Ionicons name="calendar-outline" size={64} color="#d1d5db" />
-            <Text style={styles.emptyText}>No bookings yet</Text>
-            <TouchableOpacity
-              style={styles.browseButton}
-              onPress={() => navigation.navigate('Properties')}
-            >
-              <Text style={styles.browseButtonText}>Browse Properties</Text>
-            </TouchableOpacity>
+            <Text style={styles.emptyText}>No {activeTab} bookings found</Text>
+            {activeTab === 'upcoming' && (
+              <TouchableOpacity
+                style={styles.browseButton}
+                onPress={() => navigation.navigate('Properties')}
+              >
+                <Text style={styles.browseButtonText}>Browse Properties</Text>
+              </TouchableOpacity>
+            )}
           </View>
         }
       />
@@ -133,71 +175,40 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     padding: 20,
     paddingTop: 60,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
   },
   headerTitle: {
     fontSize: 24,
     fontWeight: 'bold',
+    color: '#111827',
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#fff',
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+    paddingHorizontal: 16,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderBottomWidth: 2,
+    borderBottomColor: 'transparent',
+  },
+  activeTab: {
+    borderBottomColor: '#10b981',
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#6b7280',
+  },
+  activeTabText: {
+    color: '#10b981',
   },
   list: {
     padding: 16,
-  },
-  card: {
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  propertyTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    flex: 1,
-    marginRight: 8,
-  },
-  statusBadge: {
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 12,
-  },
-  statusText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-    textTransform: 'capitalize',
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  date: {
-    fontSize: 14,
-    color: '#666',
-    marginLeft: 8,
-  },
-  amount: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#111',
-    marginLeft: 8,
-  },
-  payment: {
-    fontSize: 14,
-    color: '#666',
-    marginLeft: 8,
-    textTransform: 'capitalize',
+    paddingBottom: 32,
   },
   empty: {
     alignItems: 'center',
@@ -205,7 +216,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: '#666',
+    color: '#6b7280',
     marginTop: 16,
     marginBottom: 24,
   },

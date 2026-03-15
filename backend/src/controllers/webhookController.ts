@@ -1,7 +1,10 @@
 import { Request, Response } from 'express';
 import crypto from 'crypto';
 import { BookingModel } from '../models/Booking.js';
+import { ReceiptService } from '../services/receiptService.js';
 import { asyncHandler, createError } from '../middleware/errorHandler.js';
+
+const receiptService = new ReceiptService();
 
 const verifyPaystackSignature = (payload: string, signature: string): boolean => {
   const secret = process.env.PAYSTACK_SECRET_KEY;
@@ -55,6 +58,21 @@ const handleSuccessfulPayment = async (data: any) => {
     await BookingModel.updateStatus(bookingId, 'confirmed');
     
     console.log(`Payment successful for booking ${bookingId}, amount: ${amount}`);
+    
+    // Generate receipt automatically with proper error handling
+    try {
+      console.log(`Generating receipt for booking ${bookingId}, reference: ${reference}`);
+      const receipt = await receiptService.generateReceipt(bookingId, reference);
+      
+      if (receipt) {
+        console.log(`Receipt generated successfully: ${receipt.receipt_number}`);
+      } else {
+        console.error(`Receipt generation returned null for booking ${bookingId}`);
+      }
+    } catch (receiptError) {
+      console.error(`Receipt generation failed for booking ${bookingId}:`, receiptError);
+      // Don't fail the payment - receipt can be generated later
+    }
   } catch (error) {
     console.error('Error updating booking after successful payment:', error);
   }
