@@ -180,7 +180,7 @@ export class ReceiptService {
       </head>
       <body>
         <div class="header">
-          <div class="logo">🌾 FARMLE</div>
+          <div class="logo">🌾 MICRO FAMS</div>
           <div class="receipt-title">Payment Receipt</div>
           <div class="receipt-number">Receipt #${receipt.receipt_number}</div>
         </div>
@@ -214,7 +214,7 @@ export class ReceiptService {
             </div>
             <div class="field">
               <span class="label">Date:</span>
-              <span class="value">${new Date(receipt.created_at).toLocaleDateString()}</span>
+              <span class="value">${new Date(receipt.generated_at).toLocaleDateString()}</span>
             </div>
             <div class="field">
               <span class="label">Method:</span>
@@ -238,9 +238,9 @@ export class ReceiptService {
         </div>
 
         <div class="footer">
-          <p>This is an official receipt from Farmle Platform</p>
+          <p>This is an official receipt from Micro Fams Platform</p>
           <p>Generated on ${new Date().toLocaleString()}</p>
-          <p>For support, contact: support@farmle.com</p>
+          <p>For support, contact: support@microfams.com</p>
         </div>
       </body>
       </html>
@@ -258,20 +258,18 @@ export class ReceiptService {
   }
 
   private async uploadPDF(pdfBuffer: Uint8Array, receiptNumber: string): Promise<string> {
-    // Reuse S3 upload logic from existing upload controller
     const { PutObjectCommand } = await import('@aws-sdk/client-s3');
     const s3Client = (await import('../config/s3.js')).default;
 
     const fileName = `receipts/${receiptNumber}.pdf`;
     
-    const uploadParams = {
+    await s3Client.send(new PutObjectCommand({
       Bucket: process.env.AWS_S3_BUCKET!,
       Key: fileName,
       Body: pdfBuffer,
       ContentType: 'application/pdf',
-    };
-
-    await s3Client.send(new PutObjectCommand(uploadParams));
+      ContentDisposition: `attachment; filename="${receiptNumber}.pdf"`,
+    }));
     
     return `https://${process.env.AWS_S3_BUCKET}.s3.${process.env.AWS_REGION}.amazonaws.com/${fileName}`;
   }

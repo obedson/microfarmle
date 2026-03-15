@@ -44,7 +44,7 @@ export default function LoginScreen({ navigation }: any) {
           <View style={styles.logo}>
             <Text style={styles.logoText}>MF</Text>
           </View>
-          <Text style={styles.title}>Micro Farmle</Text>
+          <Text style={styles.title}>Micro Fams</Text>
         </View>
 
         <View style={styles.form}>

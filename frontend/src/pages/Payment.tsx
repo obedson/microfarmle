@@ -64,11 +64,13 @@ export default function Payment() {
         booking_id: bookingId
       });
 
+      const paymentInfo = data.data || data;
+
       const handler = window.PaystackPop.setup({
-        key: 'pk_test_477fe8b07010d168c214d2dbaebdd5831800e593',
+        key: process.env.REACT_APP_PAYSTACK_PUBLIC_KEY!,
         email: user?.email,
-        amount: data.amount * 100,
-        ref: data.reference,
+        amount: booking.total_amount * 100,
+        ref: paymentInfo.reference,
         callback: (response: any) => {
           verifyBookingPayment(response.reference);
         },
@@ -87,7 +89,10 @@ export default function Payment() {
 
   const verifyBookingPayment = async (reference: string) => {
     try {
-      await apiClient.get(`/payments/verify/${reference}`);
+      const { data } = await apiClient.get(`/payments/verify/${reference}`);
+      if (!data.success) {
+        alert('Payment could not be verified. Please contact support.');
+      }
       navigate('/my-bookings');
     } catch (error) {
       console.error('Payment verification error:', error);
@@ -114,7 +119,7 @@ export default function Payment() {
       });
 
       const handler = window.PaystackPop.setup({
-        key: 'pk_test_477fe8b07010d168c214d2dbaebdd5831800e593',
+        key: process.env.REACT_APP_PAYSTACK_PUBLIC_KEY!,
         email: user?.email,
         amount: Number(amount) * 100,
         ref: data.reference,

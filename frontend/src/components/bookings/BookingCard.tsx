@@ -308,30 +308,22 @@ const BookingCard: React.FC<BookingCardProps> = ({
                     });
 
                     if (response.ok) {
-                      const contentType = response.headers.get('content-type');
-                      
-                      // If the response is a PDF or other file, download it as a blob
-                      const blob = await response.blob();
-                      const url = window.URL.createObjectURL(blob);
-                      const a = document.createElement('a');
-                      a.href = url;
-                      
-                      // Extract filename from header if possible, else use default
-                      const disposition = response.headers.get('content-disposition');
-                      let filename = `receipt-${booking.id.slice(-8)}.pdf`;
-                      if (disposition && disposition.indexOf('attachment') !== -1) {
-                        const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
-                        const matches = filenameRegex.exec(disposition);
-                        if (matches != null && matches[1]) { 
-                          filename = matches[1].replace(/['"]/g, '');
-                        }
+                      const data = await response.json();
+                      if (data.url) {
+                        // Open S3 URL directly — no CORS issue
+                        window.open(data.url, '_blank');
+                      } else {
+                        // Fallback: text receipt blob
+                        const blob = await new Response(data).blob();
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `receipt-${booking.id.slice(-8)}.txt`;
+                        document.body.appendChild(a);
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        document.body.removeChild(a);
                       }
-                      
-                      a.download = filename;
-                      document.body.appendChild(a);
-                      a.click();
-                      window.URL.revokeObjectURL(url);
-                      document.body.removeChild(a);
                     } else {
                       const error = await response.json();
                       alert(`Error: ${error.error || 'Failed to download receipt'}`);

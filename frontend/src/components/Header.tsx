@@ -34,7 +34,7 @@ const Header: React.FC = () => {
               <span className="text-white font-bold text-lg">MF</span>
             </div>
             <span className="font-bold text-xl text-gray-900 hidden sm:block">
-              Micro Farmle
+              Micro Fams
             </span>
           </Link>
 

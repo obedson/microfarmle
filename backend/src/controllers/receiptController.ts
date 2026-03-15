@@ -221,8 +221,24 @@ Request ID: ${requestId}
       processingTime: Date.now() - startTime
     });
 
-    res.setHeader('Cache-Control', 'private, max-age=3600');
-    res.redirect(receipt.pdf_url);
+    // Generate a pre-signed URL (expires in 5 min) so the browser downloads directly from S3
+    const { GetObjectCommand } = await import('@aws-sdk/client-s3');
+    const { getSignedUrl } = await import('@aws-sdk/s3-request-presigner');
+    const s3Client = (await import('../config/s3.js')).default;
+
+    const key = receipt.pdf_url.split('.amazonaws.com/')[1];
+    const signedUrl = await getSignedUrl(
+      s3Client,
+      new GetObjectCommand({
+        Bucket: process.env.AWS_S3_BUCKET!,
+        Key: key,
+        ResponseContentDisposition: `attachment; filename="${receipt.receipt_number}.pdf"`,
+      }),
+      { expiresIn: 300 }
+    );
+
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({ success: true, url: signedUrl, filename: `${receipt.receipt_number}.pdf` });
 
   } catch (error) {
     logger.error('Receipt download error', {

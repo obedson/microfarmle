@@ -21,7 +21,7 @@ export const sendPasswordResetEmail = async (email: string, resetToken: string) 
   sendSmtpEmail.to = [{ email }];
   sendSmtpEmail.sender = { 
     email: process.env.FROM_EMAIL || 'obedsonfield@gmail.com',
-    name: 'Micro Farmle'
+    name: 'Micro Fams'
   };
   sendSmtpEmail.subject = 'Reset Your Password';
   sendSmtpEmail.htmlContent = `
@@ -99,7 +99,7 @@ const emailTemplates = {
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
       <div style="background-color: #22c55e; color: white; padding: 30px; text-align: center;">
         <h1 style="margin: 0; font-size: 28px;">Payment Successful!</h1>
-        <p style="margin: 10px 0 0 0; opacity: 0.9;">Thank you for your booking on Farmle</p>
+        <p style="margin: 10px 0 0 0; opacity: 0.9;">Thank you for your booking on Micro Fams</p>
       </div>
       <div style="padding: 30px;">
         <h2 style="color: #374151; margin-top: 0;">Receipt #${data.receiptNumber}</h2>
@@ -128,11 +128,11 @@ const emailTemplates = {
         </div>
 
         <p style="color: #6b7280; font-size: 14px; line-height: 1.5;">
-          You can also access this receipt anytime by logging into your <a href="${process.env.FRONTEND_URL}/my-bookings" style="color: #22c55e; text-decoration: none;">Farmle Dashboard</a>.
+          You can also access this receipt anytime by logging into your <a href="${process.env.FRONTEND_URL}/my-bookings" style="color: #22c55e; text-decoration: none;">Micro Fams Dashboard</a>.
         </p>
       </div>
       <div style="background-color: #f3f4f6; padding: 20px; text-align: center; color: #9ca3af; font-size: 12px;">
-        <p style="margin: 0;">&copy; ${new Date().getFullYear()} Farmle Platform. All rights reserved.</p>
+        <p style="margin: 0;">&copy; ${new Date().getFullYear()} Micro Fams Platform. All rights reserved.</p>
         <p style="margin: 5px 0 0 0;">Ensuring food security through technology.</p>
       </div>
     </div>
@@ -162,7 +162,7 @@ export const sendEmail = async ({
   sendSmtpEmail.to = [{ email: to }];
   sendSmtpEmail.sender = { 
     email: process.env.FROM_EMAIL || 'obedsonfield@gmail.com',
-    name: 'Micro Farmle'
+    name: 'Micro Fams'
   };
   sendSmtpEmail.subject = subject;
   

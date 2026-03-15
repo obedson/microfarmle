@@ -40,7 +40,7 @@ export class SecurityService {
    */
   static async generateMFASecret(userId: string, email: string) {
     const secret = crypto.randomBytes(20).toString('hex');
-    const otpauthUrl = `otpauth://totp/Farmle:${email}?secret=${secret}&issuer=Farmle`;
+    const otpauthUrl = `otpauth://totp/Micro Fams:${email}?secret=${secret}&issuer=Micro Fams`;
     
     const qrCodeDataUrl = await QRCode.toDataURL(otpauthUrl);
     
