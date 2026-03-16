@@ -60,7 +60,7 @@ app.use(helmet({
   }
 }));
 app.use(cors({
-  origin: ['http://localhost:3000', 'https://microfarmle.vercel.app', 'http://localhost:3001'],
+  origin: ['http://localhost:3000', 'http://localhost:3001', 'https://microfarmle.vercel.app', 'https://microfams.vercel.app'],
   credentials: true
 }));
 
