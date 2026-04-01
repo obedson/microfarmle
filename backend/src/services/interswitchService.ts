@@ -87,13 +87,15 @@ class InterswitchService {
 
   /**
    * Requirement 3.1: NIN Verification
-   * Documentation Match: prompt2.md (idNumber, isConsent)
+   * Documentation Match: prompt3.md (use 'id')
    */
   async getNINFullDetails(nin: string, consent: boolean = true) {
     try {
       const token = await this.getAccessToken();
+      
+      // Fixed: Use 'id' instead of 'idNumber' as per prompt3.md
       const body = { 
-        idNumber: nin,
+        id: nin,
         isConsent: consent 
       };
 
