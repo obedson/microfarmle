@@ -93,11 +93,12 @@ class InterswitchService {
     try {
       const token = await this.getAccessToken();
       const body = { 
-        idNumber: nin,            // Corrected from 'id' to 'idNumber' based on prompt2.md
+        idNumber: nin,
         isConsent: consent 
       };
 
       console.log(`Interswitch NIN: Requesting details for ${nin.slice(0,3)}******* with consent ${consent}`);
+      console.log('Interswitch NIN Request Body:', JSON.stringify(body));
 
       const response = await axios.post(
         `${this.marketplaceUrl}/marketplace-routing/api/v1/verify/identity/nin/verify`,
@@ -115,6 +116,27 @@ class InterswitchService {
       return response.data;
     } catch (error: any) {
       console.error('Interswitch NIN API Error:', JSON.stringify(error.response?.data || error.message, null, 2));
+      
+      // DEVELOPMENT FALLBACK: If NIN is 11111111111 and we get a 500, return a success mock 
+      // This allows the flow to be developed even if the sandbox is being difficult
+      if (process.env.NODE_ENV !== 'production' && nin === '11111111111') {
+        console.warn('⚠️ Interswitch NIN API failed, but providing DEV MOCK response for 11111111111');
+        return {
+          responseCode: '00',
+          message: 'SUCCESS',
+          data: {
+            firstName: 'Osaro',
+            lastName: 'Osaro',
+            middleName: 'Testing',
+            mobile: '08031234123',
+            gender: 'MALE',
+            dateOfBirth: '1990-01-01',
+            address: '123 NIN Sandbox Avenue, Lagos',
+            image: null
+          }
+        };
+      }
+      
       throw new Error(error.response?.data?.message || error.message || 'NIN lookup failed');
     }
   }
