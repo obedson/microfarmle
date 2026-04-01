@@ -2,8 +2,11 @@ import { Router } from 'express';
 import { register, login, forgotPassword, resetPassword } from '../controllers/authController.js';
 import { authenticateToken, AuthRequest } from '../middleware/auth.js';
 import { supabase } from '../utils/supabase.js';
+import profileRoutes from './profile.js';
 
 const router = Router();
+
+router.use('/profile', profileRoutes);
 
 router.post('/register', register);
 router.post('/login', login);

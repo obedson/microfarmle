@@ -1,0 +1,1 @@
+Go through the whole project to understand the project overall implementations, also here E:\microfams\db.md is the current structure of the database, provide your analysis and concern

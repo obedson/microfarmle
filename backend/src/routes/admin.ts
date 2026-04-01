@@ -96,4 +96,87 @@ router.get('/audit-logs', async (req: AuthRequest, res) => {
   }
 });
 
+/**
+ * Requirement 7.1 - 7.6: Group Admin Role Management
+ */
+router.put('/groups/:groupId/admin', async (req: AuthRequest, res) => {
+  const { groupId } = req.params;
+  const { newAdminUserId } = req.body;
+
+  try {
+    // 1. Verify new admin is a paid member
+    const { data: membership } = await supabase
+      .from('group_members')
+      .select('id, role')
+      .eq('group_id', groupId)
+      .eq('user_id', newAdminUserId)
+      .eq('payment_status', 'paid')
+      .single();
+
+    if (!membership) {
+      return res.status(400).json({ error: 'User must be a paid member of the group' });
+    }
+
+    // 2. Find current owner
+    const { data: currentOwner } = await supabase
+      .from('group_members')
+      .select('id, user_id')
+      .eq('group_id', groupId)
+      .eq('role', 'owner')
+      .maybeSingle();
+
+    // 3. Swap roles
+    if (currentOwner) {
+      await supabase
+        .from('group_members')
+        .update({ role: 'member' })
+        .eq('id', currentOwner.id);
+    }
+
+    await supabase
+      .from('group_members')
+      .update({ role: 'owner' })
+      .eq('id', membership.id);
+
+    await logAudit({
+      user_id: req.user.id,
+      action: 'group.admin_change',
+      resource_type: 'group',
+      resource_id: groupId,
+      details: { newAdminUserId, previousAdminUserId: currentOwner?.user_id },
+      ip_address: req.ip
+    });
+
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+router.delete('/groups/:groupId/admin', async (req: AuthRequest, res) => {
+  const { groupId } = req.params;
+
+  try {
+    const { data: currentOwner, error } = await supabase
+      .from('group_members')
+      .select('id')
+      .eq('group_id', groupId)
+      .eq('role', 'owner')
+      .maybeSingle();
+
+    if (!currentOwner) {
+      return res.status(404).json({ error: 'Group currently has no owner' });
+    }
+
+    await supabase
+      .from('group_members')
+      .update({ role: 'member' })
+      .eq('id', currentOwner.id);
+
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 export default router;

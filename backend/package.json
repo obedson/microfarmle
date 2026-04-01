@@ -1,7 +1,7 @@
 {
-  "name": "Farmle backend",
+  "name": "Micro Fams backend",
   "version": "1.0.0",
-  "description": "Farmle Backend API - Agro Career Management and Investment Platform",
+  "description": "Micro Fams Backend API - Agro Career Management and Investment Platform",
   "type": "module",
   "main": "dist/index.js",
   "scripts": {

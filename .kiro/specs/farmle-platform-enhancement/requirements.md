@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The Farmle platform is a comprehensive agro-career management system that connects farmers with property owners for livestock farming space rentals. The platform currently includes property rental marketplace, booking system with payment processing, educational courses, product marketplace, contribution groups, and farm records tracking. This requirements document addresses critical user experience issues, missing functionality, and establishes requirements for a production-ready platform that serves farmers, property owners, and administrators effectively.
+The Microfams platform is a comprehensive agro-career management system that connects farmers with property owners for livestock farming space rentals. The platform currently includes property rental marketplace, booking system with payment processing, educational courses, product marketplace, contribution groups, and farm records tracking. This requirements document addresses critical user experience issues, missing functionality, and establishes requirements for a production-ready platform that serves farmers, property owners, and administrators effectively.
 
 ## Glossary
 

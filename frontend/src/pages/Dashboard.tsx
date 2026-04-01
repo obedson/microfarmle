@@ -9,6 +9,7 @@ import UserCourseProgress from '../components/courses/UserCourseProgress';
 import ProductRecommendations from '../components/marketplace/ProductRecommendations';
 import FarmRecommendations from '../components/farm-records/FarmRecommendations';
 import MFASetup from '../components/ui/MFASetup';
+import { Shield, Sparkles } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001/api';
 
@@ -95,6 +96,24 @@ export default function Dashboard() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {(!user?.is_platform_subscriber || !user?.nin_verified) && (
+        <div className="mb-8 bg-gradient-to-r from-primary-600 to-primary-800 rounded-2xl p-8 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden relative group">
+          <div className="relative z-10">
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <Sparkles className="text-primary-300" /> Unlock Premium Access
+            </h2>
+            <p className="text-primary-100 mt-2 max-w-md">Verify your identity and subscribe to start creating investment groups and using the full wallet system.</p>
+          </div>
+          <button 
+            onClick={() => navigate('/become-a-member')}
+            className="relative z-10 px-8 py-4 bg-white text-primary-700 rounded-xl font-bold hover:bg-primary-50 transition-all transform hover:scale-105 active:scale-95 shadow-lg whitespace-nowrap"
+          >
+            Become a Member
+          </button>
+          <Shield className="absolute -right-10 -bottom-10 w-64 h-64 text-white/10 rotate-12 group-hover:rotate-0 transition-transform duration-700" />
+        </div>
+      )}
+
       <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
       
       {/* Rental Stats */}
@@ -160,11 +179,18 @@ export default function Dashboard() {
             <p className="text-sm text-gray-500 mt-1">Find properties to rent</p>
           </button>
           <button
-            onClick={() => navigate('/create-property')}
+            onClick={() => navigate('/wallet')}
             className="bg-green-600 text-white rounded-lg shadow p-6 text-left hover:shadow-lg transition hover:bg-green-700"
           >
+            <p className="text-lg font-semibold">My Wallet</p>
+            <p className="text-sm text-green-100 mt-1">Manage funds and transfers</p>
+          </button>
+          <button
+            onClick={() => navigate('/create-property')}
+            className="bg-white border-2 border-green-600 text-green-600 rounded-lg shadow p-6 text-left hover:shadow-lg transition"
+          >
             <p className="text-lg font-semibold">List a Property</p>
-            <p className="text-sm text-green-100 mt-1">Add a new property</p>
+            <p className="text-sm text-gray-500 mt-1">Add a new property</p>
           </button>
         </div>
       </div>

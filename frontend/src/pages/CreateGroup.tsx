@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../api/client';
 import { useAuthStore } from '../store/authStore';
+import { ShieldCheck, UserPlus, CreditCard, CheckCircle2, XCircle, ArrowRight, Info } from 'lucide-react';
 
 export default function CreateGroup() {
   const navigate = useNavigate();
@@ -55,47 +56,94 @@ export default function CreateGroup() {
     }
   };
 
-  const handlePaymentSuccess = (reference: string) => {
-    setFormData({ ...formData, payment_reference: reference });
-  };
-
   if (checkingEligibility) {
     return <div className="text-center py-12">Checking eligibility...</div>;
   }
 
   if (!eligibility?.canCreate) {
-    const isAdmin = user?.role === 'admin';
+    const { conditions } = eligibility || {};
     
     return (
-      <div className="max-w-2xl mx-auto px-4 py-8">
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6">
-          <h2 className="text-xl font-bold text-yellow-800 mb-4">
-            {isAdmin ? 'Admin Access' : 'Cannot Create Group Yet'}
-          </h2>
-          {isAdmin ? (
-            <p className="text-yellow-700 mb-4">
-              As an admin, you have full access to create groups without restrictions.
-            </p>
-          ) : (
-            <>
-              <p className="text-yellow-700 mb-4">
-                You need to invite <strong>10 paid members</strong> before you can create a group.
-              </p>
-              <div className="bg-white rounded p-4 mb-4">
-                <p className="text-sm text-gray-600">Your Referral Code:</p>
-                <p className="text-2xl font-bold text-green-600">{user?.referral_code || 'N/A'}</p>
-                <p className="text-sm text-gray-500 mt-2">
-                  Share this code with others during registration
-                </p>
+      <div className="max-w-2xl mx-auto px-4 py-12">
+        <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+          <div className="bg-yellow-500 px-8 py-6 text-white">
+            <h2 className="text-2xl font-bold flex items-center gap-2">
+              <Info /> Requirements Not Met
+            </h2>
+            <p className="text-yellow-50 opacity-90 text-sm mt-1">Complete the steps below to unlock group creation.</p>
+          </div>
+          
+          <div className="p-8 space-y-6">
+            <div className="space-y-4">
+              <div className={`flex items-center justify-between p-4 rounded-2xl border ${conditions?.nin_verified ? 'bg-green-50 border-green-100' : 'bg-gray-50 border-gray-100'}`}>
+                <div className="flex items-center gap-4">
+                  {conditions?.nin_verified ? <CheckCircle2 className="text-green-500" /> : <XCircle className="text-gray-300" />}
+                  <div>
+                    <p className="font-bold text-gray-900">Identity Verification</p>
+                    <p className="text-xs text-gray-500">NIN must be verified for compliance.</p>
+                  </div>
+                </div>
+                {!conditions?.nin_verified && (
+                  <Link to="/verify-nin" className="text-primary-600 font-bold text-sm flex items-center gap-1 hover:underline">
+                    Verify <ArrowRight size={14} />
+                  </Link>
+                )}
               </div>
-            </>
-          )}
-          <button
-            onClick={() => navigate('/groups')}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700"
-          >
-            Back to Groups
-          </button>
+
+              <div className={`flex items-center justify-between p-4 rounded-2xl border ${conditions?.is_platform_subscriber ? 'bg-green-50 border-green-100' : 'bg-gray-50 border-gray-100'}`}>
+                <div className="flex items-center gap-4">
+                  {conditions?.is_platform_subscriber ? <CheckCircle2 className="text-green-500" /> : <XCircle className="text-gray-300" />}
+                  <div>
+                    <p className="font-bold text-gray-900">Premium Membership</p>
+                    <p className="text-xs text-gray-500">Active subscription required.</p>
+                  </div>
+                </div>
+                {!conditions?.is_platform_subscriber && (
+                  <Link to="/become-a-member" className="text-primary-600 font-bold text-sm flex items-center gap-1 hover:underline">
+                    Subscribe <ArrowRight size={14} />
+                  </Link>
+                )}
+              </div>
+
+              <div className={`flex items-center justify-between p-4 rounded-2xl border ${conditions?.paid_invitees >= 2 ? 'bg-green-50 border-green-100' : 'bg-gray-50 border-gray-100'}`}>
+                <div className="flex items-center gap-4">
+                  {conditions?.paid_invitees >= 2 ? <CheckCircle2 className="text-green-500" /> : <XCircle className="text-gray-300" />}
+                  <div>
+                    <p className="font-bold text-gray-900">Community Referrals</p>
+                    <p className="text-xs text-gray-500">Need 2 paid referrals ({conditions?.paid_invitees || 0}/2)</p>
+                  </div>
+                </div>
+                {conditions?.paid_invitees < 2 && (
+                  <Link to="/referrals" className="text-primary-600 font-bold text-sm flex items-center gap-1 hover:underline">
+                    Invite <ArrowRight size={14} />
+                  </Link>
+                )}
+              </div>
+            </div>
+
+            <div className="bg-gray-900 rounded-2xl p-6 text-white">
+              <p className="text-xs text-gray-400 uppercase font-bold mb-2 tracking-widest">Your Referral Code</p>
+              <div className="flex items-center justify-between">
+                <span className="text-2xl font-mono font-bold tracking-wider">{user?.referral_code || 'N/A'}</span>
+                <button 
+                  onClick={() => {
+                    navigator.clipboard.writeText(user?.referral_code || '');
+                    alert('Copied!');
+                  }}
+                  className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-xs font-bold transition-colors"
+                >
+                  COPY
+                </button>
+              </div>
+            </div>
+
+            <button
+              onClick={() => navigate('/groups')}
+              className="w-full py-4 text-gray-500 font-bold hover:text-gray-900 transition-colors"
+            >
+              Back to Groups
+            </button>
+          </div>
         </div>
       </div>
     );

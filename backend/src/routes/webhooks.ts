@@ -4,6 +4,7 @@ import { BookingModel } from '../models/Booking.js';
 import { GroupModel } from '../models/Group.js';
 import { ContributionModel } from '../models/Contribution.js';
 import supabase from '../utils/supabase.js';
+import { walletController } from '../controllers/walletController.js';
 
 const router = Router();
 
@@ -134,6 +135,15 @@ router.post('/paystack', async (req: Request, res: Response) => {
     res.sendStatus(200);
   } catch (error) {
     console.error('Webhook error:', error);
+    res.sendStatus(500);
+  }
+});
+
+router.post('/interswitch', async (req: Request, res: Response) => {
+  try {
+    await walletController.interswitchWebhook(req, res);
+  } catch (error) {
+    console.error('Interswitch webhook error:', error);
     res.sendStatus(500);
   }
 });

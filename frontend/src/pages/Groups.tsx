@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { Users, MapPin, Plus } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Users, MapPin, Plus, Sparkles } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { apiClient } from '../api/client';
+import { useAuthStore } from '../store/authStore';
 
 export default function Groups() {
+  const { user } = useAuthStore();
+  const navigate = useNavigate();
   const [selectedState, setSelectedState] = useState('');
   const [selectedLga, setSelectedLga] = useState('');
 
@@ -29,6 +32,24 @@ export default function Groups() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-8">
+      {(!user?.is_platform_subscriber || !user?.nin_verified) && (
+        <div className="mb-8 bg-gradient-to-r from-primary-600 to-primary-800 rounded-2xl p-6 text-white shadow-lg flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-white/10 rounded-xl"><Sparkles /></div>
+            <div>
+              <p className="font-bold">Unlock Group Creation</p>
+              <p className="text-primary-100 text-sm">Become a premium member to create and manage your own groups.</p>
+            </div>
+          </div>
+          <button 
+            onClick={() => navigate('/become-a-member')}
+            className="px-6 py-2 bg-white text-primary-700 rounded-lg font-bold hover:bg-primary-50 transition-colors shadow-md"
+          >
+            Upgrade
+          </button>
+        </div>
+      )}
+
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Find Groups Near You</h1>
         <Link

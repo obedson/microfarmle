@@ -109,17 +109,113 @@ export class GroupModel {
   }
 
   static async canCreateGroup(userId: string) {
-    const { data, error } = await supabase
+    const { data: user, error } = await supabase
       .from('users')
-      .select('paid_referrals_count, role')
+      .select('nin_verified, is_platform_subscriber, role')
       .eq('id', userId)
       .single();
     if (error) throw error;
     
     // Admins can always create groups
-    if (data.role === 'admin') return true;
+    if (user.role === 'admin') return { canCreate: true, conditions: { nin_verified: true, is_platform_subscriber: true, paid_invitees: 2 } };
     
-    // Regular users need 10 paid referrals
-    return data.paid_referrals_count >= 10;
+    // Count referred users who are platform subscribers (paid invitees)
+    const { count: paidInviteesCount } = await supabase
+      .from('users')
+      .select('*', { count: 'exact', head: true })
+      .eq('referred_by', userId)
+      .eq('is_platform_subscriber', true);
+
+    const conditions = {
+      nin_verified: !!user.nin_verified,
+      is_platform_subscriber: !!user.is_platform_subscriber,
+      paid_invitees: paidInviteesCount || 0
+    };
+
+    const canCreate = conditions.nin_verified && 
+                      conditions.is_platform_subscriber && 
+                      conditions.paid_invitees >= 2;
+
+    return { canCreate, conditions };
+  }
+
+  static async castMemberActionVote({ groupId, actionType, targetMemberId, voterId }: { 
+    groupId: string, 
+    actionType: 'SUSPEND' | 'EXPEL', 
+    targetMemberId: string, 
+    voterId: string 
+  }) {
+    // 1. Check if voter already voted for this action on this target in this group
+    const { data: existingVote } = await supabase
+      .from('group_member_action_votes')
+      .select('id')
+      .eq('group_id', groupId)
+      .eq('target_user_id', targetMemberId)
+      .eq('voter_id', voterId)
+      .eq('action_type', actionType)
+      .maybeSingle();
+
+    if (existingVote) {
+      const error: any = new Error('You have already voted for this action');
+      error.statusCode = 409;
+      throw error;
+    }
+
+    // 2. Prevent self-voting
+    if (voterId === targetMemberId) {
+      const error: any = new Error('You cannot vote on your own membership status');
+      error.statusCode = 400;
+      throw error;
+    }
+
+    // 3. Record the vote
+    const { error: insertError } = await supabase
+      .from('group_member_action_votes')
+      .insert({
+        group_id: groupId,
+        target_user_id: targetMemberId,
+        voter_id: voterId,
+        action_type: actionType
+      });
+
+    if (insertError) throw insertError;
+
+    // 4. Count current votes
+    const { count: voteCount } = await supabase
+      .from('group_member_action_votes')
+      .select('*', { count: 'exact', head: true })
+      .eq('group_id', groupId)
+      .eq('target_user_id', targetMemberId)
+      .eq('action_type', actionType);
+
+    // 5. Get active member count
+    const { count: memberCount } = await supabase
+      .from('group_members')
+      .select('*', { count: 'exact', head: true })
+      .eq('group_id', groupId)
+      .eq('payment_status', 'paid')
+      .eq('is_active', true);
+
+    const threshold = Math.ceil((2/3) * (memberCount || 0));
+    let executed = false;
+
+    // 6. Execute action if threshold reached
+    if (voteCount && voteCount >= threshold) {
+      const newStatus = actionType === 'SUSPEND' ? 'suspended' : 'expelled';
+      const { error: updateError } = await supabase
+        .from('group_members')
+        .update({ 
+          status: newStatus,
+          is_active: false,
+          updated_at: new Date().toISOString()
+        })
+        .eq('group_id', groupId)
+        .eq('user_id', targetMemberId);
+
+      if (updateError) throw updateError;
+      executed = true;
+    }
+
+    return { voteCount, threshold, executed };
   }
 }

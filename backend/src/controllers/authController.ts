@@ -1,8 +1,10 @@
 import { Request, Response } from 'express';
 import { UserModel } from '../models/User.js';
+import { WalletService } from '../services/walletService.js';
 import { generateToken } from '../utils/jwt.js';
 import Joi from 'joi';
 
+const walletService = new WalletService();
 const registerSchema = Joi.object({
   email: Joi.string().email().required(),
   password: Joi.string().min(6).required(),
@@ -30,6 +32,14 @@ export const register = async (req: Request, res: Response) => {
     }
 
     const user = await UserModel.create(value);
+    
+    // Provision wallet
+    try {
+      await walletService.provisionUserWallet(user.id);
+    } catch (walletError) {
+      console.error(`Wallet provisioning failed for user ${user.id}:`, walletError);
+    }
+
     const token = generateToken({ id: user.id, email: user.email, role: user.role });
 
     const { password, ...userWithoutPassword } = user as any;

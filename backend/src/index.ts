@@ -33,11 +33,14 @@ import orderRoutes from './routes/orders.js';
 import orderPaymentRoutes from './routes/orderPayments.js';
 import locationRoutes from './routes/locations.js';
 import groupRoutes from './routes/groups.js';
+import groupAdminRoutes from './routes/groupAdmin.js';
 import contributionRoutes from './routes/contributions.js';
 import adminRoutes from './routes/admin.js';
 import reportRoutes from './routes/reports.js';
+import walletRoutes from './routes/wallet.js';
 import { startCronJobs } from './jobs/contributionJobs.js';
 import { startBookingJobs } from './jobs/bookingJobs.js';
+import { startWalletJobs } from './jobs/walletJobs.js';
 import './cleanupBookings.js';
 
 const app = express();
@@ -87,9 +90,11 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/payments', orderPaymentRoutes);
 app.use('/api/locations', locationRoutes);
 app.use('/api/groups', groupRoutes);
+app.use('/api/group-admin', groupAdminRoutes);
 app.use('/api', contributionRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/reports', reportRoutes);
+app.use('/api/wallet', walletRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
@@ -112,6 +117,7 @@ if (process.env.NODE_ENV !== 'test') {
   if (process.env.NODE_ENV === 'production') {
     startCronJobs();
     startBookingJobs();
+    startWalletJobs();
     logger.info('✅ Cron jobs enabled (production mode)');
   } else {
     logger.warn('⚠️  Cron jobs disabled (development mode)');

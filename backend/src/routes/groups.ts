@@ -4,9 +4,11 @@ import { authenticateToken, AuthRequest } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
 import { createGroupSchema, joinGroupSchema } from '../utils/validation.js';
 import { GroupModel } from '../models/Group.js';
+import { WalletService } from '../services/walletService.js';
 import { Response } from 'express';
 import supabase from '../utils/supabase.js';
 
+const walletService = new WalletService();
 const router = Router();
 
 // Rate limiters
@@ -28,8 +30,8 @@ router.get('/search', async (req, res, next) => {
 
 router.get('/can-create', authenticateToken, async (req: AuthRequest, res: Response, next) => {
   try {
-    const canCreate = await GroupModel.canCreateGroup(req.user.id);
-    res.json({ canCreate, requiredReferrals: 10 });
+    const result = await GroupModel.canCreateGroup(req.user.id);
+    res.json(result);
   } catch (error) {
     next(error);
   }
@@ -46,10 +48,11 @@ router.get('/:id', async (req, res, next) => {
 
 router.post('/', authenticateToken, validate(createGroupSchema), async (req: AuthRequest, res: Response, next) => {
   try {
-    const canCreate = await GroupModel.canCreateGroup(req.user.id);
+    const { canCreate, conditions } = await GroupModel.canCreateGroup(req.user.id);
     if (!canCreate) {
       return res.status(403).json({ 
-        error: 'You need to invite 10 paid members before creating a group' 
+        error: 'You do not meet the requirements to create a group.',
+        conditions
       });
     }
 
@@ -60,6 +63,13 @@ router.post('/', authenticateToken, validate(createGroupSchema), async (req: Aut
       req.user.id,
       payment_reference
     );
+    
+    // Provision NUBAN
+    try {
+      await walletService.provisionGroupNuban(group.id, group.name);
+    } catch (nubanError) {
+      console.error(`Group NUBAN provisioning failed for group ${group.id}:`, nubanError);
+    }
     
     res.status(201).json({ 
       success: true,
@@ -86,6 +96,16 @@ router.post('/', authenticateToken, validate(createGroupSchema), async (req: Aut
 
 router.post('/:id/join', authenticateToken, joinGroupLimiter, validate(joinGroupSchema), async (req: AuthRequest, res: Response, next) => {
   try {
+    const { data: user } = await supabase
+      .from('users')
+      .select('nin_verified')
+      .eq('id', req.user.id)
+      .single();
+
+    if (!user?.nin_verified) {
+      return res.status(403).json({ error: 'You must verify your NIN before joining a group.' });
+    }
+
     const { payment_reference, amount } = req.body;
     
     const membership = await GroupModel.joinGroup(

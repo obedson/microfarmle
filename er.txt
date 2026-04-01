@@ -1,1 +1,86 @@
- rm -rf ~/.cache/puppeteer && echo "Cleaned puppeteer cache"
+Backend Console
+
+NINService: Initialized with Interswitch Provider
+🧹 Booking cleanup service started
+Contribution cron jobs started
+Error cleaning up unpaid bookings: {
+  message: 'TypeError: fetch failed',
+  details: 'TypeError: fetch failed\n' +
+    '    at node:internal/deps/undici/undici:16416:13\n' +
+    '    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)\n' +
+    '    at async cleanupUnpaidBookings (E:\\microfams\\backend\\src\\cleanupBookings.ts:7:27)',
+  hint: '',
+  code: ''
+}
+Sending payment reminders...
+Interswitch Passport: Requesting token from https://passport-v2.k8.isw.la/passport/oauth/token
+Interswitch OTP Send Error: read ECONNRESET
+
+
+Frontend Console
+
+requests.js:1  POST http://localhost:3001/api/auth/profile/send-otp 422 (Unprocessable Entity)
+_$initInterceptor.s.XMLHttpRequest.send @ requests.js:1
+XMLHttpRequest.send @ 200.js:1
+dispatchXhrRequest @ xhr.js:220
+xhr @ xhr.js:16
+dispatchRequest @ dispatchRequest.js:48
+Promise.then
+_request @ Axios.js:180
+request @ Axios.js:41
+httpMethod @ Axios.js:243
+wrap @ bind.js:12
+sendOTP @ profileAPI.ts:10
+mutationFn @ VerifyNIN.tsx:30
+fn @ mutation.ts:179
+run @ retryer.ts:147
+createRetryer @ retryer.ts:204
+executeMutation @ mutation.ts:174
+execute @ mutation.ts:216
+await in execute
+mutate @ mutationObserver.ts:136
+(anonymous) @ useMutation.ts:96
+onClick @ VerifyNIN.tsx:133
+callCallback @ react-dom.development.js:4164
+invokeGuardedCallbackDev @ react-dom.development.js:4213
+invokeGuardedCallback @ react-dom.development.js:4277
+invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:4291
+executeDispatch @ react-dom.development.js:9041
+processDispatchQueueItemsInOrder @ react-dom.development.js:9073
+processDispatchQueue @ react-dom.development.js:9086
+dispatchEventsForPlugins @ react-dom.development.js:9097
+(anonymous) @ react-dom.development.js:9288
+batchedUpdates$1 @ react-dom.development.js:26179
+batchedUpdates @ react-dom.development.js:3991
+dispatchEventForPluginEventSystem @ react-dom.development.js:9287
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
+dispatchEvent @ react-dom.development.js:6457
+dispatchDiscreteEvent @ react-dom.development.js:6430
+
+VerifyNIN.tsx:133 AxiosError: Request failed with status code 422
+    at settle (settle.js:19:1)
+    at XMLHttpRequest.onloadend (xhr.js:62:1)
+    at Axios.request (Axios.js:46:1)
+execute @ mutation.ts:261
+await in execute
+mutate @ mutationObserver.ts:136
+(anonymous) @ useMutation.ts:96
+onClick @ VerifyNIN.tsx:133
+callCallback @ react-dom.development.js:4164
+invokeGuardedCallbackDev @ react-dom.development.js:4213
+invokeGuardedCallback @ react-dom.development.js:4277
+invokeGuardedCallbackAndCatchFirstError @ react-dom.development.js:4291
+executeDispatch @ react-dom.development.js:9041
+processDispatchQueueItemsInOrder @ react-dom.development.js:9073
+processDispatchQueue @ react-dom.development.js:9086
+dispatchEventsForPlugins @ react-dom.development.js:9097
+(anonymous) @ react-dom.development.js:9288
+batchedUpdates$1 @ react-dom.development.js:26179
+batchedUpdates @ react-dom.development.js:3991
+dispatchEventForPluginEventSystem @ react-dom.development.js:9287
+dispatchEventWithEnableCapturePhaseSelectiveHydrationWithoutDiscreteEventReplay @ react-dom.development.js:6465
+dispatchEvent @ react-dom.development.js:6457
+dispatchDiscreteEvent @ react-dom.development.js:6430
+
+
+Does safe token api requre Auth token also?

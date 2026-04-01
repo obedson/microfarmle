@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { Users, MapPin, DollarSign, AlertCircle } from 'lucide-react';
+import { Users, MapPin, DollarSign, AlertCircle, Sparkles, ShieldAlert } from 'lucide-react';
 import { apiClient } from '../api/client';
 import { useAuthStore } from '../store/authStore';
 
@@ -110,6 +110,21 @@ export default function GroupDetail() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8">
+      {user && (!user.is_platform_subscriber || !user.nin_verified) && (
+        <div className="mb-8 bg-white border border-primary-100 rounded-2xl p-6 shadow-sm flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-primary-50 text-primary-600 rounded-xl"><Sparkles size={24} /></div>
+            <div>
+              <p className="font-bold text-gray-900">Premium Membership Required</p>
+              <p className="text-gray-500 text-sm">You must verify your identity and subscribe to join groups.</p>
+            </div>
+          </div>
+          <Link to="/become-a-member" className="px-6 py-2 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 transition-colors">
+            Get Access
+          </Link>
+        </div>
+      )}
+
       <div className="bg-white rounded-lg shadow-lg p-8">
         <div className="flex justify-between items-start mb-4">
           <h1 className="text-3xl font-bold">{group.name}</h1>

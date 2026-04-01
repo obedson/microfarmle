@@ -31,6 +31,12 @@ import PaymentCallback from './pages/PaymentCallback';
 import Groups from './pages/Groups';
 import CreateGroup from './pages/CreateGroup';
 import GroupDetail from './pages/GroupDetail';
+import Wallet from './pages/Wallet';
+import Profile from './pages/Profile';
+import VerifyNIN from './pages/VerifyNIN';
+import BecomeAMember from './pages/BecomeAMember';
+import GroupAdminDashboard from './pages/GroupAdminDashboard';
+import GroupMemberDashboard from './pages/GroupMemberDashboard';
 import ReferralDashboard from './pages/ReferralDashboard';
 import ContributionSettings from './pages/ContributionSettings';
 import ContributionDashboard from './pages/ContributionDashboard';
@@ -83,6 +89,12 @@ function App() {
         <Route path="/owner/bookings" element={<ProtectedRoute><OwnerBookings /></ProtectedRoute>} />
         <Route path="/farm-records" element={<ProtectedRoute><FarmRecords /></ProtectedRoute>} />
         <Route path="/referrals" element={<ProtectedRoute><ReferralDashboard /></ProtectedRoute>} />
+        <Route path="/wallet" element={<ProtectedRoute><Wallet /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/verify-nin" element={<ProtectedRoute><VerifyNIN /></ProtectedRoute>} />
+        <Route path="/become-a-member" element={<ProtectedRoute><BecomeAMember /></ProtectedRoute>} />
+        <Route path="/groups/:id/admin" element={<ProtectedRoute><GroupAdminDashboard /></ProtectedRoute>} />
+        <Route path="/groups/:id/member" element={<ProtectedRoute><GroupMemberDashboard /></ProtectedRoute>} />
       </Routes>
     </Layout>
   );

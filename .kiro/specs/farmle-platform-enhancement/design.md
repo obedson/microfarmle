@@ -1,8 +1,8 @@
-# Design Document: Farmle Platform Enhancement
+# Design Document: Microfams Platform Enhancement
 
 ## Overview
 
-The Farmle platform enhancement introduces comprehensive improvements to the agro-career management system, focusing on user experience, operational efficiency, and platform scalability. This design addresses critical gaps in booking management, payment processing, analytics, and cross-platform integration while maintaining the existing technology stack and database schema.
+The Microfams platform enhancement introduces comprehensive improvements to the agro-career management system, focusing on user experience, operational efficiency, and platform scalability. This design addresses critical gaps in booking management, payment processing, analytics, and cross-platform integration while maintaining the existing technology stack and database schema.
 
 ### Key Enhancement Areas
 
@@ -1497,7 +1497,7 @@ The testing strategy employs both unit testing and property-based testing to ens
 
 **Testing Library**: fast-check for TypeScript/JavaScript property-based testing
 **Test Configuration**: Minimum 100 iterations per property test
-**Tagging Format**: Each property test tagged with: **Feature: farmle-platform-enhancement, Property {number}: {property_text}**
+**Tagging Format**: Each property test tagged with: **Feature: Microfams-platform-enhancement, Property {number}: {property_text}**
 
 ### Test Categories
 
