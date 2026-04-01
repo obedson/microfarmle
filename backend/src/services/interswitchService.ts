@@ -93,7 +93,7 @@ class InterswitchService {
     try {
       const token = await this.getAccessToken();
       const body = { 
-        id: nin,            // Changed from 'idNumber' to 'id' based on error log
+        idNumber: nin,            // Corrected from 'id' to 'idNumber' based on prompt2.md
         isConsent: consent 
       };
 
