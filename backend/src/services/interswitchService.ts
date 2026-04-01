@@ -87,27 +87,26 @@ class InterswitchService {
 
   /**
    * Requirement 3.1: NIN Verification
-   * Documentation Match: prompt3.md (use 'id')
+   * Documentation Match: prompt3.md (use 'id' key and TerminalId header)
    */
   async getNINFullDetails(nin: string, consent: boolean = true) {
     try {
       const token = await this.getAccessToken();
       
-      // Fixed: Use 'id' instead of 'idNumber' as per prompt3.md
       const body = { 
         id: nin,
         isConsent: consent 
       };
 
       console.log(`Interswitch NIN: Requesting details for ${nin.slice(0,3)}******* with consent ${consent}`);
-      console.log('Interswitch NIN Request Body:', JSON.stringify(body));
-
+      
       const response = await axios.post(
         `${this.marketplaceUrl}/marketplace-routing/api/v1/verify/identity/nin/verify`,
         body,
         {
           headers: {
             'Authorization': `Bearer ${token}`,
+            'TerminalId': process.env.INTERSWITCH_TERMINAL_ID || '3PXM0001',
             'Content-Type': 'application/json',
             'Accept': 'application/json'
           },
@@ -119,20 +118,21 @@ class InterswitchService {
     } catch (error: any) {
       console.error('Interswitch NIN API Error:', JSON.stringify(error.response?.data || error.message, null, 2));
       
-      // DEVELOPMENT FALLBACK: If NIN is 11111111111 and we get a 500, return a success mock 
-      // This allows the flow to be developed even if the sandbox is being difficult
-      if (process.env.NODE_ENV !== 'production' && nin === '11111111111') {
-        console.warn('⚠️ Interswitch NIN API failed, but providing DEV MOCK response for 11111111111');
+      // DEVELOPMENT FALLBACK: Provide mock responses for known test NINs or 11111111111 if sandbox fails
+      const isTestNIN = ['11111111111', '12345678901', '00000000000'].includes(nin);
+      
+      if (process.env.NODE_ENV !== 'production' && isTestNIN) {
+        console.warn(`⚠️ Interswitch NIN API failed, but providing DEV MOCK response for ${nin}`);
         return {
           responseCode: '00',
           message: 'SUCCESS',
           data: {
-            firstName: 'Osaro',
-            lastName: 'Osaro',
-            middleName: 'Testing',
+            firstName: 'Sarah',
+            lastName: 'Jane Doe',
+            middleName: 'NIN-Test',
             mobile: '08031234123',
-            gender: 'MALE',
-            dateOfBirth: '1990-01-01',
+            gender: 'FEMALE',
+            dateOfBirth: '1995-05-15',
             address: '123 NIN Sandbox Avenue, Lagos',
             image: null
           }
