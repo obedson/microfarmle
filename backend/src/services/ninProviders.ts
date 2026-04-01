@@ -33,21 +33,25 @@ export class InterswitchNINProvider implements NINProvider {
       }
 
       // Extract phone: Log shows it's in 'mobile'
-      const phone = ninInfo.mobile || ninInfo.phone || ninInfo.mobileNo || '';
+      const phone = ninInfo.mobile || ninInfo.phone || ninInfo.mobileNo || ninInfo.telephone || '';
 
       // Mask phone number: 0803****123
       const maskedPhone = phone ? `${phone.slice(0, 4)}****${phone.slice(-3)}` : '';
+
+      const firstName = ninInfo.firstName || ninInfo.firstname || '';
+      const middleName = ninInfo.middleName || ninInfo.middlename || '';
+      const lastName = ninInfo.lastName || ninInfo.lastname || ninInfo.surname || '';
 
       return {
         nin: nin,
         status: 'WAITING_FOR_OTP',
         maskedPhone,
         phone, 
-        fullName: `${ninInfo.firstName || ninInfo.firstname || ''} ${ninInfo.middleName || ninInfo.middlename || ''} ${ninInfo.lastName || ninInfo.lastname || ''}`.trim().replace(/\s+/g, ' '),
-        dateOfBirth: ninInfo.dateOfBirth || ninInfo.dob,
+        fullName: `${firstName} ${middleName} ${lastName}`.trim().replace(/\s+/g, ' '),
+        dateOfBirth: ninInfo.dateOfBirth || ninInfo.dob || ninInfo.birthdate,
         gender: (ninInfo.gender || 'm').toLowerCase().startsWith('m') ? 'MALE' : 'FEMALE',
         address: typeof ninInfo.address === 'object' ? ninInfo.address.addressLine : (ninInfo.address || null),
-        photo: ninInfo.image || ninInfo.photo
+        photo: ninInfo.image || ninInfo.photo || ninInfo.picture
       };
     } catch (error: any) {
       console.error('Interswitch NIN Provider Error:', error.message);
