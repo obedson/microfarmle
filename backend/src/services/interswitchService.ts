@@ -25,7 +25,7 @@ class InterswitchService {
     this.marketplaceUrl = process.env.INTERSWITCH_MARKETPLACE_URL || 'https://api-marketplace-routing.k8.isw.la';
     this.apiUrl = process.env.INTERSWITCH_API_URL || 'https://api.interswitchng.com';
     this.baseUrl = this.apiUrl;
-    this.authUrl = process.env.INTERSWITCH_AUTH_URL || 'https://passport-v2.k8.isw.la';
+    this.authUrl = process.env.INTERSWITCH_AUTH_URL || 'https://passport.interswitchng.com/passport/oauth/token';
     this.clientId = process.env.INTERSWITCH_CLIENT_ID || '';
     this.clientSecret = process.env.INTERSWITCH_CLIENT_SECRET || '';
     this.webhookSecret = process.env.INTERSWITCH_WEBHOOK_SECRET || '';
@@ -46,13 +46,13 @@ class InterswitchService {
     }
 
     try {
-      // Use authUrl directly to avoid path duplication seen in er.txt
+      // Use authUrl directly
       const url = this.authUrl;
       const auth = Buffer.from(`${this.clientId}:${this.clientSecret}`).toString('base64');
       
       const params = new URLSearchParams();
       params.append('grant_type', 'client_credentials');
-      params.append('scope', 'profile'); // Added scope as per prompt2.md
+      params.append('scope', 'profile');
 
       console.log(`Interswitch Passport: Requesting token from ${url}`);
 
@@ -94,7 +94,7 @@ class InterswitchService {
     try {
       const token = await this.getAccessToken();
       const body = { 
-        id: nin,            // Changed from 'idNumber' to 'id' based on error log
+        idNumber: nin,            // Corrected from 'id' to 'idNumber' based on prompt2.md
         isConsent: consent 
       };
 
