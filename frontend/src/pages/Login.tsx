@@ -22,8 +22,8 @@ const Login: React.FC = () => {
   const loginMutation = useMutation({
     mutationFn: ({ email, password }: LoginForm) => authAPI.login(email, password),
     onSuccess: (response) => {
-      const { user, token } = response.data.data;
-      login(user, token);
+      const { user, token, refreshToken } = response.data.data;
+      login(user, token, refreshToken);
       navigate('/dashboard');
     },
   });

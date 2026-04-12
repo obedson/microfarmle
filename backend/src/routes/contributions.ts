@@ -37,5 +37,7 @@ router.post('/contributions/members/:memberId/expel', authenticateToken, contrib
 router.get('/user/group-funds', authenticateToken, contributionController.getUserGroupFunds);
 router.get('/groups/:groupId/booking-discount', authenticateToken, contributionController.calculateGroupDiscount);
 router.post('/bookings/pay-with-group-funds', authenticateToken, contributionController.processGroupFundPayment);
+router.post('/groups/propose-admin-change', authenticateToken, contributionController.proposeAdminChange);
+router.post('/groups/consensus-requests/:requestId/vote', authenticateToken, contributionController.voteOnConsensusRequest);
 
 export default router;

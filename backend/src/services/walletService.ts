@@ -371,7 +371,7 @@ export class WalletService {
     if (!member) throw new Error('User is not a member of this group');
 
     const { data: request, error } = await supabase
-      .from('group_withdrawal_requests')
+      .from('group_consensus_requests')
       .insert({
         group_id: groupId,
         requested_by: requestedBy,
@@ -387,7 +387,7 @@ export class WalletService {
     await logAudit({
       user_id: requestedBy,
       action: 'GROUP_WITHDRAWAL_INITIATED',
-      resource_type: 'group_withdrawal_request',
+      resource_type: 'group_consensus_request',
       resource_id: request.id,
       ip_address: ip,
       details: { groupId, amount, targetUserId }
@@ -404,8 +404,8 @@ export class WalletService {
 
   async getGroupWithdrawalRequest(requestId: string) {
     const { data, error } = await supabase
-      .from('group_withdrawal_requests')
-      .select('*, group_withdrawal_approvals(voter_id, voted_at)')
+      .from('group_consensus_requests')
+      .select('*, group_consensus_approvals(voter_id, voted_at)')
       .eq('id', requestId)
       .single();
 
@@ -415,7 +415,7 @@ export class WalletService {
 
   async castApprovalVote(requestId: string, voterId: string, ip: string) {
     const { data: request } = await supabase
-      .from('group_withdrawal_requests')
+      .from('group_consensus_requests')
       .select('*, groups(member_count, creator_id)')
       .eq('id', requestId)
       .single();
@@ -434,7 +434,7 @@ export class WalletService {
 
     // Cast vote
     const { error: voteError } = await supabase
-      .from('group_withdrawal_approvals')
+      .from('group_consensus_approvals')
       .insert({ approval_request_id: requestId, voter_id: voterId });
 
     if (voteError && voteError.code === '23505') {
@@ -445,12 +445,12 @@ export class WalletService {
 
     // Check threshold
     const { count: approvalCount } = await supabase
-      .from('group_withdrawal_approvals')
+      .from('group_consensus_approvals')
       .select('*', { count: 'exact', head: true })
       .eq('approval_request_id', requestId);
 
     const { data: adminVoted } = await supabase
-      .from('group_withdrawal_approvals')
+      .from('group_consensus_approvals')
       .select('*')
       .eq('approval_request_id', requestId)
       .eq('voter_id', (request.groups as any).creator_id)
@@ -480,7 +480,7 @@ export class WalletService {
       await logAudit({
         user_id: voterId,
         action: 'GROUP_WITHDRAWAL_EXECUTED',
-        resource_type: 'group_withdrawal_request',
+        resource_type: 'group_consensus_request',
         resource_id: requestId,
         ip_address: ip,
         details: { approvalCount, threshold }

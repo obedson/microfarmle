@@ -118,10 +118,10 @@ class InterswitchService {
     } catch (error: any) {
       console.error('Interswitch NIN API Error:', JSON.stringify(error.response?.data || error.message, null, 2));
       
-      // DEVELOPMENT FALLBACK: Provide mock responses for known test NINs or 11111111111 if sandbox fails
-      const isTestNIN = ['11111111111', '12345678901', '00000000000'].includes(nin);
+      // DEVELOPMENT FALLBACK: Provide mock responses for known test NINs or any NIN if USE_MOCK_KYC is true
+      const isMockEnabled = process.env.USE_MOCK_KYC === 'true' || ['11111111111', '12345678901', '00000000000'].includes(nin);
       
-      if (process.env.NODE_ENV !== 'production' && isTestNIN) {
+      if (process.env.NODE_ENV !== 'production' && isMockEnabled) {
         console.warn(`⚠️ Interswitch NIN API failed, but providing DEV MOCK response for ${nin}`);
         return {
           responseCode: '00',
@@ -139,7 +139,19 @@ class InterswitchService {
         };
       }
       
-      throw new Error(error.response?.data?.message || error.message || 'NIN lookup failed');
+      // Provide more specific error messages
+      const errorData = error.response?.data;
+      let errorMessage = 'NIN verification failed';
+      
+      if (errorData?.message && errorData.message.trim()) {
+        errorMessage = errorData.message.trim();
+      } else if (errorData?.responseCode === 'ERROR') {
+        errorMessage = 'Invalid NIN or NIN not found in NIMC database. Please verify the NIN is correct.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      throw new Error(errorMessage);
     }
   }
 
@@ -170,6 +182,10 @@ class InterswitchService {
       return response.data;
     } catch (error: any) {
       console.error('Interswitch OTP Send Error:', error.response?.data || error.message);
+      if (process.env.NODE_ENV !== 'production') {
+        console.warn(`⚠️ Interswitch OTP Send failed, providing DEV MOCK response`);
+        return { reference: 'MOCK-OTP-REF-' + requestRef, otpreferenece: 'MOCK-OTP-REF-' + requestRef };
+      }
       throw new Error('Failed to send verification code');
     }
   }
@@ -198,7 +214,7 @@ class InterswitchService {
       return response.data.status === 'SUCCESS' || response.data.responseCode === '00';
     } catch (error: any) {
       console.error('Interswitch OTP Validation Error:', error.response?.data || error.message);
-      if (process.env.NODE_ENV !== 'production' && (otp === '111111' || otp === '123456')) return true;
+      if (process.env.NODE_ENV !== 'production' && (otp === '111111' || otp === '123456' || process.env.USE_MOCK_KYC === 'true')) return true;
       return false;
     }
   }

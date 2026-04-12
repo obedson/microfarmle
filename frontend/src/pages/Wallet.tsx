@@ -10,7 +10,8 @@ export default function WalletPage() {
   const queryClient = useQueryClient();
   const { user } = useAuthStore();
   const navigate = useNavigate();
-  const [p2pData, setP2pData] = useState({ recipientId: '', amount: 0 });
+  const [p2pData, setP2pData] = useState({ recipientEmail: '', amount: 0 });
+  const [recipientInfo, setRecipientInfo] = useState<{name: string, nin_verified: boolean} | null>(null);
   const [withdrawData, setWithdrawData] = useState({ accountNumber: '', bankCode: '044', amount: 0 });
   const [preview, setPreview] = useState<any>(null);
 
@@ -19,15 +20,43 @@ export default function WalletPage() {
     queryFn: () => walletApi.getWallet().then(res => res.data)
   });
 
+  const lookupMutation = useMutation({
+    mutationFn: (email: string) => walletApi.lookupP2PRecipient(email),
+    onSuccess: (res) => {
+      setRecipientInfo(res.data);
+    },
+    onError: (err: any) => {
+      toast.error(err.response?.data?.error || 'User not found');
+      setRecipientInfo(null);
+    }
+  });
+
   const p2pMutation = useMutation({
-    mutationFn: walletApi.initiateP2P,
+    mutationFn: (data: typeof p2pData) => walletApi.initiateP2P(data.recipientEmail, data.amount),
     onSuccess: () => {
       toast.success('P2P Transfer Successful');
       queryClient.invalidateQueries({ queryKey: ['wallet'] });
-      setP2pData({ recipientId: '', amount: 0 });
+      setP2pData({ recipientEmail: '', amount: 0 });
+      setRecipientInfo(null);
     },
-    onError: (err: any) => toast.error(err.response?.data?.error || 'Transfer failed')
+    onError: (err: any) => {
+      const errorMsg = err.response?.data?.error || err.message || 'Transfer failed';
+      // Clean up backend error class prefixes to make it user friendly
+      const cleanMsg = errorMsg.replace('InsufficientFundsError: ', '').replace('LedgerTransactionError: ', '');
+      toast.error(cleanMsg, { duration: 6000 });
+      setRecipientInfo(null);
+    }
   });
+
+  const handleVerifyP2P = () => {
+    if (!p2pData.recipientEmail) {
+      return toast.error('Please enter a recipient email');
+    }
+    if (p2pData.amount < 100) {
+      return toast.error('Minimum transfer amount is ₦100');
+    }
+    lookupMutation.mutate(p2pData.recipientEmail);
+  };
 
   const previewMutation = useMutation({
     mutationFn: walletApi.previewWithdrawal,
@@ -98,28 +127,67 @@ export default function WalletPage() {
             <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
               <Send size={18} className="text-blue-600" /> P2P Transfer
             </h3>
-            <div className="space-y-3">
-              <input 
-                placeholder="Recipient ID (UUID)" 
-                className="w-full p-2 border rounded"
-                value={p2pData.recipientId}
-                onChange={e => setP2pData({...p2pData, recipientId: e.target.value})}
-              />
-              <input 
-                type="number" 
-                placeholder="Amount" 
-                className="w-full p-2 border rounded"
-                value={p2pData.amount || ''}
-                onChange={e => setP2pData({...p2pData, amount: Number(e.target.value)})}
-              />
-              <button 
-                className="w-full bg-blue-600 text-white py-2 rounded font-medium"
-                onClick={() => p2pMutation.mutate(p2pData)}
-                disabled={p2pMutation.isPending}
-              >
-                {p2pMutation.isPending ? 'Processing...' : 'Send Money'}
-              </button>
-            </div>
+            
+            {!recipientInfo ? (
+              <div className="space-y-3">
+                <input 
+                  placeholder="Recipient Email Address" 
+                  type="email"
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={p2pData.recipientEmail}
+                  onChange={e => setP2pData({...p2pData, recipientEmail: e.target.value})}
+                />
+                <input 
+                  type="number" 
+                  placeholder="Amount (Min ₦100)" 
+                  className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+                  value={p2pData.amount || ''}
+                  onChange={e => setP2pData({...p2pData, amount: Number(e.target.value)})}
+                />
+                <button 
+                  className="w-full bg-blue-600 text-white py-2.5 rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-70"
+                  onClick={handleVerifyP2P}
+                  disabled={lookupMutation.isPending}
+                >
+                  {lookupMutation.isPending ? 'Verifying...' : 'Verify Recipient'}
+                </button>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Recipient Name:</span>
+                    <span className="font-bold flex items-center gap-1">
+                      {recipientInfo.name} 
+                      {recipientInfo.nin_verified ? (
+                        <ShieldAlert size={14} className="text-green-600" aria-label="Verified User" />
+                      ) : null}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">Amount:</span>
+                    <span className="font-bold text-lg">₦{p2pData.amount.toLocaleString()}</span>
+                  </div>
+                </div>
+                
+                <div className="flex gap-3">
+                  <button 
+                    className="flex-1 bg-gray-200 text-gray-800 py-2.5 rounded-lg font-medium hover:bg-gray-300 transition"
+                    onClick={() => setRecipientInfo(null)}
+                    disabled={p2pMutation.isPending}
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    className="flex-1 bg-blue-600 text-white py-2.5 rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-70"
+                    onClick={() => p2pMutation.mutate(p2pData)}
+                    disabled={p2pMutation.isPending}
+                  >
+                    {p2pMutation.isPending ? 'Processing...' : 'Confirm Transfer'}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Withdrawal Section */}

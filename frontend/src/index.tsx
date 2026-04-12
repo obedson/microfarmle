@@ -7,6 +7,8 @@ import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
 import { NotificationProvider } from './contexts/NotificationContext';
 
+import { Toaster } from 'react-hot-toast';
+
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -26,6 +28,7 @@ root.render(
       <QueryClientProvider client={queryClient}>
         <NotificationProvider>
           <BrowserRouter>
+             <Toaster position="top-right" />
             <App />
           </BrowserRouter>
         </NotificationProvider>

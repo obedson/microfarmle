@@ -114,6 +114,7 @@ class ProfileController {
       const result = await ninService.verifyOTPAndComplete(req.user!.id, value.requestRef, value.otp);
       res.json(result);
     } catch (error: any) {
+      console.error('Confirm OTP Error:', error.message);
       res.status(422).json({ error: error.message });
     }
   }

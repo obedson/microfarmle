@@ -1,5 +1,5 @@
 import supabase from '../utils/supabase.js';
-import { verifyPaystackPayment, isDevelopmentMode } from '../utils/paystack.js';
+import { verifyPaystackPayment } from '../utils/paystack.js';
 
 export class GroupModel {
   static async createWithPayment(groupData: any, userId: string, paymentRef: string) {
@@ -8,19 +8,15 @@ export class GroupModel {
       throw new Error('Entry fee must be between ₦500 and ₦10,000');
     }
 
-    // Verify payment (skip in development mode)
-    if (!isDevelopmentMode()) {
-      const verification = await verifyPaystackPayment(paymentRef);
-      
-      if (!verification.valid) {
-        throw new Error(verification.message || 'Payment verification failed');
-      }
+    // Verify payment
+    const verification = await verifyPaystackPayment(paymentRef);
+    
+    if (!verification.valid) {
+      throw new Error(verification.message || 'Payment verification failed');
+    }
 
-      if (verification.amount < entryFee) {
-        throw new Error(`Payment amount (₦${verification.amount}) is less than entry fee (₦${entryFee})`);
-      }
-    } else {
-      console.log('⚠️  DEV MODE: Skipping payment verification');
+    if (verification.amount < entryFee) {
+      throw new Error(`Payment amount (₦${verification.amount}) is less than entry fee (₦${entryFee})`);
     }
 
     // Use atomic RPC function
@@ -75,6 +71,18 @@ export class GroupModel {
   }
 
   static async joinGroup(groupId: string, userId: string, paymentRef: string, amount: number) {
+    // Ensure user doesn't already belong to a group
+    const { count: groupCount, error: countError } = await supabase
+      .from('group_members')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .neq('status', 'expelled'); // They can join another if they have been expelled from their previous one.
+
+    if (countError) throw countError;
+    if (groupCount && groupCount > 0) {
+      throw new Error('You can only belong to one group at a time.');
+    }
+
     const { data, error } = await supabase
       .from('group_members')
       .insert({ 
@@ -111,14 +119,14 @@ export class GroupModel {
   static async canCreateGroup(userId: string) {
     const { data: user, error } = await supabase
       .from('users')
-      .select('nin_verified, is_platform_subscriber, role')
+      .select('nin_verified, is_platform_subscriber, role, paid_referrals_count')
       .eq('id', userId)
       .single();
     if (error) throw error;
     
     // Admins can always create groups
-    if (user.role === 'admin') return { canCreate: true, conditions: { nin_verified: true, is_platform_subscriber: true, paid_invitees: 2 } };
-    
+    if (user.role === 'admin') return { canCreate: true, conditions: { nin_verified: true, is_platform_subscriber: true, paid_invitees: 2, not_in_group: true } };
+
     // Count referred users who are platform subscribers (paid invitees)
     const { count: paidInviteesCount } = await supabase
       .from('users')
@@ -126,15 +134,24 @@ export class GroupModel {
       .eq('referred_by', userId)
       .eq('is_platform_subscriber', true);
 
+    // Count user's current groups
+    const { count: groupCount } = await supabase
+      .from('group_members')
+      .select('*', { count: 'exact', head: true })
+      .eq('user_id', userId)
+      .neq('status', 'expelled');
+
     const conditions = {
       nin_verified: !!user.nin_verified,
       is_platform_subscriber: !!user.is_platform_subscriber,
-      paid_invitees: paidInviteesCount || 0
+      paid_invitees: paidInviteesCount || 0,
+      not_in_group: (groupCount || 0) === 0
     };
 
     const canCreate = conditions.nin_verified && 
                       conditions.is_platform_subscriber && 
-                      conditions.paid_invitees >= 2;
+                      conditions.paid_invitees >= 2 &&
+                      conditions.not_in_group;
 
     return { canCreate, conditions };
   }

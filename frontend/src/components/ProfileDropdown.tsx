@@ -45,6 +45,7 @@ export default function ProfileDropdown() {
     { label: 'Profile', icon: User, path: '/profile' },
     { label: 'Wallet', icon: Wallet, path: '/wallet' },
     { label: 'Messages', icon: MessageSquare, path: '/messages' },
+    { label: 'Referrals', icon: User, path: '/referrals' },
     { label: 'Settings', icon: Settings, path: '/settings' },
   ];
 

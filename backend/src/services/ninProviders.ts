@@ -25,6 +25,11 @@ export class InterswitchNINProvider implements NINProvider {
       const response = await interswitchService.getNINFullDetails(nin, consent);
       console.log('Interswitch NIN Raw Response:', JSON.stringify(response, null, 2));
 
+      // Check for error response
+      if (response.responseCode === 'ERROR' || !response.data) {
+        throw new Error(response.message || 'NIN lookup failed or returned no data');
+      }
+
       // The response structure from the log shows details are inside the 'data' object
       const ninInfo = response.data;
 

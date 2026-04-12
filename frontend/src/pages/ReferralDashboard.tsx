@@ -35,10 +35,10 @@ export default function ReferralDashboard() {
         <div className="bg-white rounded-lg shadow p-6">
           <p className="text-gray-600 text-sm mb-2">Can Create Group</p>
           <p className="text-3xl font-bold">
-            {(user?.paid_referrals_count || 0) >= 10 ? (
+            {(user?.paid_referrals_count || 0) >= 2 ? (
               <CheckCircle className="text-green-600" size={32} />
             ) : (
-              <span className="text-gray-400">{10 - (user?.paid_referrals_count || 0)} more</span>
+              <span className="text-gray-400">{2 - (user?.paid_referrals_count || 0)} more</span>
             )}
           </p>
         </div>

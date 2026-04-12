@@ -5,7 +5,7 @@ import { supabase } from '../utils/supabase.js';
 import Joi from 'joi';
 
 const p2pSchema = Joi.object({
-  recipientId: Joi.string().guid({ version: 'uuidv4' }).required(),
+  recipientEmail: Joi.string().email().required(),
   amount: Joi.number().min(100).required()
 });
 
@@ -32,17 +32,60 @@ class WalletController {
     res.json(result);
   }
 
+  async lookupRecipient(req: AuthRequest, res: Response) {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: 'Email is required' });
+
+    const { data: recipient, error } = await supabase
+      .from('users')
+      .select('id, name, nin_verified')
+      .eq('email', email)
+      .single();
+
+    if (error || !recipient) {
+      return res.status(404).json({ error: 'User with this email not found' });
+    }
+
+    if (recipient.id === req.user!.id) {
+      return res.status(400).json({ error: 'You cannot send money to yourself' });
+    }
+
+    res.json({
+      name: recipient.name,
+      nin_verified: recipient.nin_verified
+    });
+  }
+
   async initiateP2P(req: AuthRequest, res: Response) {
     const { error, value } = p2pSchema.validate(req.body);
     if (error) return res.status(400).json({ error: error.details[0].message });
 
-    const result = await walletService.initiateP2PTransfer(
-      req.user!.id,
-      value.recipientId,
-      value.amount,
-      req.ip || '0.0.0.0'
-    );
-    res.json(result);
+    const { data: recipient } = await supabase
+      .from('users')
+      .select('id')
+      .eq('email', value.recipientEmail)
+      .single();
+
+    if (!recipient) {
+      return res.status(404).json({ error: 'User with this email not found' });
+    }
+
+    if (recipient.id === req.user!.id) {
+      return res.status(400).json({ error: 'You cannot send money to yourself' });
+    }
+
+    // Wrap the service call to handle caught errors safely
+    try {
+      const result = await walletService.initiateP2PTransfer(
+        req.user!.id,
+        recipient.id,
+        value.amount,
+        req.ip || '0.0.0.0'
+      );
+      res.json(result);
+    } catch (svcError: any) {
+      res.status(400).json({ error: svcError.message });
+    }
   }
 
   async previewWithdrawal(req: AuthRequest, res: Response) {

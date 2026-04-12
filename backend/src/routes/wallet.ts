@@ -20,6 +20,7 @@ router.use(authenticateToken as any);
 // Individual wallet routes
 router.get('/', walletController.getWallet);
 router.get('/transactions/:id', walletController.getTransaction);
+router.post('/p2p/lookup', walletLimiter, walletController.lookupRecipient);
 router.post('/p2p', walletLimiter, walletController.initiateP2P);
 router.post('/withdraw', walletLimiter, walletController.previewWithdrawal);
 router.post('/withdraw/confirm', walletLimiter, walletController.confirmWithdrawal);

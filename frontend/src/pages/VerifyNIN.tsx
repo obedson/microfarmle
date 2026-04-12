@@ -40,10 +40,7 @@ export default function VerifyNIN() {
     onSuccess: () => {
       toast.success('Identity verified successfully!');
       queryClient.invalidateQueries({ queryKey: ['profile'] });
-      // Update local storage user
-      const storedUser = JSON.parse(localStorage.getItem('user') || '{}');
-      storedUser.nin_verified = true;
-      localStorage.setItem('user', JSON.stringify(storedUser));
+      useAuthStore.getState().updateUser({ nin_verified: true });
       setStep(4);
     },
     onError: (err: any) => toast.error(err.response?.data?.error || 'Invalid OTP')

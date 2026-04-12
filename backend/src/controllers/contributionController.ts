@@ -33,21 +33,167 @@ export const processGroupFundPayment = async (req: AuthRequest, res: Response) =
   try {
     const { bookingId, groupId, amount } = req.body;
     
-    // Verify user is in group
+    // Get group info
+    const { data: group } = await supabase
+      .from('groups')
+      .select('creator_id, member_count')
+      .eq('id', groupId)
+      .single();
+
+    if (!group) return res.status(404).json({ error: 'Group not found' });
+
+    // Verify user is group admin OR platform admin
+    const isGroupAdmin = group.creator_id === req.user.id;
+    const isPlatformAdmin = req.user.role === 'admin';
+
+    if (!isGroupAdmin && !isPlatformAdmin) {
+      return res.status(403).json({ error: 'Only the Group Admin or Platform Admin can propose group fund payments' });
+    }
+
+    const { data: request, error: reqError } = await supabase
+      .from('group_consensus_requests')
+      .insert({
+        group_id: groupId,
+        requested_by: req.user.id,
+        amount: amount,
+        booking_id: bookingId,
+        request_type: 'BOOKING_PAYMENT',
+        status: group.member_count <= 1 ? 'PENDING' : 'PENDING' // Keep pending to let the voting endpoint process execution in unified way, or auto-execute if 1
+      })
+      .select()
+      .single();
+
+    if (reqError) throw reqError;
+
+    if (group.member_count <= 1) {
+      // Auto execute for single member group since 1/1 is 100%
+      await supabase.rpc('process_group_fund_payment', {
+        p_booking_id: bookingId, p_group_id: groupId, p_amount: amount
+      });
+      await supabase.from('group_consensus_requests').update({ status: 'EXECUTED' }).eq('id', request.id);
+      return res.json({ message: 'Payment executed automatically for single-member group', request });
+    }
+
+    res.status(201).json({ message: 'Voting request created for group payment', request });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+export const proposeAdminChange = async (req: AuthRequest, res: Response) => {
+  try {
+    const { groupId, proposedAdminId } = req.body;
+
+    // Get group info
+    const { data: group } = await supabase
+      .from('groups')
+      .select('creator_id, member_count')
+      .eq('id', groupId)
+      .single();
+
+    if (!group) return res.status(404).json({ error: 'Group not found' });
+
+    // Verify user is group admin OR platform admin
+    const isGroupAdmin = group.creator_id === req.user.id;
+    const isPlatformAdmin = req.user.role === 'admin';
+
+    if (!isGroupAdmin && !isPlatformAdmin) {
+      return res.status(403).json({ error: 'Only the Group Admin or Platform Admin can propose an admin change' });
+    }
+
+    const { data: request, error: reqError } = await supabase
+      .from('group_consensus_requests')
+      .insert({
+        group_id: groupId,
+        requested_by: req.user.id,
+        proposed_admin_id: proposedAdminId,
+        amount: 0,
+        request_type: 'ADMIN_CHANGE',
+        status: 'PENDING'
+      })
+      .select()
+      .single();
+
+    if (reqError) throw reqError;
+
+    if (group.member_count <= 1) {
+      await supabase.from('groups').update({ creator_id: proposedAdminId }).eq('id', groupId);
+      await supabase.from('group_consensus_requests').update({ status: 'EXECUTED' }).eq('id', request.id);
+      return res.json({ message: 'Admin role transferred automatically for single-member group', request });
+    }
+
+    res.status(201).json({ message: 'Voting request created for admin change', request });
+  } catch (error: any) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+export const voteOnConsensusRequest = async (req: AuthRequest, res: Response) => {
+  try {
+    const { requestId } = req.params;
+
+    // Check request
+    const { data: request, error: fetchError } = await supabase
+      .from('group_consensus_requests')
+      .select('*, groups(member_count)')
+      .eq('id', requestId)
+      .single();
+
+    if (fetchError || !request) return res.status(404).json({ error: 'Request not found' });
+    if (request.status !== 'PENDING') return res.status(400).json({ error: 'Request is already ' + request.status });
+
+    // Verify user is an active member
     const { data: member } = await supabase
       .from('group_members')
       .select('id')
-      .eq('group_id', groupId)
+      .eq('group_id', request.group_id)
       .eq('user_id', req.user.id)
       .eq('member_status', 'active')
       .single();
 
-    if (!member) {
-      return res.status(403).json({ error: 'You are not an active member of this group' });
+    if (!member) return res.status(403).json({ error: 'You are not an active member of this group' });
+
+    // Cast vote
+    const { error: voteError } = await supabase
+      .from('group_consensus_approvals')
+      .insert({ request_id: requestId, voter_id: req.user.id });
+
+    if (voteError && voteError.code === '23505') {
+       return res.status(400).json({ error: 'You have already voted on this request' });
     }
 
-    const result = await ContributionService.processGroupFundPayment(bookingId, groupId, amount);
-    res.json(result);
+    // Count votes
+    const { count: voteCount } = await supabase
+      .from('group_consensus_approvals')
+      .select('*', { count: 'exact', head: true })
+      .eq('request_id', requestId);
+
+    const requiredVotes = Math.ceil((request.groups.member_count as number) * (2 / 3));
+
+    if ((voteCount || 0) >= requiredVotes) {
+      // Execute the request
+      if (request.request_type === 'BOOKING_PAYMENT') {
+        const { error: execError } = await supabase.rpc('process_group_fund_payment', {
+          p_booking_id: request.booking_id,
+          p_group_id: request.group_id,
+          p_amount: request.amount
+        });
+        if (execError) throw execError;
+        
+      } else if (request.request_type === 'ADMIN_CHANGE') {
+        const { error: adminUpdateError } = await supabase
+          .from('groups')
+          .update({ creator_id: request.proposed_admin_id })
+          .eq('id', request.group_id);
+        if (adminUpdateError) throw adminUpdateError;
+      }
+      
+      // Update request to executed
+      await supabase.from('group_consensus_requests').update({ status: 'EXECUTED' }).eq('id', requestId);
+      return res.json({ message: 'Vote cast and request executed successfully', executed: true });
+    }
+
+    res.json({ message: 'Vote cast successfully. Still pending more votes.', executed: false, currentVotes: voteCount, requiredVotes });
   } catch (error: any) {
     res.status(400).json({ error: error.message });
   }

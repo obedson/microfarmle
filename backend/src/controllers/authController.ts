@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
 import { UserModel } from '../models/User.js';
 import { WalletService } from '../services/walletService.js';
-import { generateToken } from '../utils/jwt.js';
+import { generateToken, generateRefreshToken } from '../utils/jwt.js';
+import { supabase } from '../utils/supabase.js';
 import Joi from 'joi';
 
 const walletService = new WalletService();
@@ -31,7 +32,10 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: 'Email already registered' });
     }
 
-    const user = await UserModel.create(value);
+    const user = await UserModel.create({
+      ...value,
+      referredBy: value.referral_code
+    });
     
     // Provision wallet
     try {
@@ -41,11 +45,20 @@ export const register = async (req: Request, res: Response) => {
     }
 
     const token = generateToken({ id: user.id, email: user.email, role: user.role });
+    const refreshToken = generateRefreshToken();
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+    await supabase.from('refresh_tokens').insert({
+        user_id: user.id,
+        token: refreshToken,
+        expires_at: expiresAt.toISOString()
+    });
 
     const { password, ...userWithoutPassword } = user as any;
     res.status(201).json({
       success: true,
-      data: { user: userWithoutPassword, token },
+      data: { user: userWithoutPassword, token, refreshToken },
     });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Registration failed' });
@@ -70,11 +83,28 @@ export const login = async (req: Request, res: Response) => {
     }
 
     const token = generateToken({ id: user.id, email: user.email, role: user.role });
+    const refreshToken = generateRefreshToken();
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+    await supabase.from('refresh_tokens').insert({
+        user_id: user.id,
+        token: refreshToken,
+        expires_at: expiresAt.toISOString()
+    });
+
     const { password, ...userWithoutPassword } = user as any;
+
+    // Lazily generate referral code if missing
+    if (!userWithoutPassword.referral_code) {
+      const code = Math.random().toString(36).substring(2, 10).toUpperCase();
+      await supabase.from('users').update({ referral_code: code }).eq('id', user.id);
+      userWithoutPassword.referral_code = code;
+    }
 
     res.json({
       success: true,
-      data: { user: userWithoutPassword, token },
+      data: { user: userWithoutPassword, token, refreshToken },
     });
   } catch (error) {
     res.status(500).json({ success: false, error: 'Login failed' });

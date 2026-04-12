@@ -27,8 +27,8 @@ const Register: React.FC = () => {
     (data: RegisterForm) => authAPI.register(data),
     {
       onSuccess: (response) => {
-        const { user, token } = response.data.data;
-        login(user, token);
+        const { user, token, refreshToken } = response.data.data;
+        login(user, token, refreshToken);
         navigate('/dashboard');
       },
       onError: (error: any) => {

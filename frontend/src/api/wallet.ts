@@ -7,8 +7,11 @@ export const walletApi = {
   getTransaction: (id: string) => 
     apiClient.get(`/wallet/transactions/${id}`),
   
-  initiateP2P: (data: { recipientId: string; amount: number }) => 
-    apiClient.post('/wallet/p2p', data),
+  lookupP2PRecipient: (email: string) =>
+    apiClient.post('/wallet/p2p/lookup', { email }),
+    
+  initiateP2P: (recipientEmail: string, amount: number) => 
+    apiClient.post('/wallet/p2p', { recipientEmail, amount }),
   
   previewWithdrawal: (data: { accountNumber: string; bankCode: string; amount: number }) => 
     apiClient.post('/wallet/withdraw', data),

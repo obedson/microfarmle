@@ -1,165 +1,28 @@
-POST Lookup NIN Mid
-https://api.onepipe.io/v2/transact
-
-HEADERS
-
-Authorization: Bearer dthEjKlKSL30mNVwbpne_0e1a5973b7a2430bbc6d2f6032ea17f1
-
-Signature: 3a2b58350e8068507e6b5bff106850a5
-
-Content-Type: application/json
-
-Body
-
-{
-  "request_ref":"111111111", 
-  "request_type":"lookup_nin_mid",
-  "auth": {
-    "type": "nin", 
-    "secure": "{{auth.nin}}",
-    "auth_provider": "Demoprovider",
-    "route_mode": null
-  },
-  "transaction": {
-    "mock_mode": "live", 
-    "transaction_ref": "{{transaction-ref}}", 
-    "transaction_desc": "A random transaction", 
-    "transaction_ref_parent": null, 
-    "amount": 0,
-    "customer":{
-    	"customer_ref": "DemoApp_Customer007",
-    	"firstname": "Uju",
-    	"surname": "Usmanu",
-    	"email": "ujuusmanu@gmail.com",
-    	"mobile_no": "234802343132"
-    },
-    "meta":{
-    	"a_key":"a_meta_value_1",
-    	"b_key":"a_meta_value_2"
-    },
-    "details": {
+This generic ERROR message is the "boss fight" of Interswitch integrations. Since we fixed the body key to id, the gateway is now letting you through, but the downstream NIN provider is rejecting the request because it's missing Merchant Metadata in the headers.For the Marketplace Routing API, the headers are just as important as the body. If you are missing the TerminalId or the correct Content-Type, the NIMC proxy returns this exact blank error.The Fix: Update your Request HeadersYou need to add the TerminalId to your headers. In the Interswitch Sandbox (k8s), this acts as your "license" to query the NIN database.Here are the exact headers your NINService should be sending:Header KeyValueWhy?AuthorizationBearer {{your_access_token}}Proves you are authenticated.TerminalId3PXM0001Identifies your app (MicroFams) to the NIN provider.Content-Typeapplication/jsonTells the server you are sending JSON.Acceptapplication/jsonTells the server you want JSON back.Revised Prompt for your AI Code GeneratorTo ensure your AI generator (Cursor/Copilot/GPT) fixes this properly, use this prompt:Task: Fix the NINService request to the Interswitch NIN Verify endpoint.The Problem: The API is returning a generic "An Error Occurred" because of missing headers.Instructions:Keep the POST body as: {"id": "11111111111", "isConsent": true}.Crucial: Add TerminalId to the request Headers with the value '3PXM0001'.Ensure the Authorization header has a space: Bearer ${token}.Ensure Content-Type and Accept are both set to application/json.The code should look like this:JavaScriptconst response = await axios.post(
+  'https://api-marketplace-routing.k8.isw.la/marketplace-routing/api/v1/verify/identity/nin/verify',
+  { id: nin, isConsent: true },
+  {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'TerminalId': '3PXM0001',
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
     }
   }
-}
+);
+Why this matters for MicroFamsInterswitch’s Marketplace API is a "multi-tenant" system. Even though your access_token is valid, the NIN service specifically needs that TerminalId header to know which "gate" to open.One last check: The Test DataIf you still get the error after adding the headers, the Interswitch Sandbox might be rejecting 11111111111 as an invalid test number. Try the standard Interswitch test NIN:Test NIN: 12345678901Update your headers first, try with your current NIN, and if that fails, swap to the 12345678901 test number. Let's see if those logs finally turn green!
 
-Example Request: Lookup NIN Min - Successful
+python download_video.py "https://www.youtube.com/watch?v=CmG5_sIas1Q" /mnt/e/Tuto
 
-curl --location 'https://api.onepipe.io/v2/transact' \
---header 'Authorization: Bearer dthEjKlKSL30mNVwbpne_0e1a5973b7a2430bbc6d2f6032ea17f1' \
---header 'Signature: 3a2b58350e8068507e6b5bff106850a5' \
+
+curl --location 'https://qa.interswitchng.com/passport/oauth/token' \ --header 'Content-Type: application/x-www-form-urlencoded' \ --header 'Cookie: SESSION=2b6bc85d-32f8-4495-861f-5d9089e21c21; SESSION=2b6bc85d-32f8-4495-861f-5d9089e21c21' \ --header 'Authorization: Basic Your-ClientId-And-Secret-In-Base64' \ --data-urlencode 'scope=profile' \ --data-urlencode 'grant_type=client_credentials'
+
+curl --location 'https://api-marketplace-routing.k8.isw.la/marketplace-routing/api/v1/verify/identity/tin?tin=08120451-1001' \
+--header 'Authorization: Bearer eyJhbGciOiJSUzI1NiJ9.eyJhdWQiOlsiYXBpL'
+
+curl --location 'https://api-marketplace-routing.k8.isw.la/marketplace-routing/api/v1/verify/identity/nin/verify' \
 --header 'Content-Type: application/json' \
---data-raw '{
-  "request_ref":"111111111", 
-  "request_type":"lookup_nin_mid",
-  "auth": {
-    "type": "nin", 
-    "secure": "{{auth.nin}}",
-    "auth_provider": "Demoprovider",
-    "route_mode": null
-  },
-  "transaction": {
-    "mock_mode": "live", 
-    "transaction_ref": "{{transaction-ref}}", 
-    "transaction_desc": "A random transaction", 
-    "transaction_ref_parent": null, 
-    "amount": 0,
-    "customer":{
-    	"customer_ref": "DemoApp_Customer007",
-    	"firstname": "Uju",
-    	"surname": "Usmanu",
-    	"email": "ujuusmanu@gmail.com",
-    	"mobile_no": "234802343132"
-    },
-    "meta":{
-    	"a_key":"a_meta_value_1",
-    	"b_key":"a_meta_value_2"
-    },
-    "details": {
-    }
-  }
+--header 'Authorization: Bearer eyJhbGciOiJSUzI1NiJ9.eyJhdWQiOlsiYW1sX2RvbWVzdGljX3NlcnZpY' \
+--data '{
+    "id": "11111111111"
 }'
-
-Example Request: Lookup NIN Min - Waiting...
-
-curl --location 'https://api.onepipe.io/v2/transact' \
---header 'Authorization: Bearer dthEjKlKSL30mNVwbpne_0e1a5973b7a2430bbc6d2f6032ea17f1' \
---header 'Signature: 3a2b58350e8068507e6b5bff106850a5' \
---header 'Content-Type: application/json' \
---data-raw '{
-  "request_ref":"111111111", 
-  "request_type":"lookup_nin_mid",
-  "auth": {
-    "type": "nin", 
-    "secure": "{{auth.nin}}",
-    "auth_provider": "Demoprovider",
-    "route_mode": null
-  },
-  "transaction": {
-    "mock_mode": "live", 
-    "transaction_ref": "{{transaction-ref}}", 
-    "transaction_desc": "A random transaction", 
-    "transaction_ref_parent": null, 
-    "amount": 0,
-    "customer":{
-    	"customer_ref": "DemoApp_Customer007",
-    	"firstname": "Uju",
-    	"surname": "Usmanu",
-    	"email": "ujuusmanu@gmail.com",
-    	"mobile_no": "234802343132"
-    },
-    "meta":{
-    	"a_key":"a_meta_value_1",
-    	"b_key":"a_meta_value_2"
-    },
-    "details": {
-    }
-  }
-}'
-
-Example Response: 200 OK
-
-Body
-
-{
-  "status": "WaitingForOTP",
-  "message": "Please enter the OTP sent to 2348022****08, use 12345678 as your OTP",
-  "data": {
-    "provider_response_code": "900T0",
-    "provider": "Demoprovider",
-    "errors": null,
-    "error": null,
-    "provider_response": null,
-    "client_info": {
-      "name": null,
-      "id": null,
-      "bank_cbn_code": null,
-      "bank_name": null,
-      "console_url": null,
-      "js_background_image": null,
-      "css_url": null,
-      "logo_url": null,
-      "footer_text": null,
-      "show_options_icon": false,
-      "paginate": false,
-      "paginate_count": 0,
-      "options": null,
-      "merchant": null,
-      "colors": null,
-      "meta": null
-    }
-  }
-}
-
-Example Response:
-
-Headers (5)
-
-Date:  Sun, 05 Jul 2020 23:25:02 GMT
-
-Content-Type:  application/json; charset=utf-8
-
-Content-Length: 518
-
-Connection: keep-alive
-
-Server: Kestrel
