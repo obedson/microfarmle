@@ -155,3 +155,45 @@ acceptance/release approval. Production rollout, flag enablement, capacity,
 retention and device-security checks have not been performed or implied.
 No new production provider is required or approved by this implementation.
 WP-P6-002/003/004, Phase 7 and Phase 8 were not implemented or promoted.
+
+## PR #295 acceptance-gate correction (2026-09-06)
+
+The preceding verification table records the original implementation head, not
+the corrected head. Original head: 0a80e9758bdd14d8450407809e002b3e3d104ffb.
+General CI run 34018934894 failed in the backend invitation test, the full
+frontend audit, and the MCP-server production audit. Database integration,
+hosted legacy upgrade, browser smoke, mobile and repository security passed.
+Dedicated real farm acceptance run 34018934982 passed on that same head.
+
+The invitation failure was reproduced locally (1 failed / 3 tests): its fixed
+2026-09-02 expiration was older than wall-clock time. A test-scoped fixed clock
+of 2026-09-01 now makes the existing valid-expiry fixture deterministic; real
+timers are restored after each test. Original assertions and production
+invitation validation are unchanged. After correction, the focused 3 tests and
+the full 201 suites / 988 tests pass, as does backend typechecking.
+
+Both failing dependency trees already locked fast-uri 3.1.5 on the baseline;
+WP-P6-001 introduced no dependency changes. These were high-severity findings,
+not the previously disclosed moderate findings. Existing ci.yml explicitly
+requires full frontend and production MCP audits at audit-level=high;
+WORK_PLAN.md Phase 0 also requires a green dependency gate. That policy justifies
+the limited lock-only fast-uri 3.1.5 to 3.1.7 patch update in those two trees.
+No other package, manifest, override, audit threshold or exception changed.
+Advisory reference: https://github.com/advisories/GHSA-5jgf-p345-68v8 .
+
+Before correction: frontend audit 6 moderate / 1 high; MCP audit 1 moderate /
+1 high, both exit 1. After correction: both audit gates exit 0. Frontend
+production audit also exits 0. Moderate findings are not described as resolved
+or formally accepted by this change. Frontend clean install, typecheck, 46
+suites / 121 tests and production build pass. MCP clean install with scripts
+disabled, server syntax checks and AJV compile/validation smoke pass; no live
+MCP service, provider or credentials were used for these checks.
+
+Reconciliation remains unchanged and WP-P6-001 remains PARTIAL pending final
+requirement-by-requirement acceptance/release review. New-head CI must be
+evaluated independently; earlier passing runs are not substituted. No merge,
+PR #294 change, credential change or WP-P6-002/003/004 work is authorized here.
+Corrected-tree local regression: real farm desktop/mobile acceptance 2/2 passed;
+existing browser smoke 3/3 passed; pinned current-tree Gitleaks and both
+reconciliation tests passed. Remaining audit counts: full frontend 6 moderate
+(1 in production scope), MCP production 1 moderate; zero high/critical.
