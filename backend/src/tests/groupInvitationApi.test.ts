@@ -5,7 +5,10 @@ jest.mock('../services/groupInvitationService.js',()=>({groupInvitationService:{
 const res=()=>{const r:any={};r.status=jest.fn().mockReturnValue(r);r.json=jest.fn().mockReturnValue(r);r.set=jest.fn().mockReturnValue(r);return r;};
 const org='00000000-0000-4000-8000-000000000301',group='00000000-0000-4000-8000-000000000302',actor='00000000-0000-4000-8000-000000000303',invite='00000000-0000-4000-8000-000000000304';
 const req=(extra:any={})=>({tenant:{id:org},user:{id:actor},params:{id:group},body:{},header:(n:string)=>n==='Idempotency-Key'?'invitation-command-001':undefined,...extra});
-describe('group invitation API',()=>{beforeEach(()=>jest.clearAllMocks());
+describe('group invitation API',()=>{
+  // Keep the valid-expiry fixture deterministic without changing production validation.
+  beforeEach(()=>{jest.clearAllMocks();jest.useFakeTimers({now:new Date('2026-09-01T10:00:00Z')});});
+  afterEach(()=>jest.useRealTimers());
   it('creates a tenant-bound invitation and prevents token caching',async()=>{(groupInvitationService.create as jest.Mock).mockResolvedValue({invitationId:invite,token:'x'.repeat(43)} as never);const r=res();await groupInvitationController.create(req({body:{intendedUserId:invite,expiresAt:'2026-09-02T10:00:00Z',organizationId:'attacker'}}) as any,r);expect(groupInvitationService.create).toHaveBeenCalledWith(expect.objectContaining({organizationId:org,groupId:group,actorId:actor}));expect(r.set).toHaveBeenCalledWith('Cache-Control','no-store');});
   it('accepts only under resolved actor and tenant',async()=>{const r=res();await groupInvitationController.accept(req({body:{token:'x'.repeat(43),actorId:'attacker'}}) as any,r);expect(groupInvitationService.accept).toHaveBeenCalledWith(expect.objectContaining({organizationId:org,actorId:actor}));});
   it('requires idempotency for revocation',async()=>{const r=res();await groupInvitationController.revoke(req({params:{id:group,invitationId:invite},body:{reasonCode:'INVITATION_CANCELLED'},header:()=>undefined}) as any,r);expect(r.status).toHaveBeenCalledWith(400);expect(groupInvitationService.revoke).not.toHaveBeenCalled();});

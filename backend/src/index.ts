@@ -31,6 +31,8 @@ import { requestMetrics } from './middleware/requestMetrics.js';
 import { initSentry, sentryErrorHandler } from './utils/sentry.js';
 
 import farmRecordRoutes from './routes/farmRecords.js';
+import farmOperationsRoutes from './routes/farmOperations.js';
+import { startFarmJobs } from './jobs/farmJobs.js';
 import courseRoutes from './routes/courses.js';
 import courseVideoRoutes from './routes/courseVideos.js';
 import productRoutes from './routes/products.js';
@@ -105,6 +107,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/communications', communicationRoutes);
 app.use('/api/receipts', receiptRoutes);
 app.use('/api/farm-records', farmRecordRoutes);
+app.use('/api/farm-operations', farmOperationsRoutes);
 app.use('/api/courses', courseRoutes);
 app.use('/api', courseVideoRoutes);
 app.use('/api/products', productRoutes);
@@ -154,6 +157,7 @@ if (backendConfiguration.nodeEnv !== 'test') {
     startSavingsJobs();
     startRetentionJobs();
     startIdentityJobs();
+    startFarmJobs();
     paymentTimeoutJob.scheduleJob();
     logger.info('✅ Cron jobs enabled (production mode)');
   } else {

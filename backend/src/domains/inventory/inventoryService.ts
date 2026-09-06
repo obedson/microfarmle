@@ -18,14 +18,11 @@ export class InventoryService {
   }
   async move(organizationId: string, itemId: string, input: { quantityMinor: number; reason: string; idempotencyKey: string }): Promise<InventoryItem> {
     if (!Number.isInteger(input.quantityMinor) || input.quantityMinor === 0 || !input.reason.trim() || !input.idempotencyKey.trim()) throw new Error('INVENTORY_MOVEMENT_INVALID');
-    const { data: item, error: itemError } = await supabase.from('inventory_items').select('*').eq('organization_id', organizationId).eq('id', itemId).single();
-    if (itemError || !item) throw new Error('INVENTORY_ITEM_NOT_FOUND');
-    const next = Number(item.quantity_minor) + input.quantityMinor;
-    if (next < 0) throw new Error('INVENTORY_QUANTITY_NEGATIVE');
-    const { error: movementError } = await supabase.from('inventory_movements').insert({ organization_id: organizationId, item_id: itemId, quantity_minor: input.quantityMinor, reason: input.reason.trim(), idempotency_key: input.idempotencyKey.trim() });
-    if (movementError && movementError.code !== '23505') throw movementError;
-    const { data, error } = await supabase.from('inventory_items').update({ quantity_minor: next, updated_at: new Date().toISOString() }).eq('organization_id', organizationId).eq('id', itemId).select('*').single();
-    if (error) throw error;
+    const { data, error } = await supabase.rpc('apply_inventory_movement', {
+      p_organization: organizationId, p_item: itemId, p_quantity: input.quantityMinor,
+      p_reason: input.reason.trim(), p_key: input.idempotencyKey.trim(),
+    });
+    if (error) throw new Error('INVENTORY_MOVEMENT_REJECTED');
     return mapItem(data);
   }
 }

@@ -1,0 +1,22 @@
+name: Farm Operations acceptance
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  farm-operations:
+    name: Farm Operations real backend and offline acceptance
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: npm ci --prefix backend
+      - run: npm ci --prefix frontend
+      - run: npx --prefix frontend playwright install --with-deps chromium
+      - name: Isolated database, real API, production build and responsive offline journeys
+        run: node backend/scripts/verify-farm-e2e.mjs

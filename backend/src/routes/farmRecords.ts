@@ -17,13 +17,13 @@ const router = Router();
 
 router.use(authenticateToken, resolveTenant);
 router.get('/', getMyRecords);
-router.post('/', createRecord);
+router.post('/', requireFeature('farm_erp.operations'), createRecord);
 router.get('/my-records', getMyRecords);
 router.get('/analytics', getAnalytics);
 router.get('/recommendations', requireFeature('intelligence.agronomic_recommendations'), getFarmerRecommendations);
-router.put('/:id', updateRecord);
-router.delete('/:id', deleteRecord);
-router.patch('/:id/link-booking', linkToBooking);
+router.put('/:id', requireFeature('farm_erp.operations'), updateRecord);
+router.delete('/:id', requireFeature('farm_erp.operations'), deleteRecord);
+router.patch('/:id/link-booking', requireFeature('farm_erp.operations'), linkToBooking);
 router.get('/property/:propertyId/productivity', getPropertyProductivity);
 
 export default router;

@@ -96,12 +96,9 @@ export class FarmRecordModel {
   }
 
   static async delete(id: string, organizationId: string, farmerId: string) {
-    const { error } = await supabase
-      .from('farm_records')
-      .delete()
-      .eq('id', id)
-      .eq('organization_id', organizationId)
-      .eq('farmer_id', farmerId);
+    const { error } = await supabase.rpc('archive_legacy_farm_record', {
+      p_organization: organizationId, p_actor: farmerId, p_record: id,
+    });
 
     if (error) throw error;
   }

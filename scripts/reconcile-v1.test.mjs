@@ -81,3 +81,12 @@ test('V1 reconciliation is current and every linked evidence path exists', () =>
     }
   }
 });
+test('approved farm evidence is exclusive, requires a client, and cannot auto-close the package',()=>{
+ const report=JSON.parse(read('docs/V1_RECONCILIATION.json'));
+ const farm=report.items.find(item=>item.id==='WP-P6-001');
+ assert.equal(farm.status,'partial');assert.equal(farm.workPlanChecked,false);assert.equal(farm.layers.client,'evidence_found');
+ assert.deepEqual(farm.evidence.specification,['docs/specs/FARM_OPERATIONS.md']);
+ for(const path of ['backend/src/routes/farmOperations.ts','frontend/e2e/farm/operations.spec.ts','docs/specs/FARM_OPERATIONS.md']){
+  assert.deepEqual(report.items.filter(item=>Object.values(item.evidence).flat().includes(path)).map(item=>item.id),['WP-P6-001']);
+ }
+});

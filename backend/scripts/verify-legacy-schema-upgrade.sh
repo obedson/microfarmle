@@ -354,6 +354,22 @@ if [[ "$loan_disbursement_orchestration_present" == "f" ]]; then
   migrations+=(install_loan_disbursement_orchestration.sql)
 fi
 
+
+# WP-P6-001 upgrades are tested only in this disposable schema copy.
+# Reuse the existing inventory foundation when the hosted source predates it.
+farm_inventory_present="$(docker exec "$container" psql --username postgres --dbname microfams --no-psqlrc --tuples-only --no-align --command "SELECT to_regclass('public.inventory_items') IS NOT NULL")"
+if [[ "$farm_inventory_present" == "f" ]]; then migrations+=(install_inventory_foundation.sql); fi
+farm_bridge_present="$(docker exec "$container" psql --username postgres --dbname microfams --no-psqlrc --tuples-only --no-align --command "SELECT to_regprocedure('public.apply_inventory_movement(uuid,uuid,bigint,text,text)') IS NOT NULL")"
+if [[ "$farm_bridge_present" == "f" ]]; then migrations+=(install_farm_inventory_bridge.sql); fi
+farm_resources_present="$(docker exec "$container" psql --username postgres --dbname microfams --no-psqlrc --tuples-only --no-align --command "SELECT to_regclass('public.farm_resources') IS NOT NULL")"
+if [[ "$farm_resources_present" == "f" ]]; then migrations+=(install_farm_operations.sql); fi
+farm_reminders_present="$(docker exec "$container" psql --username postgres --dbname microfams --no-psqlrc --tuples-only --no-align --command "SELECT to_regclass('public.farm_task_reminders') IS NOT NULL")"
+if [[ "$farm_reminders_present" == "f" ]]; then migrations+=(install_farm_task_reminders.sql); fi
+farm_retention_present="$(docker exec "$container" psql --username postgres --dbname microfams --no-psqlrc --tuples-only --no-align --command "SELECT to_regprocedure('public.archive_legacy_farm_record(uuid,uuid,uuid)') IS NOT NULL")"
+if [[ "$farm_retention_present" == "f" ]]; then migrations+=(install_farm_legacy_retention.sql); fi
+# CREATE OR REPLACE is safe for both previously installed and fresh farm layers.
+migrations+=(fix_farm_effective_assignment_access.sql)
+
 for migration in "${migrations[@]}"; do
   echo "dry-run applying $migration"
   docker exec --interactive "$container" psql --username postgres --dbname microfams \
@@ -480,7 +496,11 @@ docker exec "$container" psql --username postgres --dbname microfams --set ON_ER
         'public.begin_loan_disbursement(uuid,uuid,uuid,uuid,text,text,text,uuid,timestamp with time zone)') IS NULL
       OR to_regprocedure(
         'public.succeed_loan_disbursement_payout(uuid,text,text,bigint,text,text,uuid,text,text)') IS NULL
-    THEN RAISE EXCEPTION 'required trust, booking, group, savings, and credit schema was not installed'; END IF;
+      OR to_regprocedure('public.execute_farm_command(uuid,uuid,uuid,jsonb)') IS NULL
+      OR to_regprocedure('public.read_farm_operations(uuid,uuid,jsonb)') IS NULL
+      OR to_regprocedure('public.emit_farm_task_reminders()') IS NULL
+      OR to_regprocedure('public.archive_legacy_farm_record(uuid,uuid,uuid)') IS NULL
+    THEN RAISE EXCEPTION 'required trust, booking, group, savings, credit and farm schema was not installed'; END IF;
   END \$\$;" >/dev/null
 
 echo "legacy schema upgrade dry run passed"
