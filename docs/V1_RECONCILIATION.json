@@ -7191,37 +7191,45 @@
         "specification": "evidence_found",
         "implementation": "evidence_found",
         "api": "evidence_found",
-        "client": "not_required",
+        "client": "evidence_found",
         "tests": "evidence_found",
         "operations": "evidence_found"
       },
       "evidence": {
         "specification": [
-          ".kiro/specs/farmle-platform-enhancement/design.md",
-          ".kiro/specs/farmle-platform-enhancement/requirements.md",
-          "docs/specs/FINANCIAL_CORE.md",
-          "docs/specs/INVESTMENT_OVERSUBSCRIPTION_REFUNDS.md"
+          "docs/specs/FARM_OPERATIONS.md"
         ],
         "implementation": [
-          "backend/migrations/create_farm_records.sql",
-          "backend/src/services/agronomicRecommendationService.ts",
-          "backend/src/services/farmRecordService.ts",
-          "backend/src/services/reportingPolicy.ts"
+          "backend/src/domains/farm/farmRules.ts",
+          "backend/src/domains/farm/farmService.ts",
+          "backend/migrations/install_farm_operations.sql",
+          "backend/migrations/install_farm_inventory_bridge.sql",
+          "backend/migrations/install_farm_task_reminders.sql",
+          "backend/migrations/install_farm_legacy_retention.sql"
         ],
         "api": [
-          "backend/src/controllers/farmRecordController.ts"
+          "backend/src/routes/farmOperations.ts",
+          "backend/src/routes/farmRecords.ts"
         ],
         "client": [
-          "frontend/src/api/farmRecords.ts",
-          "frontend/src/components/FarmAnalytics.tsx",
-          "frontend/src/components/FarmRecordForm.tsx",
-          "frontend/src/pages/FarmRecords.tsx"
+          "frontend/src/pages/FarmOperations.tsx",
+          "frontend/src/services/farmOffline.ts",
+          "frontend/src/services/farmOperationsAPI.ts",
+          "frontend/public/farm-offline-sw.js"
         ],
         "tests": [
-          "frontend/e2e/farm-records.spec.ts"
+          "backend/src/tests/farmOperationsRules.test.ts",
+          "backend/src/tests/farmOperationsApi.test.ts",
+          "backend/src/tests/farmInventoryBridge.test.ts",
+          "backend/tests/schema/test-farm-operations.sql",
+          "backend/tests/schema/test-farm-upgrade.sql",
+          "frontend/src/pages/FarmOperations.test.tsx",
+          "frontend/src/services/farmOffline.test.ts",
+          "frontend/e2e/farm/operations.spec.ts"
         ],
         "operations": [
-          "docs/runbooks/FARM_RECORDS_OPERATIONS.md"
+          "docs/runbooks/FARM_OPERATIONS.md",
+          "docs/FARM_OPERATIONS_EVIDENCE.md"
         ]
       }
     },

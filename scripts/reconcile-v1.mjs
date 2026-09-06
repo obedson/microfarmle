@@ -21,6 +21,8 @@ const walk = directory => {
 };
 const repoFiles = execFileSync('git', ['ls-files', '-z'], { cwd: root }).toString('utf8').split('\0').filter(Boolean).map(path => join(root, path));
 const evidenceExclusions = new Set([
+  // Farm Operations owns these exact paths; do not use them as fuzzy evidence for other packages.
+  ...["docs/specs/FARM_OPERATIONS.md","backend/src/domains/farm/farmRules.ts","backend/src/domains/farm/farmService.ts","backend/migrations/install_farm_operations.sql","backend/migrations/install_farm_task_reminders.sql","backend/migrations/install_farm_legacy_retention.sql","backend/src/routes/farmOperations.ts","frontend/src/pages/FarmOperations.tsx","frontend/src/services/farmOffline.ts","frontend/src/services/farmOperationsAPI.ts","frontend/public/farm-offline-sw.js","backend/src/tests/farmOperationsRules.test.ts","backend/src/tests/farmOperationsApi.test.ts","backend/src/tests/farmInventoryBridge.test.ts","backend/tests/schema/test-farm-operations.sql","backend/tests/schema/test-farm-upgrade.sql","frontend/src/pages/FarmOperations.test.tsx","frontend/src/services/farmOffline.test.ts","frontend/e2e/farm/operations.spec.ts","docs/runbooks/FARM_OPERATIONS.md","docs/FARM_OPERATIONS_EVIDENCE.md","backend/migrations/install_farm_inventory_bridge.sql","backend/src/jobs/farmJobs.ts","backend/tests/farmOperationsServer.ts","backend/tests/schema/farm-e2e-fixtures.sql","backend/tests/schema/farm-upgrade-fixture.sql","backend/scripts/verify-farm-e2e.mjs",".github/workflows/farm-operations.yml","frontend/src/pages/farmOperationFields.ts","frontend/playwright.farm.config.ts","frontend/scripts/serve-farm-build.mjs"],
   'docs/V1_RECONCILIATION.json',
   'docs/V1_RECONCILIATION.md',
   'docs/V1_GAPS.md',
@@ -62,6 +64,45 @@ const evidence = (item, roots, minimum = 1) => {
   return matches.slice(0, 4).map(match => match.path);
 };
 const evidenceOverrides = new Map([
+  ['WP-P6-001', {
+  "exclusive": true,
+  "clientRequired": true,
+  "specification": [
+    "docs/specs/FARM_OPERATIONS.md"
+  ],
+  "implementation": [
+    "backend/src/domains/farm/farmRules.ts",
+    "backend/src/domains/farm/farmService.ts",
+    "backend/migrations/install_farm_operations.sql",
+    "backend/migrations/install_farm_inventory_bridge.sql",
+    "backend/migrations/install_farm_task_reminders.sql",
+    "backend/migrations/install_farm_legacy_retention.sql"
+  ],
+  "api": [
+    "backend/src/routes/farmOperations.ts",
+    "backend/src/routes/farmRecords.ts"
+  ],
+  "client": [
+    "frontend/src/pages/FarmOperations.tsx",
+    "frontend/src/services/farmOffline.ts",
+    "frontend/src/services/farmOperationsAPI.ts",
+    "frontend/public/farm-offline-sw.js"
+  ],
+  "tests": [
+    "backend/src/tests/farmOperationsRules.test.ts",
+    "backend/src/tests/farmOperationsApi.test.ts",
+    "backend/src/tests/farmInventoryBridge.test.ts",
+    "backend/tests/schema/test-farm-operations.sql",
+    "backend/tests/schema/test-farm-upgrade.sql",
+    "frontend/src/pages/FarmOperations.test.tsx",
+    "frontend/src/services/farmOffline.test.ts",
+    "frontend/e2e/farm/operations.spec.ts"
+  ],
+  "operations": [
+    "docs/runbooks/FARM_OPERATIONS.md",
+    "docs/FARM_OPERATIONS_EVIDENCE.md"
+  ]
+}],
   ['WP-P2-006', {
     api: [
       'backend/src/routes/organizations.ts',
@@ -105,14 +146,17 @@ for (const [index, line] of read(workPlanPath).split(/\r?\n/).entries()) {
   const rawId = explicitId(text) ?? `WP-P${phaseNumber}-${String(counter).padStart(3, '0')}`;
   const id = items.some(item => item.id === rawId) ? `${rawId}-${counter}` : rawId;
   const verified = evidenceOverrides.get(id) ?? {};
-  const specEvidence = mergeEvidence(evidence(text, ['docs/specs/', '.kiro/specs/'], 1), verified.specification);
-  const implementationEvidence = mergeEvidence(evidence(text, ['backend/migrations/', 'backend/src/domains/', 'backend/src/services/'], 2), verified.implementation);
-  const apiEvidence = mergeEvidence(evidence(text, ['backend/src/routes/', 'backend/src/controllers/'], 2), verified.api);
-  const clientEvidence = mergeEvidence(evidence(text, ['frontend/src/', 'mobile/'], 2), verified.client);
-  const testEvidence = mergeEvidence(evidence(text, ['backend/src/tests/', 'backend/tests/', 'frontend/src/', 'frontend/e2e/', 'mobile/'], 2).filter(path => /test|spec|e2e/i.test(path)), verified.tests);
-  const opsEvidence = mergeEvidence(evidence(text, ['docs/runbooks/', 'docs/'], 2).filter(path => /runbook|rollback|recovery|deployment|credentials|readiness/i.test(path)), verified.operations);
+  const layerEvidence = (layer, discovered) => verified.exclusive
+    ? (verified[layer] ?? []).filter(path => existsSync(join(root, path)))
+    : mergeEvidence(discovered, verified[layer]);
+  const specEvidence = layerEvidence('specification', evidence(text, ['docs/specs/', '.kiro/specs/'], 1));
+  const implementationEvidence = layerEvidence('implementation', evidence(text, ['backend/migrations/', 'backend/src/domains/', 'backend/src/services/'], 2));
+  const apiEvidence = layerEvidence('api', evidence(text, ['backend/src/routes/', 'backend/src/controllers/'], 2));
+  const clientEvidence = layerEvidence('client', evidence(text, ['frontend/src/', 'mobile/'], 2));
+  const testEvidence = layerEvidence('tests', evidence(text, ['backend/src/tests/', 'backend/tests/', 'frontend/src/', 'frontend/e2e/', 'mobile/'], 2).filter(path => /test|spec|e2e/i.test(path)));
+  const opsEvidence = layerEvidence('operations', evidence(text, ['docs/runbooks/', 'docs/'], 2).filter(path => /runbook|rollback|recovery|deployment|credentials|readiness/i.test(path)));
   const isFoundation = ['0','1','8'].includes(phaseNumber);
-  const clientRequired = !isFoundation && !/migration|schema|account purpose|audit export|reconciliation|worker|adapter|foundation/i.test(text);
+  const clientRequired = verified.clientRequired ?? (!isFoundation && !/migration|schema|account purpose|audit export|reconciliation|worker|adapter|foundation/i.test(text));
   const apiRequired = !/specification|approve|migration|cutover|schema|runbook|ci|test|secret|architecture decision/i.test(text);
   const layers = {
     specification: specEvidence.length ? 'evidence_found' : 'missing',
