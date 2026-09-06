@@ -174,3 +174,7 @@ harden_tenant_membership_rls.sql
 install_organization_membership_invitations.sql
 install_organization_membership_access.sql
 install_organization_settings.sql
+install_farm_inventory_bridge.sql
+install_farm_operations.sql
+install_farm_task_reminders.sql
+install_farm_legacy_retention.sql

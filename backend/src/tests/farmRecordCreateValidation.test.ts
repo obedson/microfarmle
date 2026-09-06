@@ -37,3 +37,10 @@ describe('farm record create reference validation', () => {
     )).rejects.toThrow('property must match');
   });
 });
+it('rejects a standalone foreign property without relying on a booking',async()=>{
+ const maybeSingle=jest.fn().mockResolvedValue({data:null,error:null});
+ const eqOrg=jest.fn().mockReturnValue({maybeSingle});const eqId=jest.fn().mockReturnValue({eq:eqOrg});
+ (supabase.from as jest.Mock).mockReturnValue({select:()=>({eq:eqId})});
+ await expect(FarmRecordService.validateCreateReferences(null,'foreign-property','organization-1','farmer-1')).rejects.toThrow('Farm property does not belong');
+ expect(supabase.from).toHaveBeenCalledWith('properties');expect(eqOrg).toHaveBeenCalledWith('organization_id','organization-1');
+});

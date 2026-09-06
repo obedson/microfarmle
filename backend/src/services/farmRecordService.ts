@@ -9,7 +9,14 @@ export class FarmRecordService {
     organizationId: string,
     farmerId: string
   ) {
-    if (!bookingId) return;
+    if (!bookingId) {
+      if (propertyId) {
+        const { data: property, error } = await supabase.from('properties').select('id')
+          .eq('id', propertyId).eq('organization_id', organizationId).maybeSingle();
+        if (error || !property) throw new Error('Farm property does not belong to the active organization');
+      }
+      return;
+    }
 
     const { data: booking, error } = await supabase
       .from('bookings')

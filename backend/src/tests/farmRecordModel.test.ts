@@ -3,7 +3,7 @@ import supabase from '../utils/supabase.js';
 
 jest.mock('../utils/supabase.js', () => ({
   __esModule: true,
-  default: { from: jest.fn() },
+  default: { from: jest.fn(), rpc: jest.fn() },
 }));
 
 describe('FarmRecordModel tenant and owner boundaries', () => {
@@ -30,16 +30,12 @@ describe('FarmRecordModel tenant and owner boundaries', () => {
     expect(eqFarmer).toHaveBeenCalledWith('farmer_id', 'farmer-1');
   });
 
-  it('scopes deletes to both organization and authenticated farmer', async () => {
-    const eqFarmer = jest.fn().mockResolvedValue({ error: null });
-    const eqOrganization = jest.fn().mockReturnValue({ eq: eqFarmer });
-    const eqId = jest.fn().mockReturnValue({ eq: eqOrganization });
-    const deleteQuery = jest.fn().mockReturnValue({ eq: eqId });
-    (supabase.from as jest.Mock).mockReturnValue({ delete: deleteQuery });
-
+  it('archives through the atomic tenant and actor checked command without deleting history', async () => {
+    (supabase.rpc as jest.Mock).mockResolvedValue({error:null});
     await FarmRecordModel.delete('record-1', 'organization-1', 'farmer-1');
-
-    expect(eqOrganization).toHaveBeenCalledWith('organization_id', 'organization-1');
-    expect(eqFarmer).toHaveBeenCalledWith('farmer_id', 'farmer-1');
+    expect(supabase.rpc).toHaveBeenCalledWith('archive_legacy_farm_record', {
+      p_organization:'organization-1',p_actor:'farmer-1',p_record:'record-1',
+    });
+    expect(supabase.from).not.toHaveBeenCalled();
   });
 });

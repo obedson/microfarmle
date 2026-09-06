@@ -36,6 +36,11 @@ jest.mock('../services/farmRecordService.js', () => ({
   },
 }));
 
+jest.mock('../middleware/requireFeature.js',()=>({requireFeature:()=> (req:any,res:any,next:any)=>{
+ if(req.headers['x-test-farm-disabled'])return res.status(503).json({success:false,error:'FEATURE_DISABLED'});
+ next();
+}}));
+
 const app = express();
 app.use(express.json());
 app.use('/api/farm-records', farmRecordRoutes);
@@ -89,4 +94,14 @@ describe('farm record API ownership boundary', () => {
       'record-1', 'booking-1', 'organization-1', 'farmer-1'
     );
   });
+});
+it('legacy rollout disablement blocks all mutations without hiding history',async()=>{
+ jest.clearAllMocks();
+ for(const method of ['post','put','delete','patch'] as const){
+  const path=method==='post'?'/api/farm-records':method==='patch'?'/api/farm-records/record-1/link-booking':'/api/farm-records/record-1';
+  await request(app)[method](path).set('X-Test-Farm-Disabled','true').send({}).expect(503);
+ }
+ expect(FarmRecordModel.create).not.toHaveBeenCalled();expect(FarmRecordModel.update).not.toHaveBeenCalled();expect(FarmRecordModel.delete).not.toHaveBeenCalled();expect(FarmRecordService.linkToBooking).not.toHaveBeenCalled();
+ (FarmRecordModel.findByFarmer as jest.Mock).mockResolvedValue([]);
+ await request(app).get('/api/farm-records').set('X-Test-Farm-Disabled','true').expect(200);
 });

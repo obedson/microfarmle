@@ -110,5 +110,5 @@ export const deleteRecord = asyncHandler(async (req: TenantRequest, res: Respons
   const { id } = req.params;
   const userId = (req as any).user.id;
   await FarmRecordModel.delete(id, req.tenant!.id, userId);
-  res.json({ success: true, message: 'Record deleted' });
+  res.json({ success: true, message: 'Record archived; operational history retained' });
 });
