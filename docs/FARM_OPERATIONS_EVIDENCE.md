@@ -197,3 +197,33 @@ Corrected-tree local regression: real farm desktop/mobile acceptance 2/2 passed;
 existing browser smoke 3/3 passed; pinned current-tree Gitleaks and both
 reconciliation tests passed. Remaining audit counts: full frontend 6 moderate
 (1 in production scope), MCP production 1 moderate; zero high/critical.
+
+## A1/A2 remediation verification
+
+The final review of 6139f96 identified expired-assignment visibility/reminders
+and incomplete manager/cross-tenant mutation journey evidence. The additive
+fix_farm_effective_assignment_access migration applies assignment start/end dates
+to task-specific visibility and directly to reminder recipients. Evidence and
+history use the same parent-resource visibility predicate. Existing mutation
+denial and authorized current-assignment access are preserved.
+
+The committed schema regression creates A, assigns a task and private evidence,
+expires A, and creates a separate current B for the same user. It asserts no
+A task/history/evidence read, no A reminder, denied A mutation, and successful
+B task/evidence access, reminder and mutation. Future-dated assignments and
+expired reminder recipients with separately elevated farm access are also tested.
+
+The real desktop/mobile journey now authenticates a distinct farm_manager
+fixture, uses the real organization switcher, and asserts manager-created records.
+It rejects cross-tenant mutations both with a forged tenant header and foreign
+resource IDs under the outsider tenant, then confirms the original resource
+version/data are unchanged. No backend interception or authentication bypass
+is introduced. Initial test setup failures exposed stale membership UI between
+synthetic actors; fresh page loading after each real login corrected the setup.
+
+Local verification: focused backend 43 tests; full backend 201 suites / 988
+tests; frontend 46 suites / 121 tests; typechecks; full clean schema including
+A1 regression; populated farm upgrade; real desktop/mobile acceptance 2/2;
+existing browser regressions 3/3; reconciliation 2/2; pinned Gitleaks passed.
+Hosted legacy upgrade and new-head CI remain separate gates. WP-P6-001 is not
+promoted by this implementation commit.

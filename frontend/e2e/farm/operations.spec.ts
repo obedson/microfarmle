@@ -2,7 +2,7 @@ import {expect,test,Page} from '@playwright/test';
 import {execFileSync} from 'node:child_process';
 const organization='61000000-0000-4000-8000-000000000001';
 const worker='61000000-0000-4000-8000-000000000002';
-async function login(page:Page,email='farm-owner@example.com',org=organization) {
+async function login(page:Page,email='farm-manager@example.com',org=organization) {
  await page.goto('/login');
  await page.getByLabel('Email Address').fill(email);
  await page.getByLabel('Password',{exact:true}).fill('Synthetic-field-test-42!');
@@ -10,7 +10,13 @@ async function login(page:Page,email='farm-owner@example.com',org=organization) 
  await page.getByRole('button',{name:'Sign In'}).click();
  expect((await response).status()).toBe(200);
  await expect(page).toHaveURL(/dashboard/);
- await page.evaluate(org=>localStorage.setItem('organization-storage',JSON.stringify({state:{activeOrganizationId:org},version:0})),org);
+ // Each synthetic actor starts with freshly loaded membership UI.
+ await page.reload();
+ const menu=page.getByRole('button',{name:'Toggle menu'});
+ if(await menu.isVisible())await menu.click();
+ const switcher=page.locator('label[aria-label="Active organization"] select:visible').first();
+ await expect(switcher.locator('option[value="'+org+'"]')).toHaveCount(1);
+ await Promise.all([page.waitForNavigation(),switcher.selectOption(org)]);
  await page.goto('/farm-operations');
  await expect(page.getByRole('heading',{name:'Farm Operations',exact:true})).toBeVisible();
 }
@@ -23,13 +29,13 @@ async function save(page:Page) {
  await expect(page.getByRole('button',{name:'Save operation',exact:true})).toBeEnabled();
  return resource;
 }
-async function api(page:Page,path:string,body?:unknown,operationId?:string) {
+async function api(page:Page,path:string,body?:unknown,operationId?:string,org=organization) {
  return page.evaluate(async({path,body,operationId,organization})=>{
   const response=await fetch('http://127.0.0.1:3002/api/farm-operations'+path,{
    method:body?'POST':'GET',headers:{Authorization:'Bearer '+localStorage.getItem('token'),'X-Organization-ID':organization,
    'Content-Type':'application/json',...(operationId?{'Idempotency-Key':operationId}:{})},body:body?JSON.stringify(body):undefined});
   return {status:response.status,body:await response.json()};
- },{path,body,operationId,organization});
+ },{path,body,operationId,organization:org});
 }
 test('real farm setup, operations, evidence, offline replay, conflict and revoked access',async({page,context},info)=>{
  test.setTimeout(180000);
@@ -39,6 +45,8 @@ test('real farm setup, operations, evidence, offline replay, conflict and revoke
  await page.getByLabel('Operation type').fill('Mixed agriculture');
  await page.getByLabel('Tenure / ownership').fill('Owned');
  const farm=await save(page);
+ expect(farm.created_by).toBe('61000000-0000-4000-8000-000000000004');
+ expect(farm.data.managerId).toBe(farm.created_by);
  await page.getByLabel('Farm',{exact:true}).selectOption(farm.id);
  await kind(page,'unit');
  await page.getByLabel('Unit name').fill('Production unit');
@@ -120,6 +128,14 @@ test('real farm setup, operations, evidence, offline replay, conflict and revoke
  await login(page,'farm-outsider@example.com','61000000-0000-4000-8000-000000000003');
  expect((await api(page,'?id='+farm.id)).status).toBe(403);
  expect((await api(page,'?id='+attachment.id+'&view=evidence')).status).toBe(403);
+ const crossTenantMutation={id:unit.id,farmId:farm.id,kind:'unit',version:unit.version+1,state:unit.state,data:{...unit.data,name:'Cross-tenant overwrite'}};
+ // Reject both a forged tenant selection and a foreign ID under the actor's own tenant.
+ expect((await api(page,'/commands',crossTenantMutation,crypto.randomUUID())).status).toBe(403);
+ expect((await api(page,'/commands',crossTenantMutation,crypto.randomUUID(),'61000000-0000-4000-8000-000000000003')).status).toBe(404);
+ await login(page);
+ const retained=await api(page,'?id='+unit.id);
+ expect(retained.body.data.items[0].data.name).toBe('Updated unit');
+ expect(retained.body.data.items[0].version).toBe(unit.version+1);
  await login(page,'farm-worker@example.com');
  await page.getByLabel('Farm',{exact:true}).selectOption(farm.id);
  await kind(page,'expense');

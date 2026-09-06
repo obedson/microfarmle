@@ -7205,7 +7205,8 @@
           "backend/migrations/install_farm_operations.sql",
           "backend/migrations/install_farm_inventory_bridge.sql",
           "backend/migrations/install_farm_task_reminders.sql",
-          "backend/migrations/install_farm_legacy_retention.sql"
+          "backend/migrations/install_farm_legacy_retention.sql",
+          "backend/migrations/fix_farm_effective_assignment_access.sql"
         ],
         "api": [
           "backend/src/routes/farmOperations.ts",

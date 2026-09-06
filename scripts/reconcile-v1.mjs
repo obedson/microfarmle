@@ -21,6 +21,7 @@ const walk = directory => {
 };
 const repoFiles = execFileSync('git', ['ls-files', '-z'], { cwd: root }).toString('utf8').split('\0').filter(Boolean).map(path => join(root, path));
 const evidenceExclusions = new Set([
+  'backend/migrations/fix_farm_effective_assignment_access.sql',
   // Farm Operations owns these exact paths; do not use them as fuzzy evidence for other packages.
   ...["docs/specs/FARM_OPERATIONS.md","backend/src/domains/farm/farmRules.ts","backend/src/domains/farm/farmService.ts","backend/migrations/install_farm_operations.sql","backend/migrations/install_farm_task_reminders.sql","backend/migrations/install_farm_legacy_retention.sql","backend/src/routes/farmOperations.ts","frontend/src/pages/FarmOperations.tsx","frontend/src/services/farmOffline.ts","frontend/src/services/farmOperationsAPI.ts","frontend/public/farm-offline-sw.js","backend/src/tests/farmOperationsRules.test.ts","backend/src/tests/farmOperationsApi.test.ts","backend/src/tests/farmInventoryBridge.test.ts","backend/tests/schema/test-farm-operations.sql","backend/tests/schema/test-farm-upgrade.sql","frontend/src/pages/FarmOperations.test.tsx","frontend/src/services/farmOffline.test.ts","frontend/e2e/farm/operations.spec.ts","docs/runbooks/FARM_OPERATIONS.md","docs/FARM_OPERATIONS_EVIDENCE.md","backend/migrations/install_farm_inventory_bridge.sql","backend/src/jobs/farmJobs.ts","backend/tests/farmOperationsServer.ts","backend/tests/schema/farm-e2e-fixtures.sql","backend/tests/schema/farm-upgrade-fixture.sql","backend/scripts/verify-farm-e2e.mjs",".github/workflows/farm-operations.yml","frontend/src/pages/farmOperationFields.ts","frontend/playwright.farm.config.ts","frontend/scripts/serve-farm-build.mjs"],
   'docs/V1_RECONCILIATION.json',
@@ -76,7 +77,8 @@ const evidenceOverrides = new Map([
     "backend/migrations/install_farm_operations.sql",
     "backend/migrations/install_farm_inventory_bridge.sql",
     "backend/migrations/install_farm_task_reminders.sql",
-    "backend/migrations/install_farm_legacy_retention.sql"
+    "backend/migrations/install_farm_legacy_retention.sql",
+    "backend/migrations/fix_farm_effective_assignment_access.sql"
   ],
   "api": [
     "backend/src/routes/farmOperations.ts",

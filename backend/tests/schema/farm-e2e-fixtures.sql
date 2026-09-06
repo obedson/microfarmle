@@ -8,6 +8,10 @@ INSERT INTO users(id,email,password,name,role) VALUES
  ('61000000-0000-4000-8000-000000000001','farm-owner@example.com',crypt('Synthetic-field-test-42!',gen_salt('bf')),'Synthetic Farm Manager','farmer'),
  ('61000000-0000-4000-8000-000000000002','farm-worker@example.com',crypt('Synthetic-field-test-42!',gen_salt('bf')),'Synthetic Farm Worker','farmer'),
  ('61000000-0000-4000-8000-000000000003','farm-outsider@example.com',crypt('Synthetic-field-test-42!',gen_salt('bf')),'Synthetic Other Tenant','farmer');
+INSERT INTO users(id,email,password,name,role) VALUES
+ ('61000000-0000-4000-8000-000000000004','farm-manager@example.com',crypt('Synthetic-field-test-42!',gen_salt('bf')),'Distinct Farm Manager','farmer');
+INSERT INTO organization_memberships(organization_id,user_id,role,status) VALUES
+ ('61000000-0000-4000-8000-000000000001','61000000-0000-4000-8000-000000000004','farm_manager','active');
 INSERT INTO organization_memberships(organization_id,user_id,role,status) VALUES
  ('61000000-0000-4000-8000-000000000001','61000000-0000-4000-8000-000000000002','member','active');
 INSERT INTO feature_flag_overrides(feature_key,scope_type,scope_id,environment,enabled,reason,status)

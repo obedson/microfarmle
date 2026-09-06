@@ -194,4 +194,61 @@ BEGIN
  PERFORM pg_temp.assert_failure(format('SELECT pg_temp.command(%L,%L,%L,%L::jsonb)','unit',gen_random_uuid(),empty_farm,'{}'),'FARM_ARCHIVED');
 END $$;
 
+
+-- A1: a separate current assignment must not revive an expired task assignment.
+DO $assignment$
+DECLARE
+ org UUID:='60000000-0000-4000-8000-000000000001';
+ actor TEXT:='60000000-0000-4000-8000-000000000002';
+ farm TEXT:=gen_random_uuid()::TEXT; old_worker TEXT:=gen_random_uuid()::TEXT;
+ current_worker TEXT:=gen_random_uuid()::TEXT; old_task TEXT:=gen_random_uuid()::TEXT;
+ current_task TEXT:=gen_random_uuid()::TEXT; attachment TEXT:=gen_random_uuid()::TEXT;
+ current_attachment TEXT:=gen_random_uuid()::TEXT; wd JSONB; td JSONB; current_td JSONB;
+BEGIN
+ PERFORM pg_temp.command('farm',farm,farm,'{"name":"Assignment boundary","operationType":"crop","tenure":"owned"}');
+ wd:=jsonb_build_object('name','Assignment A','accessRole','worker','operationalRole','Field worker',
+   'linkedUserId',actor,'startOn',(CURRENT_DATE-2)::TEXT);
+ PERFORM pg_temp.command('worker',old_worker,farm,wd);
+ td:=jsonb_build_object('name','Task A','type','harvest','workerIds',jsonb_build_array(old_worker),
+   'scheduledOn',CURRENT_DATE::TEXT,'dueOn',CURRENT_DATE::TEXT,'priority','normal');
+ PERFORM pg_temp.command('task',old_task,farm,td);
+ PERFORM pg_temp.command('evidence',attachment,farm,jsonb_build_object('parentId',old_task,'filename','a.pdf',
+   'mediaType','application/pdf','content',encode(convert_to('%PDF-1.4 synthetic assignment evidence','UTF8'),'base64')));
+ PERFORM pg_temp.command('worker',old_worker,farm,wd||jsonb_build_object('endOn',(CURRENT_DATE-1)::TEXT),1,'ACTIVE');
+ PERFORM pg_temp.command('worker',current_worker,farm,wd||jsonb_build_object('name','Assignment B'));
+ current_td:=td||jsonb_build_object('name','Task B','workerIds',jsonb_build_array(current_worker));
+ PERFORM pg_temp.command('task',current_task,farm,current_td);
+ PERFORM pg_temp.command('evidence',current_attachment,farm,jsonb_build_object('parentId',current_task,'filename','b.pdf',
+   'mediaType','application/pdf','content',encode(convert_to('%PDF-1.4 synthetic current evidence','UTF8'),'base64')));
+ IF farm_access(org,actor::UUID,farm::UUID)<>'worker' THEN RAISE EXCEPTION 'current farm access lost'; END IF;
+ IF jsonb_array_length(read_farm_operations(org,actor::UUID,jsonb_build_object('id',old_task))->'items')<>0
+   OR jsonb_array_length(read_farm_operations(org,actor::UUID,jsonb_build_object('id',old_task,'view','history'))->'items')<>0
+   OR farm_resource_visible(org,actor::UUID,attachment::UUID)
+ THEN RAISE EXCEPTION 'expired assignment leaked task/history/evidence'; END IF;
+ PERFORM pg_temp.assert_failure(format('SELECT read_farm_operations(%L,%L,%L::jsonb)',org,actor,
+   jsonb_build_object('id',attachment,'view','evidence')),'FARM_NOT_FOUND');
+ PERFORM pg_temp.assert_failure(format('SELECT pg_temp.command(%L,%L,%L,%L::jsonb,1,%L,%L)',
+   'task',old_task,farm,td,'IN_PROGRESS',actor),'FARM_ACCESS_DENIED');
+ IF jsonb_array_length(read_farm_operations(org,actor::UUID,jsonb_build_object('id',current_task))->'items')<>1
+   OR read_farm_operations(org,actor::UUID,jsonb_build_object('id',current_attachment,'view','evidence'))->>'content' IS NULL
+ THEN RAISE EXCEPTION 'current task/evidence access lost'; END IF;
+ PERFORM emit_farm_task_reminders();
+ IF EXISTS(SELECT 1 FROM farm_task_reminders WHERE task_id=old_task::UUID)
+   OR NOT EXISTS(SELECT 1 FROM farm_task_reminders WHERE task_id=current_task::UUID AND worker_id=current_worker::UUID)
+ THEN RAISE EXCEPTION 'assignment reminder selection invalid'; END IF;
+ PERFORM pg_temp.command('task',current_task,farm,current_td,1,'IN_PROGRESS',actor);
+ -- A future-dated A must not revive visibility either; B remains current.
+ PERFORM pg_temp.command('worker',old_worker,farm,wd||jsonb_build_object('startOn',(CURRENT_DATE+1)::TEXT),2,'ACTIVE');
+ IF farm_resource_visible(org,actor::UUID,old_task::UUID) THEN RAISE EXCEPTION 'future assignment leaked task'; END IF;
+ -- Elevated farm visibility must not cause an expired recipient to receive reminders.
+ PERFORM pg_temp.command('worker',current_worker,farm,wd||jsonb_build_object('name','Assignment B','accessRole','manager'),1,'ACTIVE');
+ PERFORM emit_farm_task_reminders();
+ IF EXISTS(SELECT 1 FROM farm_task_reminders WHERE task_id=old_task::UUID)
+ THEN RAISE EXCEPTION 'future assignment received reminder via manager access'; END IF;
+ PERFORM pg_temp.command('worker',old_worker,farm,wd||jsonb_build_object('endOn',(CURRENT_DATE-1)::TEXT),3,'ACTIVE');
+ PERFORM emit_farm_task_reminders();
+ IF EXISTS(SELECT 1 FROM farm_task_reminders WHERE task_id=old_task::UUID)
+ THEN RAISE EXCEPTION 'expired assignment received reminder via manager access'; END IF;
+END $assignment$;
+
 ROLLBACK;

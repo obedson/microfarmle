@@ -367,6 +367,8 @@ farm_reminders_present="$(docker exec "$container" psql --username postgres --db
 if [[ "$farm_reminders_present" == "f" ]]; then migrations+=(install_farm_task_reminders.sql); fi
 farm_retention_present="$(docker exec "$container" psql --username postgres --dbname microfams --no-psqlrc --tuples-only --no-align --command "SELECT to_regprocedure('public.archive_legacy_farm_record(uuid,uuid,uuid)') IS NOT NULL")"
 if [[ "$farm_retention_present" == "f" ]]; then migrations+=(install_farm_legacy_retention.sql); fi
+# CREATE OR REPLACE is safe for both previously installed and fresh farm layers.
+migrations+=(fix_farm_effective_assignment_access.sql)
 
 for migration in "${migrations[@]}"; do
   echo "dry-run applying $migration"

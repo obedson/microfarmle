@@ -40,7 +40,9 @@ never the request body. No frontend privileged Supabase access is used.
   farm.manage permission can create a farm with themselves as responsible manager.
   Existing farm management requires explicit manager assignment.
 - ACTIVE, effective-dated worker assignments grant manager, worker or viewer access
-  to that farm only. Registered workers must remain active organization members;
+  to that farm only. Task-specific visibility and reminder recipients also honor
+  the individual assignment dates; another current assignment cannot revive an
+  expired assignment. Registered workers must remain active organization members;
   non-login worker assignments do not grant authentication.
 - Workers progress assigned tasks and record operational events; they cannot
   create farms/units/cycles/worker assignments or change task assignments.
@@ -128,9 +130,10 @@ knowledge of an attachment ID gives no access. Only permitted image/PDF signatur
 are accepted. Downloads are explicit, not embedded as executable content.
 History, command receipts and evidence bytes reject ordinary updates/deletes.
 
-Apply the four additive migrations in schema-manifest order before deploying:
+Apply the five additive migrations in schema-manifest order before deploying:
 install_farm_inventory_bridge, install_farm_operations,
-install_farm_task_reminders, install_farm_legacy_retention.
+install_farm_task_reminders, install_farm_legacy_retention,
+fix_farm_effective_assignment_access.
 Use the established migration process; never alter a production database manually.
 No new provider secret is required. Confirm existing database encryption, backups,
 storage capacity, retention policy, HTTPS and feature approval before rollout.
