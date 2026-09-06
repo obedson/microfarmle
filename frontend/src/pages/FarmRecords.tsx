@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import FarmRecordForm from '../components/FarmRecordForm';
 import FarmAnalytics from '../components/FarmAnalytics';
 import { useFarmRecords } from '../hooks/useFarmRecords';
@@ -9,6 +10,7 @@ const FarmRecords: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-6 space-y-6">
       <header className="mb-8">
+        <Link to="/farm-operations" className="underline">Open Farm Operations</Link>
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
           Farm Records & Analytics
         </h1>
@@ -56,7 +58,7 @@ const FarmRecords: React.FC = () => {
                       <td className="px-6 py-4 text-gray-900">
                         {new Date(record.record_date).toLocaleDateString()}
                       </td>
-                      <td className="px-6 py-4 text-gray-900">{record.livestock_type}</td>
+                      <td className="px-6 py-4 text-gray-900">{record.livestock_type}{record.archived_at && <span className="block text-xs">Archived — retained history</span>}</td>
                       <td className="px-6 py-4 text-gray-900">{record.livestock_count}</td>
                       <td className="px-6 py-4 text-gray-600 hidden sm:table-cell">
                         {record.feed_consumption}

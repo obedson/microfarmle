@@ -40,7 +40,7 @@ apiClient.interceptors.response.use(
           }
         }
       } catch (refreshError) {
-        useAuthStore.getState().logout();
+        useAuthStore.getState().logout({ preserveFarmQueue: true });
         window.location.href = '/login';
       }
     }

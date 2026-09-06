@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { clearFarmOffline } from '../services/farmOffline';
 
 interface User {
   id: string;
@@ -19,24 +20,31 @@ interface AuthState {
   refreshToken: string | null;
   isAuthenticated: boolean;
   login: (user: User, token: string, refreshToken: string) => void;
-  logout: () => void;
+  logout: (options?: { preserveFarmQueue?: boolean }) => void;
   updateUser: (data: Partial<User>) => void;
 }
 
 export const useAuthStore = create<AuthState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       user: null,
       token: null,
       refreshToken: null,
       isAuthenticated: false,
       login: (user, token, refreshToken) => {
+        if (get().user && get().user?.id !== user.id) {
+          void clearFarmOffline().catch(()=>localStorage.setItem('farm-offline-clear-required','true'));
+        }
         localStorage.setItem('token', token);
         localStorage.setItem('refreshToken', refreshToken);
         localStorage.setItem('user', JSON.stringify(user));
         set({ user, token, refreshToken, isAuthenticated: true });
       },
-      logout: () => {
+      logout: (options) => {
+        if (!options?.preserveFarmQueue) void clearFarmOffline().catch(()=>{
+          // Fail closed: do not reuse a cache whose secure deletion failed.
+          localStorage.setItem('farm-offline-clear-required','true');
+        });
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
@@ -57,3 +65,10 @@ export const useAuthStore = create<AuthState>()(
     }
   )
 );
+// Keep field caches and authorization partitioned when another tab signs out
+// or changes principal. Rehydration reads the existing shared auth store only.
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'auth-storage') void useAuthStore.persist.rehydrate();
+  });
+}
