@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useAuthStore } from '../store/authStore';
 import { useOrganizationStore } from '../store/organizationStore';
 import { FarmOperation, FarmResource, farmOperationsAPI } from '../services/farmOperationsAPI';
-import { FarmSnapshot, farmPartition, loadFarmSnapshot, saveFarmSnapshot, synchronizeFarmOperations } from '../services/farmOffline';
+import { FarmSnapshot, farmPartition, loadFarmSnapshot, retryFarmOperation, saveFarmSnapshot, synchronizeFarmOperations } from '../services/farmOffline';
 import { initialStates, operationFields, stateChoices } from './farmOperationFields';
 
 const label=(value:string)=>value.replace(/_/g,' ');
@@ -183,7 +183,8 @@ export default function FarmOperations() {
     <strong>{label(q.operation.kind)}: {q.state}</strong><p>{q.error}</p>
     {['FAILED','CONFLICT'].includes(q.state)&&<button className="border p-2" onClick={async()=>{
      if(q.state==='CONFLICT'){setEditing(resources.find(r=>r.id===q.operation.id)??null);setKind(q.operation.kind);setFarmId(q.operation.farmId);setData(q.operation.data);setState(q.operation.state);setError('Review the latest record and submit an explicit correction. The original conflicting operation is retained.');return;}
-     q.state='PENDING';await persist({...snapshotRef.current});void sync();
+     if(!retryFarmOperation(snapshotRef.current,q.operation.operationId))return;
+     await persist({...snapshotRef.current});void sync();
     }}>{q.state==='CONFLICT'?'Review conflict':'Retry'}</button>}
    </div>)}
   </section>
