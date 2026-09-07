@@ -49,7 +49,15 @@ describe('password reset email delivery', () => {
     expect(mockSendTransacEmail).toHaveBeenCalledTimes(1);
     const message = mockSendTransacEmail.mock.calls[0][0];
     expect(message.to).toEqual([{ email: 'member@example.test' }]);
-    expect(message.htmlContent).toContain('/reset-password?token=' + token);
+    expect(message.htmlContent).toContain(
+      'href="http://localhost:3001/reset-password?token=' + token + '"',
+    );
+    expect(message.htmlContent.split(token)).toHaveLength(2);
+    const visibleText = message.htmlContent.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+    expect(visibleText).not.toContain(token);
+    expect(visibleText).not.toContain('reset-password?token=');
+    expect(visibleText).not.toMatch(/copy and paste/i);
+    expect(visibleText).toContain('This link will expire in 1 hour.');
     expect(log).toHaveBeenCalledWith('Password reset email delivery accepted');
     expect(JSON.stringify(log.mock.calls)).not.toContain(token);
     expect(JSON.stringify(error.mock.calls)).not.toContain(token);
