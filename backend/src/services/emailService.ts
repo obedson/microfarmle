@@ -13,7 +13,7 @@ export const sendPasswordResetEmail = async (email: string, resetToken: string) 
   const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3001'}/reset-password?token=${resetToken}`;
   
   if (!process.env.BREVO_API_KEY) {
-    console.log(`[Email skipped] Password reset to: ${email}`);
+    console.log('[Email skipped] Password reset delivery is not configured');
     return;
   }
 
@@ -40,9 +40,9 @@ export const sendPasswordResetEmail = async (email: string, resetToken: string) 
 
   try {
     await apiInstance.sendTransacEmail(sendSmtpEmail);
-    console.log(`✅ Password reset email sent to: ${email}`);
-  } catch (error: any) {
-    console.error('❌ Email sending failed:', error?.response?.body || error.message);
+    console.log('Password reset email delivery accepted');
+  } catch {
+    console.error('Password reset email delivery failed');
     // Don't throw - just log
   }
 };
