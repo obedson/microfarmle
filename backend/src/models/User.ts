@@ -109,4 +109,23 @@ export class UserModel {
 
     if (error) throw error;
   }
+
+  static async resetPasswordWithToken(token: string, newPassword: string): Promise<boolean> {
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    const { data, error } = await supabase
+      .from('users')
+      .update({
+        password: hashedPassword,
+        reset_token: null,
+        reset_token_expires: null,
+      })
+      .eq('reset_token', token)
+      .gt('reset_token_expires', new Date().toISOString())
+      .select('id')
+      .maybeSingle();
+
+    if (error) throw error;
+    return Boolean(data);
+  }
 }

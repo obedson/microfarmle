@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
+import { randomBytes } from 'node:crypto';
 import { UserModel } from '../models/User.js';
 import { WalletService } from '../services/walletService.js';
+import { sendPasswordResetEmail } from '../services/emailService.js';
 import { generateToken, generateRefreshToken } from '../utils/jwt.js';
 import { supabase } from '../utils/supabase.js';
 import Joi from 'joi';
@@ -130,17 +132,16 @@ export const forgotPassword = async (req: Request, res: Response) => {
       return res.json({ success: true, message: 'If email exists, reset link sent' });
     }
 
-    const resetToken = require('crypto').randomBytes(32).toString('hex');
+    const resetToken = randomBytes(32).toString('hex');
     const expires = new Date(Date.now() + 3600000); // 1 hour
 
     await UserModel.updateResetToken(value.email, resetToken, expires);
     
-    const { sendPasswordResetEmail } = await import('../services/emailService');
     await sendPasswordResetEmail(value.email, resetToken);
 
     res.json({ success: true, message: 'If email exists, reset link sent' });
   } catch (error) {
-    console.error('Forgot password error:', error);
+    console.error('Forgot password processing failed');
     res.status(500).json({ success: false, error: 'Failed to process request' });
   }
 };
@@ -156,12 +157,9 @@ export const resetPassword = async (req: Request, res: Response) => {
       return res.status(400).json({ success: false, error: error.details[0].message });
     }
 
-    const user = await UserModel.findByResetToken(value.token);
-    if (!user) {
+    if (!await UserModel.resetPasswordWithToken(value.token, value.password)) {
       return res.status(400).json({ success: false, error: 'Invalid or expired token' });
     }
-
-    await UserModel.updatePassword(user.id, value.password);
 
     res.json({ success: true, message: 'Password reset successfully' });
   } catch (error) {
