@@ -63,6 +63,12 @@ export const loadFarmSnapshot=async(partition:string)=>{
  return record('readonly',partition);
 };
 export const saveFarmSnapshot=(partition:string,snapshot:FarmSnapshot)=>record('readwrite',partition,snapshot);
+export function retryFarmOperation(snapshot:FarmSnapshot,operationId:string) {
+ const queued=snapshot.operations.find(candidate=>candidate.operation.operationId===operationId);
+ if(queued?.state!=='FAILED')return false;
+ queued.state='PENDING';
+ return true;
+}
 export async function synchronizeFarmOperations(
  snapshot:FarmSnapshot, send:(operation:FarmOperation)=>Promise<FarmResource>,
  persist:(snapshot:FarmSnapshot)=>Promise<unknown>, isCurrent:()=>boolean,
